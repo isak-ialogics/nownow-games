@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Input Relay proves the NowNow Games harness receives touch, pointer, drag, and keyboard input."
+    />
+    <title>Input Relay — NowNow Games</title>
+    <link rel="stylesheet" href="../../shared/site.css" />
+    <link rel="stylesheet" href="./prototype.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#play-surface">Skip to play surface</a>
+    <header class="site-header prototype-header">
+      <a
+        class="brand"
+        href="../../"
+        aria-label="Back to NowNow Games prototype hub"
+      >
+        <span aria-hidden="true">←</span>
+        <span>Prototype hub</span>
+      </a>
+      <span class="header-note">Input / 00</span>
+    </header>
+
+    <main class="prototype-main">
+      <section class="prototype-intro" aria-labelledby="prototype-title">
+        <div>
+          <p class="eyebrow">Throwaway harness proof</p>
+          <h1 id="prototype-title">
+            Input<br />
+            Relay
+          </h1>
+        </div>
+        <p>
+          Put the signal anywhere. Tap or drag on the field, or use Arrow keys /
+          WASD. Press Space or Enter to pulse. The live badges prove each input
+          path has fired.
+        </p>
+      </section>
+
+      <section class="relay-shell" aria-label="Input Relay prototype">
+        <div
+          id="play-surface"
+          class="play-surface"
+          role="application"
+          tabindex="0"
+          aria-describedby="control-instructions"
+          aria-label="Input Relay play field. Tap or drag to place the signal; use Arrow keys or WASD to move it."
+        >
+          <div class="field-grid" aria-hidden="true"></div>
+          <span class="field-label field-label-top" aria-hidden="true"
+            >Signal field</span
+          >
+          <span class="field-label field-label-bottom" aria-hidden="true"
+            >Touch · Pointer · Keyboard</span
+          >
+          <span id="signal" class="signal" aria-hidden="true"
+            ><span></span
+          ></span>
+        </div>
+
+        <aside class="status-panel" aria-labelledby="status-title">
+          <div class="status-heading">
+            <div>
+              <p class="eyebrow">Live status</p>
+              <h2 id="status-title">Both paths</h2>
+            </div>
+            <span
+              id="event-count"
+              class="event-count"
+              aria-label="0 input events"
+              >00</span
+            >
+          </div>
+
+          <div class="input-badges" aria-label="Input paths seen">
+            <div id="pointer-badge" class="input-badge" data-seen="false">
+              <span class="badge-light" aria-hidden="true"></span>
+              <span
+                ><strong>Touch / pointer</strong><small>Waiting</small></span
+              >
+            </div>
+            <div id="keyboard-badge" class="input-badge" data-seen="false">
+              <span class="badge-light" aria-hidden="true"></span>
+              <span><strong>Keyboard</strong><small>Waiting</small></span>
+            </div>
+          </div>
+
+          <div class="last-input-block">
+            <span>Last input</span>
+            <output id="last-input" aria-live="polite"
+              >Waiting for a signal</output
+            >
+          </div>
+
+          <div class="position-row" aria-label="Signal position">
+            <span>X <output id="position-x">50</output></span>
+            <span>Y <output id="position-y">50</output></span>
+          </div>
+
+          <div class="history-block">
+            <span>Recent input</span>
+            <ol id="input-history" class="input-history">
+              <li>No events yet</li>
+            </ol>
+          </div>
+
+          <button id="restart-button" class="restart-button" type="button">
+            Restart input relay
+          </button>
+        </aside>
+      </section>
+
+      <section
+        id="control-instructions"
+        class="instructions"
+        aria-labelledby="instructions-title"
+      >
+        <p class="eyebrow">Controls</p>
+        <h2 id="instructions-title">One field, two ways in.</h2>
+        <div class="instruction-grid">
+          <article>
+            <span aria-hidden="true">01</span>
+            <h3>Touch / pointer</h3>
+            <p>
+              Tap anywhere in the field to place and pulse the signal. Hold and
+              drag to move it continuously.
+            </p>
+          </article>
+          <article>
+            <span aria-hidden="true">02</span>
+            <h3>Keyboard</h3>
+            <p>
+              Use Arrow keys or WASD to move. Space or Enter pulses. Focus is
+              returned to the field after a tap.
+            </p>
+          </article>
+          <article>
+            <span aria-hidden="true">03</span>
+            <h3>Safe recovery</h3>
+            <p>
+              Held input is cleared when the page loses focus or goes into the
+              background. This proof has no audio.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

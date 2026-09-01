@@ -1,0 +1,23 @@
+{
+  "name": "nownow-games",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static, mobile-first NowNow Games prototype harness",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "budget": "node scripts/check-budget.mjs",
+    "check": "node scripts/check-static.mjs",
+    "serve:dist": "node scripts/serve.mjs dist",
+    "test": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "playwright test",
+    "verify": "npm run check && npm test && npm run build && npm run budget && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1"
+  }
+}

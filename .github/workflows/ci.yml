@@ -1,0 +1,40 @@
+name: Verify static harness
+
+on:
+  push:
+    branches: [main, "now-3/bootstrap-harness"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Node
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run static and unit checks
+        run: |
+          npm run check
+          npm test
+          npm run build
+          npm run budget
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run mobile browser and accessibility checks
+        run: npm run test:e2e

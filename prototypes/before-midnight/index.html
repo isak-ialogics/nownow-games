@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Before Midnight: a fictional seven-fill hold-and-release arcade game."
+    />
+    <title>Before Midnight - NowNow Games</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="../../" aria-label="Back to NowNow Games">&larr; All games</a>
+      <span>No sound. No tracking.</span>
+    </header>
+
+    <main>
+      <section class="title-block" aria-labelledby="game-title">
+        <p class="kicker">Seven fills / one button / one awkward coast</p>
+        <h1 id="game-title">Before <br />Midnight</h1>
+        <p class="fiction">
+          Fictional arcade values. This is not a price calculator.
+        </p>
+      </section>
+
+      <section id="game-panel" class="game-panel" aria-label="Game">
+        <div class="round-line">
+          <span>Fill <strong id="round-count">1 / 7</strong></span>
+          <span>Streak <strong id="streak-count">0</strong></span>
+        </div>
+
+        <div class="meters" aria-label="Current fill values">
+          <p><span>Arcade budget</span><strong id="budget">R 0.00</strong></p>
+          <p><span>Spend</span><strong id="spend">R 0.00</strong></p>
+          <p><span>Filled</span><strong id="units">0.0 units</strong></p>
+        </div>
+
+        <div class="gauge" aria-hidden="true">
+          <span class="gauge-fill"></span>
+          <span class="cap-mark">CAP</span>
+          <span class="needle"></span>
+        </div>
+
+        <button
+          id="pump"
+          class="pump"
+          type="button"
+          aria-describedby="instructions"
+          aria-keyshortcuts="Space Enter"
+          aria-pressed="false"
+        >
+          <span class="pump-symbol" aria-hidden="true">+</span>
+          <span id="pump-label">Press and hold</span>
+          <small id="round-clock">Round closes in 6.0s</small>
+        </button>
+
+        <p id="instructions" class="instructions">
+          Hold anywhere on the pump, then release. Keyboard: hold and release
+          <kbd>Space</kbd> or <kbd>Enter</kbd>. The meter coasts after release.
+        </p>
+
+        <ul class="status-key" aria-label="Result symbols">
+          <li>[+] Safe</li>
+          <li>[~] Near cap</li>
+          <li>[X] Over cap</li>
+        </ul>
+
+        <div
+          id="feedback"
+          class="feedback"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
+      </section>
+
+      <section
+        id="result-card"
+        class="result-card"
+        aria-labelledby="result-title"
+        tabindex="-1"
+        hidden
+      >
+        <p class="kicker">Pump discipline report</p>
+        <h2 id="result-title">Seven fills. Receipts attached.</h2>
+        <dl>
+          <div><dt>Total filled</dt><dd id="total-units">0.0 units</dd></div>
+          <div><dt>Overshoots</dt><dd id="overshoots">0 / 7</dd></div>
+          <div><dt>Best accuracy</dt><dd id="best-accuracy">0.0%</dd></div>
+          <div><dt>Personal best</dt><dd id="personal-best">0.0 pts</dd></div>
+        </dl>
+        <p id="run-score" class="run-score">Run score: 0.0 pts</p>
+        <p id="new-best" class="new-best" hidden>New personal best.</p>
+        <button id="retry" class="retry" type="button">Retry seven fills</button>
+      </section>
+    </main>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

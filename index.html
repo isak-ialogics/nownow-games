@@ -36,36 +36,21 @@
       <section class="prototype-section" aria-labelledby="prototype-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Harness check</p>
+            <p class="eyebrow">Prototype roster</p>
             <h2 id="prototype-title">Playable now</h2>
           </div>
-          <span class="count" aria-label="1 prototype">01</span>
+          <!-- PROTOTYPE_COUNT_START -->
+          <span class="count" data-prototype-count aria-label="0 prototypes"
+            >00</span
+          >
+          <!-- PROTOTYPE_COUNT_END -->
         </div>
 
-        <article class="prototype-card">
-          <div class="card-preview" aria-hidden="true">
-            <span class="preview-orbit preview-orbit-one"></span>
-            <span class="preview-orbit preview-orbit-two"></span>
-            <span class="preview-dot"></span>
-            <span class="preview-label">INPUT / 00</span>
-          </div>
-          <div class="card-content">
-            <p class="card-kicker">Throwaway harness proof</p>
-            <h3>Input Relay</h3>
-            <p>
-              Move, tap, and drag a signal. The status panel proves both touch
-              and keyboard events arrive.
-            </p>
-            <ul class="feature-list" aria-label="Supported controls">
-              <li>Touch + drag</li>
-              <li>Arrows + WASD</li>
-              <li>Space + Enter</li>
-            </ul>
-            <a class="play-link" href="./prototypes/input-lab/">
-              Open prototype <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </article>
+        <div class="prototype-grid" data-prototype-grid>
+          <!-- PROTOTYPE_CARDS_START -->
+          <p class="empty-state">No playable prototypes yet.</p>
+          <!-- PROTOTYPE_CARDS_END -->
+        </div>
       </section>
     </main>
 

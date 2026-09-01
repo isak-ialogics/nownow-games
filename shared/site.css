@@ -148,6 +148,23 @@ main {
   padding-bottom: 5rem;
 }
 
+.prototype-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.empty-state {
+  min-height: 12rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  margin: 0;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  line-height: 1.6;
+}
+
 .section-heading {
   display: flex;
   align-items: end;
@@ -310,6 +327,24 @@ main {
   .site-footer {
     flex-direction: row;
     justify-content: space-between;
+  }
+}
+
+@media (min-width: 64rem) {
+  .prototype-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .prototype-grid .prototype-card {
+    display: block;
+  }
+
+  .prototype-grid .card-preview {
+    min-height: 18rem;
+  }
+
+  .prototype-grid .card-content h3 {
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
   }
 }
 

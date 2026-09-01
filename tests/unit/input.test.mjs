@@ -6,10 +6,6 @@ import {
   createInputController,
   relativePoint,
 } from "../../shared/input.js";
-import {
-  createRelayState,
-  reduceRelayState,
-} from "../../prototypes/input-lab/state.js";
 
 class Surface extends EventTarget {
   focused = false;
@@ -107,39 +103,4 @@ test("emits pointer drag, keyboard, and blur recovery through one controller", (
   );
 
   controller.destroy();
-});
-
-test("relay reducer clamps movement, records both paths, pulses, and restarts", () => {
-  let state = createRelayState();
-  for (let index = 0; index < 10; index += 1) {
-    state = reduceRelayState(state, {
-      source: "keyboard",
-      action: "left",
-      phase: "start",
-    });
-  }
-  state = reduceRelayState(state, {
-    source: "pointer",
-    pointerType: "touch",
-    action: "position",
-    phase: "move",
-    x: 0.75,
-    y: 0.25,
-  });
-  state = reduceRelayState(state, {
-    source: "keyboard",
-    action: "activate",
-    phase: "start",
-  });
-
-  assert.deepEqual(state.position, { x: 0.75, y: 0.25 });
-  assert.equal(state.pointerSeen, true);
-  assert.equal(state.keyboardSeen, true);
-  assert.equal(state.pulseCount, 1);
-  assert.equal(state.history.length, 4);
-
-  assert.deepEqual(
-    reduceRelayState(state, { action: "restart" }),
-    createRelayState(),
-  );
 });

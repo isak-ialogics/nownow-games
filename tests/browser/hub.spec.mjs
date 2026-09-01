@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-test("empty hub is responsive, accessible, and has no retired route", async ({
+test("prototype hub is responsive, accessible, and has no retired route", async ({
   page,
 }) => {
   const response = await page.goto("/");
@@ -9,13 +9,16 @@ test("empty hub is responsive, accessible, and has no retired route", async ({
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Small games",
   );
-  await expect(page.locator("[data-prototype-count]")).toHaveText("00");
+  await expect(page.locator("[data-prototype-count]")).toHaveText("01");
   await expect(page.locator("[data-prototype-count]")).toHaveAttribute(
     "aria-label",
-    "0 prototypes",
+    "1 prototype",
   );
-  await expect(page.locator(".prototype-card")).toHaveCount(0);
-  await expect(page.getByText("No playable prototypes yet.")).toBeVisible();
+  await expect(page.locator(".prototype-card")).toHaveCount(1);
+  await expect(
+    page.getByRole("link", { name: /Open prototype/ }),
+  ).toHaveAttribute("href", "./prototypes/before-midnight/");
+  await expect(page.getByText("Before Midnight")).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
 
   await page.keyboard.press("Tab");

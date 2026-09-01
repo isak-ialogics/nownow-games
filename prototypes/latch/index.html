@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Latch!: a one-minute defensive door reaction game with original art."
+    />
+    <title>Latch! - NowNow Games</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="../../" aria-label="Back to NowNow Games">&larr; All games</a>
+      <span>Sound off / secure only</span>
+    </header>
+
+    <main>
+      <div class="heading">
+        <div>
+          <p class="kicker">Four doors / three parcels / stay watchful</p>
+          <h1>Latch!</h1>
+        </div>
+        <p>
+          A curious visitor knows a handle. Stay inside and secure only the
+          threatened door.
+        </p>
+      </div>
+
+      <section id="game-panel" class="game-panel" aria-label="Latch game">
+        <div class="hud" aria-label="Run status">
+          <p>Score <strong id="score">0</strong></p>
+          <p>Streak <strong id="streak">0x</strong></p>
+          <p>Time <strong id="timer">55</strong></p>
+          <p>Parcels <strong id="parcel-count">3 / 3</strong></p>
+        </div>
+
+        <div
+          id="car"
+          class="car"
+          aria-label="Four car doors, left to right and top to bottom"
+        >
+          <button class="door" type="button" data-door="0" aria-label="Door 1, front left" aria-keyshortcuts="1">
+            <span class="reach" aria-hidden="true"></span><span class="key">1</span>
+            <span class="warning" aria-hidden="true">!</span><span class="progress" aria-hidden="true"></span>
+            <span class="handle" aria-hidden="true"></span><span>Front left</span>
+          </button>
+          <button class="door" type="button" data-door="1" aria-label="Door 2, front right" aria-keyshortcuts="2">
+            <span class="reach" aria-hidden="true"></span><span class="key">2</span>
+            <span class="warning" aria-hidden="true">!</span><span class="progress" aria-hidden="true"></span>
+            <span class="handle" aria-hidden="true"></span><span>Front right</span>
+          </button>
+          <button class="door" type="button" data-door="2" aria-label="Door 3, rear left" aria-keyshortcuts="3">
+            <span class="reach" aria-hidden="true"></span><span class="key">3</span>
+            <span class="warning" aria-hidden="true">!</span><span class="progress" aria-hidden="true"></span>
+            <span class="handle" aria-hidden="true"></span><span>Rear left</span>
+          </button>
+          <button class="door" type="button" data-door="3" aria-label="Door 4, rear right" aria-keyshortcuts="4">
+            <span class="reach" aria-hidden="true"></span><span class="key">4</span>
+            <span class="warning" aria-hidden="true">!</span><span class="progress" aria-hidden="true"></span>
+            <span class="handle" aria-hidden="true"></span><span>Rear right</span>
+          </button>
+
+          <div class="cabin" aria-hidden="true">
+            <span class="windscreen"></span>
+            <div id="parcels" class="parcels"><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <p id="feedback" class="feedback" role="status" aria-live="polite">
+          Watch for a moving handle + striped warning.
+        </p>
+        <p id="instructions" class="instructions">
+          Tap a door or press <kbd>1</kbd>-<kbd>4</kbd>. Arrow keys move focus;
+          <kbd>Space</kbd> or <kbd>Enter</kbd> secures it. A shadow alone is not a tug.
+        </p>
+      </section>
+
+      <section id="result-card" class="result-card" aria-labelledby="result-title" tabindex="-1" hidden>
+        <p class="kicker">Picnic perimeter report</p>
+        <h2 id="result-title">Doors checked. Distance kept.</h2>
+        <dl>
+          <div><dt>Score</dt><dd id="final-score">0</dd></div>
+          <div><dt>Latches</dt><dd id="final-hits">0</dd></div>
+          <div><dt>Misses</dt><dd id="final-misses">0</dd></div>
+          <div><dt>Panic taps</dt><dd id="final-false">0</dd></div>
+        </dl>
+        <p id="result-copy">
+          Keep your distance from curious wildlife and follow local wildlife guidance.
+        </p>
+        <button id="retry" type="button">Retry Latch!</button>
+      </section>
+    </main>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

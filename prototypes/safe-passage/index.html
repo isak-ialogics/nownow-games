@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="description" content="Safe Passage: an abstract hold-and-release formation arcade game." />
+    <title>Safe Passage - NowNow Games</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header><a href="../../" aria-label="Back to NowNow Games">&larr; All games</a><span>Sound off</span></header>
+    <main>
+      <section class="intro" aria-labelledby="game-title">
+        <p class="kicker">Abstract arcade formation</p>
+        <h1 id="game-title">Safe <em>Passage</em></h1>
+        <p>Keep both craft in the approved green corridor. The lower red zone always ends the run.</p>
+      </section>
+
+      <section id="game" class="game" aria-label="Safe Passage game">
+        <div class="hud" aria-label="Run status">
+          <p>Time <strong id="time">50.0</strong></p>
+          <p>Gate chain <strong id="chain">0</strong></p>
+          <p>Safety <strong id="safety">0%</strong></p>
+          <p>Score <strong id="score">0</strong></p>
+        </div>
+        <div class="stage">
+          <canvas id="sky" width="640" height="480" role="button" tabindex="0" aria-pressed="false" aria-keyshortcuts="Space Enter ArrowUp" aria-describedby="instructions" aria-label="Formation corridor. Hold to rise and release to settle."></canvas>
+          <p id="prompt" class="prompt" aria-hidden="true">HOLD TO RISE / RELEASE TO SETTLE</p>
+        </div>
+        <p id="instructions" class="instructions">Hold anywhere in the play area, then release. Keyboard: hold and release <kbd>Space</kbd>, <kbd>Enter</kbd>, or <kbd>&uarr;</kbd>. The trailing craft reacts 350 ms later.</p>
+        <ul class="key" aria-label="Safety band key"><li><i class="green"></i>Green scores</li><li><i class="amber"></i>Amber resets chain</li><li><i class="red"></i>Red ends run</li></ul>
+      </section>
+
+      <section id="result" class="result" aria-labelledby="result-title" tabindex="-1" hidden>
+        <p class="kicker">Corridor discipline report</p>
+        <h2 id="result-title">Pass complete</h2>
+        <p id="announcement">Formation held: 0%. Safe gates: 0. Roofline breaches: 0.</p>
+        <dl><div><dt>Score</dt><dd id="final-score">0</dd></div><div><dt>Gate record</dt><dd id="final-gates">0 / 12</dd></div></dl>
+        <button id="retry" type="button">Retry passage</button>
+      </section>
+    </main>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

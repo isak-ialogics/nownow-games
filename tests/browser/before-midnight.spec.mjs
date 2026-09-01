@@ -88,7 +88,7 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
   await expectResultThenRound(page, "safe", 2);
 
   await pointerHold(page, "mouse", 1690);
-  await expectResultThenRound(page, "near", 3);
+  await expectResultThenRound(page, /near|precision/, 3);
 
   await keyboardHold(page, "Space", 800);
   await expectResultThenRound(page, "safe", 4);

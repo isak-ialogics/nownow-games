@@ -9,16 +9,28 @@ test("prototype hub is responsive, accessible, and has no retired route", async 
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Small games",
   );
-  await expect(page.locator("[data-prototype-count]")).toHaveText("02");
+  await expect(page.locator("[data-prototype-count]")).toHaveText("03");
   await expect(page.locator("[data-prototype-count]")).toHaveAttribute(
     "aria-label",
-    "2 prototypes",
+    "3 prototypes",
   );
-  await expect(page.locator(".prototype-card")).toHaveCount(2);
-  await expect(page.getByRole("link", { name: /Open prototype/ })).toHaveCount(2);
-  await expect(page.getByRole("link", { name: /Open prototype/ }).nth(1))
-    .toHaveAttribute("href", "./prototypes/latch/");
+  await expect(page.locator(".prototype-card")).toHaveCount(3);
+  const playLinks = page.getByRole("link", { name: /Open prototype/ });
+  await expect(playLinks).toHaveCount(3);
+  await expect(playLinks.nth(0)).toHaveAttribute(
+    "href",
+    "./prototypes/before-midnight/",
+  );
+  await expect(playLinks.nth(1)).toHaveAttribute(
+    "href",
+    "./prototypes/latch/",
+  );
+  await expect(playLinks.nth(2)).toHaveAttribute(
+    "href",
+    "./prototypes/safe-passage/",
+  );
   await expect(page.getByText("Before Midnight")).toBeVisible();
+  await expect(page.getByText("Safe Passage")).toBeVisible();
   await expect(page.getByText("Latch!")).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
 

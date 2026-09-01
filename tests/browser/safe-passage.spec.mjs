@@ -90,9 +90,9 @@ test("320px play supports pointer and keyboard parity, failure, and retry", asyn
 test("reduced motion keeps identical route timing without decorative motion", async ({ page }) => {
   await page.addInitScript(() => {
     const original = CanvasRenderingContext2D.prototype.fillText;
-    globalThis.__leadY = [];
+    globalThis.__craftY = { A: [], B: [] };
     CanvasRenderingContext2D.prototype.fillText = function (text, x, y, ...rest) {
-      if (text === "A") globalThis.__leadY.push(y);
+      if (text in globalThis.__craftY) globalThis.__craftY[text].push(y);
       return original.call(this, text, x, y, ...rest);
     };
   });
@@ -105,7 +105,12 @@ test("reduced motion keeps identical route timing without decorative motion", as
   await page.keyboard.down("Space");
   await page.waitForTimeout(3400);
   await page.keyboard.up("Space");
-  const leadY = await page.evaluate(() => globalThis.__leadY.slice(-20));
-  expect(Math.max(...leadY) - Math.min(...leadY)).toBeLessThan(0.01);
+  const craftY = await page.evaluate(() => ({
+    lead: globalThis.__craftY.A.slice(-20),
+    follower: globalThis.__craftY.B.slice(-20),
+  }));
+  for (const samples of Object.values(craftY)) {
+    expect(Math.max(...samples) - Math.min(...samples)).toBeLessThan(0.01);
+  }
   await expect(page.locator("#time")).not.toHaveText("50.0");
 });

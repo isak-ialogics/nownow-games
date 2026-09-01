@@ -23,11 +23,11 @@ test("prototype hub is responsive, accessible, and has no retired route", async 
   );
   await expect(playLinks.nth(1)).toHaveAttribute(
     "href",
-    "./prototypes/safe-passage/",
+    "./prototypes/latch/",
   );
   await expect(playLinks.nth(2)).toHaveAttribute(
     "href",
-    "./prototypes/latch/",
+    "./prototypes/safe-passage/",
   );
   await expect(page.getByText("Before Midnight")).toBeVisible();
   await expect(page.getByText("Safe Passage")).toBeVisible();

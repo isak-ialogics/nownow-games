@@ -9,6 +9,8 @@ RUN npm run build
 
 FROM nginx:1.29-alpine
 
+LABEL org.opencontainers.image.source="https://github.com/isak-ialogics/nownow-games"
+
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80

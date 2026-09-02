@@ -62,9 +62,11 @@ test("directory cards are ordered, escaped, counted, and linked", async (t) => {
   );
 
   const hub = populateHub(template, cards);
-  assert.match(hub, /aria-label="2 prototypes"/);
+  assert.match(hub, /aria-label="2 games"/);
   assert.match(hub, />02<\/span/);
   assert.match(hub, /\.\/prototypes\/before-midnight\//);
+  assert.match(hub, /GAME \/ 01/);
+  assert.match(hub, /Play now/);
   assert.match(hub, /Safe &lt;Passage&gt;/);
   assert.doesNotMatch(hub, /Safe <Passage>/);
   assert.ok(hub.indexOf("Before Midnight") < hub.indexOf("Safe &lt;Passage&gt;"));

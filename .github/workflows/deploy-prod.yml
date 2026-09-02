@@ -1,0 +1,104 @@
+name: Publish PROD image
+
+# NowNow builds the PROD container and publishes it to GHCR only.
+# IAL DevOps performs the actual production deployment. NowNow does not run
+# the deploy step. This mirrors the DEV publish pipeline but is gated on the
+# `prod` branch and publishes the moving `:prod` tag alongside an immutable
+# per-commit `:<sha>` tag at the same digest.
+
+on:
+  workflow_run:
+    workflows: ["Verify static harness"]
+    branches: [prod]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit SHA or ref to build and publish
+        required: true
+        default: prod
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: nownow-games-prod-publish
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: ghcr.io/isak-ialogics/nownow-games
+
+jobs:
+  publish:
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      sha: ${{ steps.source-sha.outputs.sha }}
+      digest: ${{ steps.image.outputs.digest }}
+    steps:
+      - name: Select verified source
+        id: selection
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
+          REQUESTED_REF: ${{ inputs.ref }}
+        run: |
+          if [ "$EVENT_NAME" = workflow_run ]; then ref="$VERIFIED_SHA"; else ref="$REQUESTED_REF"; fi
+          printf 'ref=%s\n' "$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ steps.selection.outputs.ref }}
+
+      - name: Record immutable source SHA
+        id: source-sha
+        run: printf 'sha=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4.0.0
+        with:
+          registry: ghcr.io
+          username: isak-ialogics
+          password: ${{ secrets.IAL_GHCR_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.0.0
+
+      - name: Build and publish image (immutable SHA tag + moving prod tag)
+        uses: docker/build-push-action@v7.0.0
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.source-sha.outputs.sha }}
+            ${{ env.IMAGE_NAME }}:prod
+
+      - name: Resolve pushed manifest digest
+        id: image
+        env:
+          SHA: ${{ steps.source-sha.outputs.sha }}
+        run: |
+          digest="$(docker buildx imagetools inspect "$IMAGE_NAME:$SHA" --format '{{.Manifest.Digest}}')"
+          test -n "$digest"
+          printf 'digest=%s\n' "$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Summarize published image
+        env:
+          SHA: ${{ steps.source-sha.outputs.sha }}
+          DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          {
+            echo "### Published PROD image to GHCR"
+            echo ""
+            echo "- Immutable: \`$IMAGE_NAME:$SHA\`"
+            echo "- Moving: \`$IMAGE_NAME:prod\`"
+            echo "- Digest: \`$DIGEST\`"
+            echo ""
+            echo "IAL DevOps deploys this image to the NowNow production host."
+          } >> "$GITHUB_STEP_SUMMARY"

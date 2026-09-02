@@ -9,6 +9,14 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     /Small game\.\s*Big nerve\.\s*Play Before Midnight\./,
   );
+  const launchNote = page.getByRole("complementary", {
+    name: "Launch announcement",
+  });
+  await expect(launchNote).toContainText("Now live — Play Before Midnight");
+  await expect(launchNote).toContainText("Share your best time.");
+  await expect(
+    launchNote.getByRole("link", { name: "Play Before Midnight" }),
+  ).toHaveAttribute("href", "./prototypes/before-midnight/");
   const viewport = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
@@ -70,4 +78,12 @@ test("game hub is responsive, accessible, and has no retired route", async ({
       fullPage: true,
     });
   }
+
+  await launchNote
+    .getByRole("link", { name: "Play Before Midnight" })
+    .click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: /Before\s+Midnight/ }),
+  ).toBeVisible();
+
 });

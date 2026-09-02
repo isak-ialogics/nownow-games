@@ -76,6 +76,15 @@ if (/\b(?:href|src)="\//.test(hub)) {
   throw new Error("Hub uses a root-absolute asset path.");
 }
 assertLaunchMetadata(hub, "Hub", "");
+for (const launchNoteCopy of [
+  "Now live",
+  "Play Before Midnight",
+  "Share your best time.",
+]) {
+  if (!hub.includes(launchNoteCopy)) {
+    throw new Error(`Hub is missing launch note copy: ${launchNoteCopy}`);
+  }
+}
 for (const marker of [
   "PROTOTYPE_COUNT_START",
   "PROTOTYPE_COUNT_END",

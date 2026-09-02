@@ -144,6 +144,50 @@ main {
   line-height: 1.65;
 }
 
+.launch-note {
+  max-width: 36rem;
+  padding: 1rem 1.1rem;
+  margin: 2rem 0 0;
+  background: rgb(200 255 61 / 7%);
+  border: 1px solid rgb(200 255 61 / 35%);
+  border-left: 0.35rem solid var(--lime);
+  border-radius: 1rem;
+}
+
+.launch-note p {
+  margin: 0;
+}
+
+.launch-note-title {
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.launch-note-title span {
+  color: var(--lime);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.launch-note-title a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  text-underline-offset: 0.25rem;
+}
+
+.launch-note-title a:focus-visible {
+  outline: 3px solid var(--lime);
+  outline-offset: 3px;
+}
+
+.launch-note-share {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
 .prototype-section {
   padding-bottom: 5rem;
 }

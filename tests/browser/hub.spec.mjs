@@ -6,6 +6,27 @@ test("game hub is responsive, accessible, and has no retired route", async ({
 }) => {
   const response = await page.goto("/");
   expect(response?.ok()).toBe(true);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://nownowgames.co.za/",
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    "https://nownowgames.co.za/",
+  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://nownowgames.co.za/assets/before-midnight-share.png",
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+  const shareImage = await page.request.get(
+    "/assets/before-midnight-share.png",
+  );
+  expect(shareImage.ok()).toBe(true);
+  expect(shareImage.headers()["content-type"]).toBe("image/png");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     /Small game\.\s*Big nerve\.\s*Play Before Midnight\./,
   );

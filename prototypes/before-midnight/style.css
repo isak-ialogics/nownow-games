@@ -260,6 +260,12 @@ kbd {
   cursor: pointer;
 }
 
+.share {
+  color: var(--ink);
+  background: #29322f;
+  border: 1px solid var(--mint);
+}
+
 [hidden] { display: none !important; }
 
 @keyframes needle-bounce {

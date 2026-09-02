@@ -47,10 +47,43 @@ async function expectResultThenRound(page, category, nextRound) {
 test("seven fills support touch, mouse, Space, Enter, results, and retry", async ({
   page,
 }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      writable: true,
+      value: undefined,
+    });
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value) => {
+          window.__copiedShare = value;
+        },
+      },
+    });
+  });
   const requests = [];
   page.on("request", (request) => requests.push(request.url()));
   const response = await page.goto("/prototypes/before-midnight/");
   expect(response?.ok()).toBe(true);
+  const canonicalUrl =
+    "https://nownowgames.co.za/prototypes/before-midnight/";
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    canonicalUrl,
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    canonicalUrl,
+  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://nownowgames.co.za/assets/before-midnight-share.png",
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Before Midnight",
   );
@@ -119,8 +152,34 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
   await expect(page.locator("#best-accuracy")).toContainText("%");
   await expect(page.locator("#personal-best")).toContainText("pts");
   await expect(page.locator("#retry")).toHaveCount(1);
-  await expect(page.locator("#result-card button")).toHaveCount(1);
+  await expect(page.locator("#result-card button")).toHaveCount(2);
   expect(await page.evaluate(() => localStorage.length)).toBe(1);
+
+  const personalBest = Number(
+    (await page.locator("#personal-best").textContent()).replace(" pts", ""),
+  ).toFixed(1);
+  const bragLine = `I scored ${personalBest} pts on Before Midnight — beat me:`;
+  const shareButton = page.getByRole("button", {
+    name: "Share your best time",
+  });
+  await shareButton.click();
+  await expect.poll(() => page.evaluate(() => window.__copiedShare)).toBe(
+    `${bragLine} ${canonicalUrl}`,
+  );
+  await expect(page.locator("#share-status")).toHaveText(
+    "Copied.",
+  );
+
+  await page.evaluate(() => {
+    navigator.share = async (payload) => {
+      window.__sharedPayload = payload;
+    };
+  });
+  await shareButton.click();
+  await expect.poll(() => page.evaluate(() => window.__sharedPayload)).toEqual({
+    text: bragLine,
+    url: canonicalUrl,
+  });
 
   const resultAccessibility = await new AxeBuilder({ page }).analyze();
   expect(resultAccessibility.violations).toEqual([]);

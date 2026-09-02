@@ -5,7 +5,7 @@ import { populateHub, readPrototypeCards } from "./hub-registry.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const destination = resolve(root, "dist");
-const sources = ["index.html", "shared", "prototypes"];
+const sources = ["index.html", "assets", "shared", "prototypes"];
 
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });

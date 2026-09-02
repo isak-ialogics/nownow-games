@@ -2,10 +2,33 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test("game hub is responsive, accessible, and has no retired route", async ({
+  context,
   page,
 }) => {
+  await context.addCookies([
+    {
+      name: "should-not-leave-browser",
+      value: "private",
+      url: "http://127.0.0.1:4173",
+    },
+  ]);
+  const analyticsRequests = [];
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (url.pathname === "/analytics/count") {
+      analyticsRequests.push({ headers: request.headers(), url });
+    }
+  });
   const response = await page.goto("/");
   expect(response?.ok()).toBe(true);
+  await expect.poll(() => analyticsRequests.length).toBeGreaterThan(0);
+  const pageview = analyticsRequests.find(
+    ({ url }) => url.searchParams.get("p") === "/",
+  );
+  expect(pageview).toBeTruthy();
+  expect([...pageview.url.searchParams.keys()].sort()).toEqual(["p", "rnd", "t"]);
+  expect(pageview.headers.cookie).toBeUndefined();
+  expect(pageview.headers.referer).toBeFalsy();
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     "https://nownowgames.co.za/",
@@ -74,6 +97,7 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   await expect(page.getByText("Safe Passage")).toBeVisible();
   await expect(page.getByText("Latch!")).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
+  await expect(page.getByText("No login. No ads. Privacy-safe analytics.")).toBeVisible();
 
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to games" })).toBeFocused();

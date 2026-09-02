@@ -9,6 +9,7 @@ const shareDescription =
 const required = [
   "index.html",
   "assets/before-midnight-share.png",
+  "shared/analytics.js",
   "shared/input.js",
   "shared/site.css",
   "prototypes/README.md",
@@ -95,6 +96,7 @@ const prototypeDirectories = (
   .sort((left, right) => left.name.localeCompare(right.name));
 
 const hub = await readFile(resolve(root, "index.html"), "utf8");
+const analytics = await readFile(resolve(root, "shared", "analytics.js"), "utf8");
 if (!hub.includes('name="viewport"')) {
   throw new Error("Hub is missing the mobile viewport meta tag.");
 }
@@ -102,6 +104,26 @@ if (/\b(?:href|src)="\//.test(hub)) {
   throw new Error("Hub uses a root-absolute asset path.");
 }
 assertLaunchMetadata(hub, "Hub", "");
+if (!hub.includes('src="./shared/analytics.js"')) {
+  throw new Error("Hub is missing the privacy-safe analytics module.");
+}
+for (const token of [
+  '"/analytics/count"',
+  'credentials:"omit"',
+  'referrerPolicy:"no-referrer"',
+  '"play-started"',
+  '"play-completed"',
+  '"share-triggered"',
+]) {
+  if (!analytics.includes(token)) {
+    throw new Error(`Analytics module is missing privacy/event contract: ${token}.`);
+  }
+}
+for (const forbidden of ["location.search", "document.referrer", "screen.width", "setItem("]) {
+  if (analytics.includes(forbidden)) {
+    throw new Error(`Analytics module includes forbidden data source: ${forbidden}.`);
+  }
+}
 for (const launchNoteCopy of [
   "Now live",
   "Play Before Midnight",
@@ -136,6 +158,9 @@ for (const directory of prototypeDirectories) {
   }
   if (/\b(?:href|src)="\//.test(prototype)) {
     throw new Error(`${directory.name} uses a root-absolute asset path.`);
+  }
+  if (!prototype.includes('src="../../shared/analytics.js"')) {
+    throw new Error(`${directory.name} is missing the analytics module.`);
   }
   if (directory.name === "before-midnight") {
     assertLaunchMetadata(

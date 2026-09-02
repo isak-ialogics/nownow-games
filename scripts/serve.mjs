@@ -20,6 +20,10 @@ createServer(async (request, response) => {
       `http://${request.headers.host ?? "localhost"}`,
     );
     const pathname = decodeURIComponent(url.pathname);
+    if (pathname === "/analytics/count") {
+      response.writeHead(204, { "Cache-Control": "no-store" }).end();
+      return;
+    }
     let file = resolve(root, `.${pathname}`);
 
     if (relative(root, file).startsWith("..")) {

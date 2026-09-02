@@ -30,7 +30,7 @@ npm ci
 npm run verify
 ```
 
-The production build is emitted to `dist/`. The repository deliberately has no backend, accounts, analytics, persistence, or external game services.
+The production build is emitted to `dist/`. The game remains a static app with no accounts or external game services. Its small cookieless analytics client sends only aggregate same-origin counters; see [`docs/ANALYTICS.md`](./docs/ANALYTICS.md) for the event contract, privacy boundary, IAL route, and rollback.
 
 ## Performance budget
 

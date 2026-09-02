@@ -44,6 +44,13 @@ async function expectResultThenRound(page, category, nextRound) {
   }
 }
 
+function eventPaths(requests) {
+  return requests
+    .map((request) => new URL(request.url()))
+    .filter((url) => url.pathname === "/analytics/count")
+    .map((url) => url.searchParams.get("p"));
+}
+
 test("seven fills support touch, mouse, Space, Enter, results, and retry", async ({
   page,
 }) => {
@@ -63,9 +70,12 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
     });
   });
   const requests = [];
-  page.on("request", (request) => requests.push(request.url()));
+  page.on("request", (request) => requests.push(request));
   const response = await page.goto("/prototypes/before-midnight/");
   expect(response?.ok()).toBe(true);
+  await expect
+    .poll(() => eventPaths(requests))
+    .toContain("/event/before-midnight/play-started/new");
   const canonicalUrl =
     "https://nownowgames.co.za/prototypes/before-midnight/";
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -147,6 +157,9 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
 
   const result = page.locator("#result-card");
   await expect(result).toBeVisible();
+  await expect
+    .poll(() => eventPaths(requests))
+    .toContain("/event/before-midnight/play-completed/new");
   await expect(page.locator("#total-units")).toContainText("units");
   await expect(page.locator("#overshoots")).toHaveText("1 / 7");
   await expect(page.locator("#best-accuracy")).toContainText("%");
@@ -163,6 +176,14 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
     name: "Share your best time",
   });
   await shareButton.click();
+  await expect
+    .poll(
+      () =>
+        eventPaths(requests).filter(
+          (path) => path === "/event/before-midnight/share-triggered/new",
+        ).length,
+    )
+    .toBe(1);
   await expect.poll(() => page.evaluate(() => window.__copiedShare)).toBe(
     `${bragLine} ${canonicalUrl}`,
   );
@@ -176,6 +197,14 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
     };
   });
   await shareButton.click();
+  await expect
+    .poll(
+      () =>
+        eventPaths(requests).filter(
+          (path) => path === "/event/before-midnight/share-triggered/new",
+        ).length,
+    )
+    .toBe(2);
   await expect.poll(() => page.evaluate(() => window.__sharedPayload)).toEqual({
     text: bragLine,
     url: canonicalUrl,
@@ -190,12 +219,40 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
     });
   }
 
+  const startsBeforeRetry = eventPaths(requests).filter(
+    (path) => path === "/event/before-midnight/play-started/new",
+  ).length;
   await page.getByRole("button", { name: "Retry seven fills" }).click();
+  await expect
+    .poll(
+      () =>
+        eventPaths(requests).filter(
+          (path) => path === "/event/before-midnight/play-started/new",
+        ).length,
+    )
+    .toBe(startsBeforeRetry + 1);
   await expect(page.locator("#round-count")).toHaveText("1 / 7");
   await expect(result).toBeHidden();
   expect(
-    requests.every((url) => url.startsWith("http://127.0.0.1:4173/")),
+    requests.every((request) =>
+      request.url().startsWith("http://127.0.0.1:4173/"),
+    ),
   ).toBe(true);
+});
+
+test("analytics labels an existing personal-best player as returning", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("nownow-before-midnight-best-v1", "12.5");
+  });
+  const requests = [];
+  page.on("request", (request) => requests.push(request));
+  await page.goto("/prototypes/before-midnight/");
+  await expect
+    .poll(() => eventPaths(requests))
+    .toContain("/event/before-midnight/play-started/returning");
+  expect(await page.evaluate(() => localStorage.length)).toBe(1);
 });
 
 test("reduced motion removes bounce and steps the live counter", async ({

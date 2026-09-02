@@ -51,6 +51,7 @@ const required = [
   "assets/before-midnight-share.png",
   "nginx.conf",
   "scripts/seo.mjs",
+  "shared/analytics.js",
   "shared/input.js",
   "shared/site.css",
   "prototypes/README.md",
@@ -219,12 +220,52 @@ for (const directory of prototypeDirectories) {
   if (!source.includes('aria-label="More NowNow Games"')) {
     throw new Error(`${directory.name} lacks useful links to other games.`);
   }
+  if (!source.includes('src="../../shared/analytics.js"')) {
+    throw new Error(`${directory.name} is missing the analytics module.`);
+  }
   if (!game.includes("../../shared/input.js")) {
     throw new Error(`${directory.name} does not use the shared input module.`);
   }
 }
 
 const hub = await readFile(resolve(root, "index.html"), "utf8");
+const analytics = await readFile(resolve(root, "shared", "analytics.js"), "utf8");
+if (!hub.includes('src="./shared/analytics.js"')) {
+  throw new Error("Hub is missing the privacy-safe analytics module.");
+}
+for (const token of [
+  '"/analytics/count"',
+  'credentials:"omit"',
+  'referrerPolicy:"no-referrer"',
+  '"play-started"',
+  '"play-completed"',
+  '"share-triggered"',
+]) {
+  if (!analytics.includes(token)) {
+    throw new Error(
+      `Analytics module is missing privacy/event contract: ${token}.`,
+    );
+  }
+}
+for (const forbidden of [
+  "location.search",
+  "document.referrer",
+  "screen.width",
+  "setItem(",
+]) {
+  if (analytics.includes(forbidden)) {
+    throw new Error(`Analytics module includes forbidden data source: ${forbidden}.`);
+  }
+}
+for (const launchNoteCopy of [
+  "Now live",
+  "Play Before Midnight",
+  "Share your best time.",
+]) {
+  if (!hub.includes(launchNoteCopy)) {
+    throw new Error(`Hub is missing launch note copy: ${launchNoteCopy}`);
+  }
+}
 for (const marker of [
   "PROTOTYPE_COUNT_START",
   "PROTOTYPE_COUNT_END",

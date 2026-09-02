@@ -2,7 +2,7 @@ name: Verify static harness
 
 on:
   push:
-    branches: [main, "now-3/bootstrap-harness"]
+    branches: [main]
   pull_request:
     branches: [main]
 

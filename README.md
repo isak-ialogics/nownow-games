@@ -49,3 +49,22 @@ Any single breach exits non-zero. This per-page model keeps the warm-cache targe
 All application source and visual design in this repository were created for NowNow Games. No third-party game concept, trademark, branded artwork, or copied game asset is included.
 
 Copyright (c) 2026 NowNow Games. All rights reserved. See [LICENSE.md](./LICENSE.md).
+
+## DEV container deployment and rollback
+
+Successful `main` verification triggers the DEV deployment workflow. It publishes
+`ghcr.io/isak-ialogics/nownow-games:<commit-sha>` and deploys that exact tag plus
+its resolved manifest digest; floating tags and image polling are intentionally
+not used. `workflow_dispatch` is retained for an explicitly selected, already
+verified recovery ref.
+
+To roll back DEV on the Swarm runner, run:
+
+```sh
+/opt/ial-deploy/deploy.sh nownow-games --env dev --rollback
+```
+
+The deployment script retains the prior tag-and-digest reference in its rollback
+state. Verify `dev-nownow-games_static` is `1/1`, its container health is
+`healthy`, and `https://nownow.dev.mplace.co.za/` returns HTTP 200 after either
+a deployment or rollback.

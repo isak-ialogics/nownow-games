@@ -2,11 +2,13 @@ import { access, readdir, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const pagesUrl = "https://isak-ialogics.github.io/nownow-games/";
+const productionUrl = "https://nownowgames.co.za/";
+const ogImageUrl = `${productionUrl}assets/before-midnight-share.png`;
 const shareDescription =
   "Hold. Release. Stop under the cap. Master seven fictional fills in Before Midnight.";
 const required = [
   "index.html",
+  "assets/before-midnight-share.png",
   "shared/input.js",
   "shared/site.css",
   "prototypes/README.md",
@@ -27,8 +29,20 @@ function assertLaunchMetadata(source, label, canonicalPath) {
       /<meta\s+property="og:type"\s+content="website"\s*\/>/,
     ],
     [
+      "Open Graph image",
+      new RegExp(
+        `<meta\\s+property="og:image"\\s+content="${ogImageUrl}"\\s*\\/>`,
+      ),
+    ],
+    [
+      "Open Graph URL",
+      new RegExp(
+        `<meta\\s+property="og:url"\\s+content="${productionUrl}${canonicalPath}"\\s*\\/>`,
+      ),
+    ],
+    [
       "Twitter card",
-      /<meta\s+name="twitter:card"\s+content="summary"\s*\/>/,
+      /<meta\s+name="twitter:card"\s+content="summary_large_image"\s*\/>/,
     ],
     [
       "theme colour",
@@ -37,7 +51,7 @@ function assertLaunchMetadata(source, label, canonicalPath) {
     [
       "canonical link",
       new RegExp(
-        `<link\\s+rel="canonical"\\s+href="${pagesUrl}${canonicalPath}"\\s*\\/>`,
+        `<link\\s+rel="canonical"\\s+href="${productionUrl}${canonicalPath}"\\s*\\/>`,
       ),
     ],
     [
@@ -61,6 +75,18 @@ function assertLaunchMetadata(source, label, canonicalPath) {
 }
 
 for (const path of required) await access(resolve(root, path));
+
+const ogImage = await readFile(
+  resolve(root, "assets", "before-midnight-share.png"),
+);
+if (
+  ogImage.length < 24 ||
+  ogImage.toString("ascii", 1, 4) !== "PNG" ||
+  ogImage.readUInt32BE(16) !== 1200 ||
+  ogImage.readUInt32BE(20) !== 630
+) {
+  throw new Error("Open Graph image must be a 1200x630 PNG.");
+}
 
 const prototypeDirectories = (
   await readdir(resolve(root, "prototypes"), { withFileTypes: true })

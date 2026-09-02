@@ -19,11 +19,19 @@
       content="Hold. Release. Stop under the cap. Master seven fictional fills in Before Midnight."
     />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
+    <meta
+      property="og:image"
+      content="https://nownowgames.co.za/assets/before-midnight-share.png"
+    />
+    <meta
+      property="og:url"
+      content="https://nownowgames.co.za/prototypes/before-midnight/"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#111515" />
     <link
       rel="canonical"
-      href="https://isak-ialogics.github.io/nownow-games/prototypes/before-midnight/"
+      href="https://nownowgames.co.za/prototypes/before-midnight/"
     />
     <link
       rel="icon"
@@ -115,7 +123,16 @@
         </dl>
         <p id="run-score" class="run-score">Run score: 0.0 pts</p>
         <p id="new-best" class="new-best" hidden>New personal best.</p>
+        <button id="share-best" class="retry share" type="button">
+          Share your best time
+        </button>
         <button id="retry" class="retry" type="button">Retry seven fills</button>
+        <p
+          id="share-status"
+          class="new-best"
+          role="status"
+          aria-live="polite"
+        ></p>
       </section>
     </main>
 

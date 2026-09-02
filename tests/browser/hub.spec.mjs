@@ -1,21 +1,26 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-test("prototype hub is responsive, accessible, and has no retired route", async ({
+test("game hub is responsive, accessible, and has no retired route", async ({
   page,
 }) => {
   const response = await page.goto("/");
   expect(response?.ok()).toBe(true);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Small games",
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    /Small game\.\s*Big nerve\.\s*Play Before Midnight\./,
   );
+  const viewport = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
   await expect(page.locator("[data-prototype-count]")).toHaveText("03");
   await expect(page.locator("[data-prototype-count]")).toHaveAttribute(
     "aria-label",
-    "3 prototypes",
+    "3 games",
   );
   await expect(page.locator(".prototype-card")).toHaveCount(3);
-  const playLinks = page.getByRole("link", { name: /Open prototype/ });
+  const playLinks = page.getByRole("link", { name: /Play now/ });
   await expect(playLinks).toHaveCount(3);
   await expect(playLinks.nth(0)).toHaveAttribute(
     "href",
@@ -29,14 +34,21 @@ test("prototype hub is responsive, accessible, and has no retired route", async 
     "href",
     "./prototypes/safe-passage/",
   );
-  await expect(page.getByText("Before Midnight")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Before Midnight", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Hold, release, and outsmart the coast. Can you stop just under the rand cap?",
+    ),
+  ).toBeVisible();
   await expect(page.getByText("Safe Passage")).toBeVisible();
   await expect(page.getByText("Latch!")).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
 
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("link", { name: "Skip to prototypes" })).toBeFocused();
-  await expect(page.getByRole("link", { name: "Skip to prototypes" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Skip to games" })).toBeFocused();
+  await expect(page.getByRole("link", { name: "Skip to games" })).toBeVisible();
 
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations).toEqual([]);

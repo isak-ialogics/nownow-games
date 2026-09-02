@@ -54,6 +54,7 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Before Midnight",
   );
+  await expect(page.getByText("Seven fills. One exacting cap.")).toBeVisible();
   await expect(page.getByText(/not a price calculator/i)).toBeVisible();
   await expect(page.locator("audio")).toHaveCount(0);
 

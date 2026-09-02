@@ -86,7 +86,7 @@ function renderCard(card, index) {
             <span class="preview-orbit preview-orbit-one"></span>
             <span class="preview-orbit preview-orbit-two"></span>
             <span class="preview-dot"></span>
-            <span class="preview-label">PROTOTYPE / ${cardNumber}</span>
+            <span class="preview-label">GAME / ${cardNumber}</span>
           </div>
           <div class="card-content">
             <p class="card-kicker">${escapeHtml(card.kicker)}</p>
@@ -96,7 +96,7 @@ function renderCard(card, index) {
 ${features}
             </ul>
             <a class="play-link" href="./prototypes/${escapeHtml(card.slug)}/">
-              Open prototype <span aria-hidden="true">&rarr;</span>
+              Play now <span aria-hidden="true">&rarr;</span>
             </a>
           </div>
         </article>`;
@@ -114,13 +114,13 @@ function replaceRegion(source, start, end, content) {
 
 export function populateHub(template, cards) {
   const count = cards.length;
-  const countLabel = `${count} prototype${count === 1 ? "" : "s"}`;
+  const countLabel = `${count} game${count === 1 ? "" : "s"}`;
   const countMarkup = `          <span class="count" data-prototype-count aria-label="${countLabel}"
             >${String(count).padStart(2, "0")}</span
           >`;
   const cardsMarkup =
     count === 0
-      ? '          <p class="empty-state">No playable prototypes yet.</p>'
+      ? '          <p class="empty-state">No games live yet.</p>'
       : cards.map(renderCard).join("\n");
 
   return replaceRegion(

@@ -11,7 +11,9 @@ const limits = Object.freeze({
     javascript: 8 * KIBIBYTE,
   }),
   shared: Object.freeze({
-    total: 14 * KIBIBYTE,
+    // Raised 14 -> 16 KiB for NOW-46: per-game card motifs replaced the shared
+    // circle placeholder. Pure CSS (no images/requests), so hub warm-cache stays fast.
+    total: 16 * KIBIBYTE,
     javascript: 7 * KIBIBYTE,
   }),
   hub: Object.freeze({ total: 7 * KIBIBYTE }),

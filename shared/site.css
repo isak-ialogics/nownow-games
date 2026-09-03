@@ -243,38 +243,72 @@ main {
   display: grid;
   min-height: 18rem;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgb(126 215 255 / 18%), transparent 55%), #202623;
+  background: #202623;
   place-items: center;
 }
 
-.preview-orbit {
+.preview-shape {
   position: absolute;
-  border: 1px solid rgb(248 247 242 / 30%);
-  border-radius: 50%;
+  left: 50%;
+  top: 50%;
 }
 
-.preview-orbit-one {
-  width: 12rem;
-  height: 12rem;
+/* Each game gets its own card motif, drawn from its core mechanic. */
+
+/* Before Midnight: a fill meter rising toward the cap you must stop under. */
+.card-art--before-midnight { background: linear-gradient(180deg, #232a24, #141813); }
+.card-art--before-midnight .preview-shape-a,
+.card-art--before-midnight .preview-shape-b {
+  width: 5rem; height: 12.5rem; border-radius: 2.6rem;
+  transform: translate(-50%, -50%);
+}
+.card-art--before-midnight .preview-shape-a { background: #12160f; border: 1px solid var(--line); }
+.card-art--before-midnight .preview-shape-b { background: linear-gradient(180deg, transparent 44%, var(--lime) 44%); }
+.card-art--before-midnight .preview-shape-c {
+  width: 6.2rem; margin-top: -3.5rem;
+  border-top: 2px dashed var(--orange); transform: translateX(-50%);
 }
 
-.preview-orbit-two {
-  width: 20rem;
-  height: 20rem;
-  border-style: dashed;
+/* Latch: two doors; the correct one is secured with a lime latch. */
+.card-art--latch { background: linear-gradient(135deg, #27221b, #151915); }
+.card-art--latch .preview-shape-a,
+.card-art--latch .preview-shape-b {
+  width: 5rem; height: 11rem; border-radius: 0.5rem 0.5rem 0.35rem 0.35rem;
+  transform: translate(-50%, -50%);
+}
+.card-art--latch .preview-shape-a { margin-left: -3.4rem; background: #1a1e1b; border: 1px solid var(--line); }
+.card-art--latch .preview-shape-b {
+  margin-left: 3.4rem; background: #1c231a; border: 2px solid var(--lime);
+  box-shadow: 0 1rem 3rem rgb(200 255 61 / 18%);
+}
+.card-art--latch .preview-shape-c {
+  z-index: 1; width: 0.75rem; height: 0.75rem; margin-left: 1.9rem;
+  background: var(--lime); border-radius: 50%;
+  box-shadow: 0 0 0 0.32rem rgb(16 18 17 / 85%), 0 0 1.2rem var(--lime);
+  transform: translate(-50%, -50%);
 }
 
-.preview-dot {
-  z-index: 1;
-  width: 4.5rem;
-  height: 4.5rem;
-  background: var(--lime);
-  border: 0.65rem solid rgb(16 18 17 / 75%);
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 1px var(--lime),
-    0 1rem 4rem rgb(200 255 61 / 25%);
+/* Safe Passage: two craft held inside an angled safety corridor. */
+.card-art--safe-passage { background: linear-gradient(160deg, #1b2531, #151915); }
+.card-art--safe-passage .preview-shape-a {
+  width: 16rem; height: 5.5rem;
+  background: linear-gradient(180deg, rgb(126 215 255 / 7%), transparent);
+  border-top: 2px dashed rgb(126 215 255 / 55%);
+  border-bottom: 2px dashed rgb(126 215 255 / 55%);
+  transform: translate(-50%, -50%) rotate(-14deg);
+}
+.card-art--safe-passage .preview-shape-b,
+.card-art--safe-passage .preview-shape-c {
+  z-index: 1; border-radius: 50% 50% 50% 15%;
+  transform: translate(-50%, -50%) rotate(-14deg);
+}
+.card-art--safe-passage .preview-shape-b {
+  width: 1.55rem; height: 1.55rem; margin: -0.6rem 0 0 -2.6rem;
+  background: var(--lime); box-shadow: 0 0 1rem rgb(200 255 61 / 45%);
+}
+.card-art--safe-passage .preview-shape-c {
+  width: 1.25rem; height: 1.25rem; margin: 0.9rem 0 0 2.6rem;
+  background: var(--sky); box-shadow: 0 0 0.8rem rgb(126 215 255 / 45%);
 }
 
 .preview-label {

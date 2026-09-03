@@ -82,10 +82,10 @@ function renderCard(card, index) {
   const cardNumber = String(index + 1).padStart(2, "0");
 
   return `        <article class="prototype-card">
-          <div class="card-preview" aria-hidden="true">
-            <span class="preview-orbit preview-orbit-one"></span>
-            <span class="preview-orbit preview-orbit-two"></span>
-            <span class="preview-dot"></span>
+          <div class="card-preview card-art--${escapeHtml(card.slug)}" aria-hidden="true">
+            <span class="preview-shape preview-shape-a"></span>
+            <span class="preview-shape preview-shape-b"></span>
+            <span class="preview-shape preview-shape-c"></span>
             <span class="preview-label">GAME / ${cardNumber}</span>
           </div>
           <div class="card-content">

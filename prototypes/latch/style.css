@@ -381,6 +381,17 @@ kbd {
 }
 .result-card button:focus-visible { outline: 4px solid var(--amber); outline-offset: 3px; }
 
+.more-games {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  padding: 1.5rem 0;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+.more-games p { flex-basis: 100%; margin: 0; color: var(--muted); }
+.more-games a { display: inline-flex; min-height: 44px; align-items: center; color: var(--mint); }
+
 body[data-paused="true"] .game-panel { opacity: .72; }
 
 @keyframes reach-in {

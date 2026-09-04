@@ -3,8 +3,49 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <meta name="description" content="Safe Passage: an abstract hold-and-release formation arcade game." />
-    <title>Safe Passage - NowNow Games</title>
+    <meta
+      name="description"
+      content="Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game."
+    />
+    <meta property="og:title" content="Safe Passage | NowNow Games" />
+    <meta
+      property="og:description"
+      content="Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://nownowgames.co.za/prototypes/safe-passage/"
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Safe Passage | NowNow Games" />
+    <meta
+      name="twitter:description"
+      content="Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game."
+    />
+    <link
+      rel="canonical"
+      href="https://nownowgames.co.za/prototypes/safe-passage/"
+    />
+    <title>Safe Passage | NowNow Games</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Safe Passage",
+        "url": "https://nownowgames.co.za/prototypes/safe-passage/",
+        "description": "Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game.",
+        "gamePlatform": "Web browser",
+        "playMode": "SinglePlayer",
+        "inLanguage": "en-ZA",
+        "isAccessibleForFree": true,
+        "publisher": {
+          "@type": "Organization",
+          "name": "NowNow Games",
+          "url": "https://nownowgames.co.za/"
+        }
+      }
+    </script>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -38,6 +79,12 @@
         <dl><div><dt>Score</dt><dd id="final-score">0</dd></div><div><dt>Gate record</dt><dd id="final-gates">0 / 12</dd></div></dl>
         <button id="retry" type="button">Retry passage</button>
       </section>
+
+      <nav class="more-games" aria-label="More NowNow Games">
+        <p>More original browser games</p>
+        <a href="../before-midnight/">Play Before Midnight</a>
+        <a href="../latch/">Play Latch!</a>
+      </nav>
     </main>
     <script type="module" src="./game.js"></script>
   </body>

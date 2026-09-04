@@ -12,6 +12,8 @@ FROM nginx:1.29-alpine
 LABEL org.opencontainers.image.source="https://github.com/isak-ialogics/nownow-games"
 
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN nginx -t
 
 EXPOSE 80
 

@@ -11,6 +11,8 @@ const contentTypes = Object.freeze({
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
+  ".txt": "text/plain; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
 });
 
 createServer(async (request, response) => {
@@ -39,9 +41,21 @@ createServer(async (request, response) => {
     if (request.method === "HEAD") response.end();
     else createReadStream(file).pipe(response);
   } catch {
-    response
-      .writeHead(404, { "Content-Type": "text/plain; charset=utf-8" })
-      .end("Not found");
+    const notFound = resolve(root, "404.html");
+    try {
+      await stat(notFound);
+      response.writeHead(404, {
+        "Cache-Control": "no-store",
+        "Content-Type": "text/html; charset=utf-8",
+        "X-Content-Type-Options": "nosniff",
+      });
+      if (request.method === "HEAD") response.end();
+      else createReadStream(notFound).pipe(response);
+    } catch {
+      response
+        .writeHead(404, { "Content-Type": "text/plain; charset=utf-8" })
+        .end("Not found");
+    }
   }
 }).listen(port, "127.0.0.1", () => {
   console.log(`Serving ${root} at http://127.0.0.1:${port}`);

@@ -8,9 +8,47 @@
     />
     <meta
       name="description"
-      content="Latch!: a one-minute defensive door reaction game with original art."
+      content="Spot the real handle tug and secure the correct door in Latch!, an original one-minute browser reaction game."
     />
-    <title>Latch! - NowNow Games</title>
+    <meta property="og:title" content="Latch! | NowNow Games" />
+    <meta
+      property="og:description"
+      content="Spot the real handle tug and secure the correct door in Latch!, an original one-minute browser reaction game."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://nownowgames.co.za/prototypes/latch/"
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Latch! | NowNow Games" />
+    <meta
+      name="twitter:description"
+      content="Spot the real handle tug and secure the correct door in Latch!, an original one-minute browser reaction game."
+    />
+    <link
+      rel="canonical"
+      href="https://nownowgames.co.za/prototypes/latch/"
+    />
+    <title>Latch! | NowNow Games</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Latch!",
+        "url": "https://nownowgames.co.za/prototypes/latch/",
+        "description": "Spot the real handle tug and secure the correct door in Latch!, an original one-minute browser reaction game.",
+        "gamePlatform": "Web browser",
+        "playMode": "SinglePlayer",
+        "inLanguage": "en-ZA",
+        "isAccessibleForFree": true,
+        "publisher": {
+          "@type": "Organization",
+          "name": "NowNow Games",
+          "url": "https://nownowgames.co.za/"
+        }
+      }
+    </script>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -94,6 +132,12 @@
         </p>
         <button id="retry" type="button">Retry Latch!</button>
       </section>
+
+      <nav class="more-games" aria-label="More NowNow Games">
+        <p>More original browser games</p>
+        <a href="../before-midnight/">Play Before Midnight</a>
+        <a href="../safe-passage/">Play Safe Passage</a>
+      </nav>
     </main>
 
     <script type="module" src="./game.js"></script>

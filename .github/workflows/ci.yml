@@ -38,3 +38,32 @@ jobs:
 
       - name: Run mobile browser and accessibility checks
         run: npm run test:e2e
+
+      - name: Build and smoke-test production container
+        run: |
+          set -euo pipefail
+          docker build --tag nownow-games:ci .
+          container_id="$(docker run --detach --publish 127.0.0.1:8080:80 nownow-games:ci)"
+          trap 'docker rm --force "$container_id" >/dev/null' EXIT
+
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:8080/ >/dev/null; then break; fi
+            test "$attempt" -lt 20
+            sleep 1
+          done
+
+          curl --silent --fail http://127.0.0.1:8080/robots.txt | grep --fixed-strings 'Allow: /'
+          curl --silent --show-error --head http://127.0.0.1:8080/sitemap.xml | grep --ignore-case '^Content-Type: application/xml'
+          test "$(curl --silent --output /tmp/not-found.html --write-out '%{http_code}' http://127.0.0.1:8080/missing-ci-route)" = 404
+          grep --fixed-strings 'That page slipped away.' /tmp/not-found.html
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' --header 'Host: www.nownowgames.co.za' http://127.0.0.1:8080/prototypes/latch/)" = 308
+          test "$(curl --silent --output /dev/null --write-out '%{redirect_url}' --header 'Host: www.nownowgames.co.za' http://127.0.0.1:8080/prototypes/latch/)" = 'https://nownowgames.co.za/prototypes/latch/'
+
+          for attempt in $(seq 1 50); do
+            health="$(docker inspect --format '{{.State.Health.Status}}' "$container_id")"
+            if test "$health" = healthy; then break; fi
+            test "$health" != unhealthy
+            test "$attempt" -lt 50
+            sleep 1
+          done
+          test "$health" = healthy

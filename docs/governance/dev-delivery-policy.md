@@ -4,7 +4,7 @@
 **Authorised by:** Board (Isak), NOW-187 — "Board directive: automatic DEV delivery;
 verify the deployed product, not manual PR gates."
 **Effective:** 2026-09-09
-**Last amended:** 2026-09-09 (see "Amendment 2026-09-09" below)
+**Last amended:** 2026-09-09 (see the "Amendment 2026-09-09" sections below)
 **Scope:** Routine DEV delivery, and the governed DEV→PROD promotion gate added
 by the 2026-09-09 amendment. Production runtime remains unchanged until a
 change clears that gate.
@@ -116,6 +116,43 @@ control above stays in force.
 - **Hermes does not implement, merge, or deploy** — Hermes accepts, authorises,
   and verifies; engineering/IAL execute.
 - Secrets are never placed in issues, comments, artifacts, source, or logs.
+
+## Amendment 2026-09-09 (b) — DEV and PROD only; GitHub Pages removed from delivery
+
+**Authorised by:** Board (Isak/Hermes), NOW-187 wake comment
+`193583ca-27a8-41e1-9bfd-bf116678f09f` (2026-09-09).
+
+GitHub Pages is **no longer an authorised environment** for NowNow Games — not
+for preview, not as a fallback, and not as an acceptance target. The board has
+directed that the studio deliver through **DEV and PROD only**.
+
+### Now in force
+
+1. **Two deployment targets, no others.** The only authorised deployment
+   targets are **DEV — `https://nownow.dev.mplace.co.za/`** and **PROD —
+   `https://nownowgames.co.za/`**. Canonical links, Open Graph URLs, and
+   structured-data URLs already point only at the PROD origin; no `github.io`
+   target remains in source.
+2. **GitHub Pages is decommissioned.** The `Deploy GitHub Pages preview`
+   workflow (`.github/workflows/pages.yml`) is disabled and removed, and the
+   configured Pages site (`https://isak-ialogics.github.io/nownow-games/`) is
+   unpublished. Historical Pages run evidence is preserved as history; it is not
+   broadly deleted.
+3. **No Pages fallback, ever.** If DEV fails, fix DEV and record the
+   failure/blocker via Paperclip. Do **not** fall back to Pages, and do **not**
+   claim success from green CI, image publication, or any preview. Pages-based
+   historical QA does **not** satisfy live DEV acceptance.
+4. **Verify and Publish DEV/PROD stay operational.** `Verify static harness`
+   (`ci.yml`) and `Publish DEV image` / `Publish PROD image`
+   (`deploy-dev.yml` / `deploy-prod.yml`) are unchanged. The
+   CI → auto DEV → Hermes live acceptance → authorised `:prod` promotion →
+   auto PROD → Hermes PROD verification flow (above) is the only delivery path.
+
+### Constraints that remain (unchanged by this amendment)
+
+- Spending, security, privacy, rights, and runtime-configuration constraints
+  remain in full force; the ICMS **Postmaster stays paused**; no new platform or
+  duplicate project is created.
 
 ## Rollback
 

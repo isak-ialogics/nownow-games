@@ -8,8 +8,11 @@ green** — no human, board, or Hermes approval gate. `Verify static harness`
 publishes or deploys. PRs are traceability artifacts, not approval queues.
 Independent QA runs against the *deployed* DEV artifact, not as a pre-merge
 line-by-line gate. Failed DEV health triggers a single bounded stop/rollback
-(below), not a recovery loop. Production is unaffected: `deploy-prod.yml` is
-gated on `prod` only. Full rationale and governance record:
+(below), not a recovery loop. DEV automation never touches production:
+`deploy-prod.yml` is gated on `prod` only, and no green CI run promotes on its
+own. Production changes only through the Hermes-authorised DEV→PROD promotion
+gate (post-DEV acceptance delegated to Hermes, 2026-09-09 amendment). Full
+rationale, promotion flow, and governance record:
 [`docs/governance/dev-delivery-policy.md`](./governance/dev-delivery-policy.md).
 
 ## Pipeline

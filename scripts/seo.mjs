@@ -1,11 +1,11 @@
+import { publicPathForCard } from "./hub-registry.mjs";
+
 export const PRODUCTION_ORIGIN = "https://nownowgames.co.za";
 
 function publicUrls(cards) {
   return [
     `${PRODUCTION_ORIGIN}/`,
-    ...cards.map(
-      ({ slug }) => `${PRODUCTION_ORIGIN}/prototypes/${slug}/`,
-    ),
+    ...cards.map((card) => `${PRODUCTION_ORIGIN}/${publicPathForCard(card)}/`),
   ];
 }
 

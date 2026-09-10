@@ -6,6 +6,12 @@ const COUNT_END = "<!-- PROTOTYPE_COUNT_END -->";
 const CARDS_START = "<!-- PROTOTYPE_CARDS_START -->";
 const CARDS_END = "<!-- PROTOTYPE_CARDS_END -->";
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PUBLIC_PATH_PATTERN =
+  /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
+
+export function publicPathForCard(card) {
+  return card.publicPath ?? `prototypes/${card.slug}`;
+}
 
 function escapeHtml(value) {
   return value
@@ -29,6 +35,14 @@ function assertCard(card, slug) {
 
   if (!Number.isInteger(card.order) || card.order < 1) {
     throw new Error(`${slug}/card.json requires a positive integer order.`);
+  }
+
+  if (
+    card.publicPath !== undefined &&
+    (typeof card.publicPath !== "string" ||
+      !PUBLIC_PATH_PATTERN.test(card.publicPath))
+  ) {
+    throw new Error(`${slug}/card.json has an invalid publicPath.`);
   }
 
   if (
@@ -95,7 +109,7 @@ function renderCard(card, index) {
             <ul class="feature-list" aria-label="Game features">
 ${features}
             </ul>
-            <a class="play-link" href="./prototypes/${escapeHtml(card.slug)}/">
+            <a class="play-link" href="./${escapeHtml(publicPathForCard(card))}/">
               Play now <span aria-hidden="true">&rarr;</span>
             </a>
           </div>

@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
+
 test("game hub is responsive, accessible, and has no retired route", async ({
   context,
   page,
@@ -9,7 +11,7 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     {
       name: "should-not-leave-browser",
       value: "private",
-      url: "http://127.0.0.1:4173",
+      url: localOrigin,
     },
   ]);
   const analyticsRequests = [];
@@ -60,7 +62,7 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   await expect(launchNote).toContainText("Share your best time.");
   await expect(
     launchNote.getByRole("link", { name: "Play Before Midnight" }),
-  ).toHaveAttribute("href", "./prototypes/before-midnight/");
+  ).toHaveAttribute("href", "./games/before-midnight/");
   const viewport = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
@@ -76,7 +78,7 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   await expect(playLinks).toHaveCount(3);
   await expect(playLinks.nth(0)).toHaveAttribute(
     "href",
-    "./prototypes/before-midnight/",
+    "./games/before-midnight/",
   );
   await expect(playLinks.nth(1)).toHaveAttribute(
     "href",

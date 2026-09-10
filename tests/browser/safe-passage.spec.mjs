@@ -1,5 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -72,7 +74,7 @@ test("320px play supports pointer and keyboard parity, failure, and retry", asyn
   await expect(page.locator("#announcement")).toContainText("Roofline breaches: 1");
   await expect(page.locator("#result button")).toHaveCount(1);
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
-  expect(requests.every((url) => url.startsWith("http://127.0.0.1:4173/"))).toBe(true);
+  expect(requests.every((url) => url.startsWith(`${localOrigin}/`))).toBe(true);
 
   const resultAccessibility = await new AxeBuilder({ page }).analyze();
   expect(resultAccessibility.violations).toEqual([]);

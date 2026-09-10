@@ -8,6 +8,8 @@ assets from a third party.
 ## Recorded measurements
 
 - Page visits use only the canonical pathname and static document title.
+- Before Midnight initializes at canonical path `/games/before-midnight/`; its
+  historical `/event/before-midnight/...` counter keys remain unchanged.
 - `/event/before-midnight/play-started/{new|returning}` fires when the automatic
   first run begins and when Retry starts another run.
 - `/event/before-midnight/play-completed/{new|returning}` fires once when the

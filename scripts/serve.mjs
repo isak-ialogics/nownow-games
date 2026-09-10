@@ -22,6 +22,18 @@ createServer(async (request, response) => {
       `http://${request.headers.host ?? "localhost"}`,
     );
     const pathname = decodeURIComponent(url.pathname);
+    if (
+      pathname === "/prototypes/before-midnight" ||
+      pathname === "/prototypes/before-midnight/"
+    ) {
+      response
+        .writeHead(308, {
+          "Cache-Control": "no-store",
+          Location: `/games/before-midnight/${url.search}`,
+        })
+        .end();
+      return;
+    }
     if (pathname === "/analytics/count") {
       response.writeHead(204, { "Cache-Control": "no-store" }).end();
       return;

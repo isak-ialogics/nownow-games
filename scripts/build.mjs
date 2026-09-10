@@ -1,7 +1,11 @@
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
-import { populateHub, readPrototypeCards } from "./hub-registry.mjs";
+import {
+  populateHub,
+  publicPathForCard,
+  readPrototypeCards,
+} from "./hub-registry.mjs";
 import { buildRobots, buildSitemap } from "./seo.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -30,21 +34,37 @@ for (const source of sources) {
 }
 
 const cards = await readPrototypeCards(resolve(root, "prototypes"));
+for (const card of cards) {
+  const sourcePath = `prototypes/${card.slug}`;
+  const publicPath = publicPathForCard(card);
+  if (publicPath === sourcePath) continue;
+  const outputPath = resolve(destination, publicPath);
+  await mkdir(dirname(outputPath), { recursive: true });
+  await cp(resolve(root, sourcePath), outputPath, { recursive: true });
+}
 const hub = await readFile(resolve(root, "index.html"), "utf8");
 await writeFile(
   resolve(destination, "index.html"),
   compactHtml(populateHub(hub, cards)),
 );
-for (const path of [
+for (const path of new Set([
   "404.html",
-  ...cards.map(({ slug }) => `prototypes/${slug}/index.html`),
-]) {
+  ...cards.flatMap((card) => [
+    `prototypes/${card.slug}/index.html`,
+    `${publicPathForCard(card)}/index.html`,
+  ]),
+])) {
   const outputPath = resolve(destination, path);
   await writeFile(outputPath, compactHtml(await readFile(outputPath, "utf8")));
 }
-for (const { slug } of cards) {
-  const outputPath = resolve(destination, "prototypes", slug, "style.css");
-  await writeFile(outputPath, compactCss(await readFile(outputPath, "utf8")));
+for (const card of cards) {
+  for (const path of new Set([
+    `prototypes/${card.slug}/style.css`,
+    `${publicPathForCard(card)}/style.css`,
+  ])) {
+    const outputPath = resolve(destination, path);
+    await writeFile(outputPath, compactCss(await readFile(outputPath, "utf8")));
+  }
 }
 await writeFile(resolve(destination, "robots.txt"), buildRobots());
 await writeFile(resolve(destination, "sitemap.xml"), buildSitemap(cards));

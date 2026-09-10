@@ -4,6 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const evidenceDir = process.env.EVIDENCE_DIR;
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 
 async function pointerHold(page, pointerType, milliseconds) {
   const pump = page.locator("#pump");
@@ -71,13 +72,12 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
   });
   const requests = [];
   page.on("request", (request) => requests.push(request));
-  const response = await page.goto("/prototypes/before-midnight/");
+  const response = await page.goto("/games/before-midnight/");
   expect(response?.ok()).toBe(true);
   await expect
     .poll(() => eventPaths(requests))
     .toContain("/event/before-midnight/play-started/new");
-  const canonicalUrl =
-    "https://nownowgames.co.za/prototypes/before-midnight/";
+  const canonicalUrl = "https://nownowgames.co.za/games/before-midnight/";
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     canonicalUrl,
@@ -235,7 +235,7 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
   await expect(result).toBeHidden();
   expect(
     requests.every((request) =>
-      request.url().startsWith("http://127.0.0.1:4173/"),
+      request.url().startsWith(`${localOrigin}/`),
     ),
   ).toBe(true);
 });
@@ -248,7 +248,7 @@ test("analytics labels an existing personal-best player as returning", async ({
   });
   const requests = [];
   page.on("request", (request) => requests.push(request));
-  await page.goto("/prototypes/before-midnight/");
+  await page.goto("/games/before-midnight/");
   await expect
     .poll(() => eventPaths(requests))
     .toContain("/event/before-midnight/play-started/returning");
@@ -259,7 +259,7 @@ test("reduced motion removes bounce and steps the live counter", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/prototypes/before-midnight/");
+  await page.goto("/games/before-midnight/");
   await expect(page.locator("body")).toHaveAttribute("data-motion", "reduced");
   await page.keyboard.down("Space");
   await page.waitForTimeout(380);

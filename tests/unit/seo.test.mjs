@@ -8,7 +8,7 @@ import {
 } from "../../scripts/seo.mjs";
 
 const cards = [
-  { slug: "before-midnight" },
+  { slug: "before-midnight", publicPath: "games/before-midnight" },
   { slug: "latch" },
   { slug: "safe-passage" },
 ];
@@ -21,7 +21,7 @@ test("sitemap follows the discovered game registry", () => {
     [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]),
     [
       `${PRODUCTION_ORIGIN}/`,
-      `${PRODUCTION_ORIGIN}/prototypes/before-midnight/`,
+      `${PRODUCTION_ORIGIN}/games/before-midnight/`,
       `${PRODUCTION_ORIGIN}/prototypes/latch/`,
       `${PRODUCTION_ORIGIN}/prototypes/safe-passage/`,
     ],

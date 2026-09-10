@@ -20,7 +20,7 @@ prototypes/<slug>/
 
 - `index.html` is a self-contained, mobile-first game page with relative asset paths and a viewport meta tag.
 - `game.js` imports `createInputController` from `../../shared/input.js`. Keep game-state transitions separate from rendering where practical.
-- `card.json` follows the one-line schema in the root README. Its positive integer `order` must be unique; the build infers `slug` from the directory.
+- `card.json` follows the one-line schema in the root README. Its positive integer `order` must be unique; the build infers `slug` from the directory. An optional safe relative `publicPath` publishes a game at a canonical route while keeping its source in the prototype registry.
 - Local CSS and original local assets may be added inside the prototype directory. Do not add third-party assets.
 
 ## Play and accessibility requirements

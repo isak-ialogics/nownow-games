@@ -1,5 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -102,7 +104,7 @@ test("touch, mouse, number key, focus activation, results, and retry work", asyn
   await expect(page.locator("#score")).toHaveText("0");
   await expect(page.locator("#timer")).toHaveText("55");
   expect(
-    requests.every((url) => url.startsWith("http://127.0.0.1:4173/")),
+    requests.every((url) => url.startsWith(`${localOrigin}/`)),
   ).toBe(true);
 });
 

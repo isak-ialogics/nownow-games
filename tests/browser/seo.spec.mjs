@@ -4,6 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const origin = "https://nownowgames.co.za";
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 const evidenceDir = process.env.EVIDENCE_DIR;
 const pages = [
   {
@@ -15,8 +16,8 @@ const pages = [
     schemaTypes: ["Organization", "WebSite"],
   },
   {
-    path: "/prototypes/before-midnight/",
-    canonical: `${origin}/prototypes/before-midnight/`,
+    path: "/games/before-midnight/",
+    canonical: `${origin}/games/before-midnight/`,
     title: "Before Midnight | NowNow Games",
     description:
       "Hold, release, and stop under the fictional cap across seven fast rounds in Before Midnight, an original browser game.",
@@ -148,6 +149,25 @@ test("crawl files enumerate public pages without blocking bots", async ({
     expect(source).toContain(`<loc>${expected.canonical}</loc>`);
   }
   expect(source).not.toContain("404.html");
+});
+
+test("the legacy Before Midnight route redirects permanently", async ({
+  page,
+  request,
+}) => {
+  const legacy = await request.get("/prototypes/before-midnight/?from=legacy", {
+    maxRedirects: 0,
+  });
+  expect(legacy.status()).toBe(308);
+  expect(legacy.headers().location).toBe(
+    "/games/before-midnight/?from=legacy",
+  );
+
+  const response = await page.goto("/prototypes/before-midnight/");
+  expect(response?.status()).toBe(200);
+  expect(page.url()).toBe(
+    `${localOrigin}/games/before-midnight/`,
+  );
 });
 
 test("unknown routes return the friendly page with HTTP 404", async ({ page }) => {

@@ -21,7 +21,7 @@ const pages = new Map([
       title: "Before Midnight | NowNow Games",
       description:
         "Hold, release, and stop under the fictional cap across seven fast rounds in Before Midnight, an original browser game.",
-      canonical: `${productionOrigin}/prototypes/before-midnight/`,
+      canonical: `${productionOrigin}/games/before-midnight/`,
       schema: ["VideoGame"],
     },
   ],
@@ -266,6 +266,16 @@ for (const launchNoteCopy of [
     throw new Error(`Hub is missing launch note copy: ${launchNoteCopy}`);
   }
 }
+for (const [path, legacyLink] of [
+  ["index.html", "./prototypes/before-midnight/"],
+  ["prototypes/latch/index.html", "../before-midnight/"],
+  ["prototypes/safe-passage/index.html", "../before-midnight/"],
+]) {
+  const source = await readFile(resolve(root, path), "utf8");
+  if (source.includes(`href="${legacyLink}"`)) {
+    throw new Error(`${path} still links to the legacy Before Midnight route.`);
+  }
+}
 for (const marker of [
   "PROTOTYPE_COUNT_START",
   "PROTOTYPE_COUNT_END",
@@ -285,6 +295,7 @@ for (const rule of [
   "server_name www.nownowgames.co.za;",
   "return 308 https://nownowgames.co.za$request_uri;",
   "error_page 404 /404.html;",
+  "return 308 /games/before-midnight/$is_args$args;",
   "try_files $uri $uri/ =404;",
 ]) {
   if (!nginx.includes(rule)) throw new Error(`nginx.conf lacks: ${rule}`);

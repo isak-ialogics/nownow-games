@@ -30,11 +30,11 @@ test("budget accepts exact limits and rejects a synthetic JS breach", async (t) 
   await writeFile(join(root, "shared", "site.css"), Buffer.alloc(7 * 1024));
   await writeFile(
     join(root, "prototypes", "synthetic", "game.js"),
-    Buffer.alloc(8 * 1024),
+    Buffer.alloc(8.5 * 1024),
   );
   await writeFile(
     join(root, "prototypes", "synthetic", "index.html"),
-    Buffer.alloc(12 * 1024),
+    Buffer.alloc(11.5 * 1024),
   );
 
   const atLimit = runBudget(root);
@@ -44,11 +44,11 @@ test("budget accepts exact limits and rejects a synthetic JS breach", async (t) 
 
   await writeFile(
     join(root, "prototypes", "synthetic", "game.js"),
-    Buffer.alloc(8 * 1024 + 1),
+    Buffer.alloc(8.5 * 1024 + 1),
   );
   await writeFile(
     join(root, "prototypes", "synthetic", "index.html"),
-    Buffer.alloc(12 * 1024 - 1),
+    Buffer.alloc(11.5 * 1024 - 1),
   );
 
   const overLimit = runBudget(root);

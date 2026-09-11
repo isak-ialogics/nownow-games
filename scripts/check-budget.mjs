@@ -8,13 +8,19 @@ const root = resolve(
 const limits = Object.freeze({
   prototype: Object.freeze({
     total: 20 * KIBIBYTE,
-    javascript: 8 * KIBIBYTE,
+    // Raised 8 -> 8.5 KiB for NOW-201: Before Midnight's own pause/resume
+    // hook for the shared feedback dialog needed a little more room than the
+    // other two games' event listeners.
+    javascript: 8.5 * KIBIBYTE,
   }),
   shared: Object.freeze({
-    // Raised 14 -> 16 KiB for NOW-46: per-game card motifs replaced the shared
-    // circle placeholder. Pure CSS (no images/requests), so hub warm-cache stays fast.
-    total: 16 * KIBIBYTE,
-    javascript: 7 * KIBIBYTE,
+    // Raised 16 -> 24 KiB / 7 -> 14 KiB for NOW-201: the always-reachable
+    // "Something wrong?" feedback control (dialog markup, validation, retry
+    // handling, and its dedicated stylesheet) is one shared module reused by
+    // all three games rather than duplicated per game. Text-only for now;
+    // voice notes are a separate follow-up and will need their own bump.
+    total: 24 * KIBIBYTE,
+    javascript: 14 * KIBIBYTE,
   }),
   hub: Object.freeze({ total: 7 * KIBIBYTE }),
 });

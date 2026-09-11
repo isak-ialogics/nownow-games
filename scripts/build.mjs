@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import {
@@ -66,6 +66,15 @@ for (const card of cards) {
     await writeFile(outputPath, compactCss(await readFile(outputPath, "utf8")));
   }
 }
+// Shared CSS ships to every game; compact it the same way per-game stylesheets
+// already are (NOW-201 needed the reclaimed headroom for the feedback control).
+const sharedDir = resolve(destination, "shared");
+for (const entry of await readdir(sharedDir, { withFileTypes: true })) {
+  if (!entry.isFile() || !entry.name.endsWith(".css")) continue;
+  const cssPath = resolve(sharedDir, entry.name);
+  await writeFile(cssPath, compactCss(await readFile(cssPath, "utf8")));
+}
+
 await writeFile(resolve(destination, "robots.txt"), buildRobots());
 await writeFile(resolve(destination, "sitemap.xml"), buildSitemap(cards));
 

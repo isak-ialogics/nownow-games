@@ -167,11 +167,15 @@ export function createInputController(
   const onPointerUp = (event) => finishPointer(event, "end");
   const onPointerCancel = (event) => finishPointer(event, "cancel");
   const onBlur = () => resetActiveInput("blur");
+  // iOS Safari fires contextmenu on long-press even when touch-action: none is set.
+  // Suppress it to prevent the system share/copy sheet from interrupting play.
+  const onContextMenu = (event) => event.preventDefault();
 
   surface.addEventListener("pointerdown", onPointerDown);
   surface.addEventListener("pointermove", onPointerMove);
   surface.addEventListener("pointerup", onPointerUp);
   surface.addEventListener("pointercancel", onPointerCancel);
+  surface.addEventListener("contextmenu", onContextMenu);
   keyboardTarget.addEventListener("keydown", onKeyDown);
   keyboardTarget.addEventListener("keyup", onKeyUp);
   keyboardTarget.addEventListener("blur", onBlur);
@@ -183,6 +187,7 @@ export function createInputController(
       surface.removeEventListener("pointermove", onPointerMove);
       surface.removeEventListener("pointerup", onPointerUp);
       surface.removeEventListener("pointercancel", onPointerCancel);
+      surface.removeEventListener("contextmenu", onContextMenu);
       keyboardTarget.removeEventListener("keydown", onKeyDown);
       keyboardTarget.removeEventListener("keyup", onKeyUp);
       keyboardTarget.removeEventListener("blur", onBlur);

@@ -1,10 +1,16 @@
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { createFeedbackReceiver } from "./feedback.mjs";
+import {
+  compressStaticBody,
+  isCompressible,
+  selectContentEncoding,
+  STATIC_SECURITY_HEADERS,
+} from "./static.mjs";
 
 const CONTENT_TYPES = Object.freeze({
   ".css": "text/css; charset=utf-8",
@@ -16,11 +22,11 @@ const CONTENT_TYPES = Object.freeze({
   ".xml": "application/xml; charset=utf-8",
 });
 
-function commonHeaders(contentType) {
+function commonHeaders(contentType, cacheControl = "no-store") {
   return {
-    "Cache-Control": "no-store",
+    ...STATIC_SECURITY_HEADERS,
+    "Cache-Control": cacheControl,
     "Content-Type": contentType,
-    "X-Content-Type-Options": "nosniff",
   };
 }
 
@@ -30,14 +36,79 @@ function sendJson(response, status, value) {
     .end(JSON.stringify(value));
 }
 
-async function sendFile(request, response, file, status = 200) {
-  await stat(file);
-  response.writeHead(
-    status,
-    commonHeaders(CONTENT_TYPES[extname(file)] ?? "application/octet-stream"),
+function cacheControlFor(file) {
+  return extname(file) === ".html"
+    ? "no-cache"
+    : "public, max-age=3600, must-revalidate";
+}
+
+function entityTag(metadata, encoding) {
+  const version = Math.trunc(metadata.mtimeMs).toString(16);
+  return `W/"${metadata.size.toString(16)}-${version}-${encoding ?? "identity"}"`;
+}
+
+function notModified(request, metadata, etag) {
+  const requestTag = request.headers["if-none-match"];
+  if (requestTag) {
+    return requestTag === "*" || requestTag.split(",").some(
+      (candidate) => candidate.trim() === etag,
+    );
+  }
+  const modifiedSince = Date.parse(request.headers["if-modified-since"] ?? "");
+  return (
+    Number.isFinite(modifiedSince) &&
+    Math.trunc(metadata.mtimeMs / 1000) * 1000 <= modifiedSince
   );
+}
+
+async function compressedFile(file, metadata, encoding, cache) {
+  const key = `${file}:${metadata.size}:${metadata.mtimeMs}:${encoding}`;
+  if (!cache.has(key)) {
+    cache.set(
+      key,
+      readFile(file).then((body) => compressStaticBody(body, encoding)),
+    );
+  }
+  try {
+    return await cache.get(key);
+  } catch (error) {
+    cache.delete(key);
+    throw error;
+  }
+}
+
+async function sendFile(request, response, file, cache, status = 200) {
+  const metadata = await stat(file);
+  const contentType = CONTENT_TYPES[extname(file)] ?? "application/octet-stream";
+  const compressible = isCompressible(contentType);
+  const encoding = compressible
+    ? selectContentEncoding(request.headers["accept-encoding"])
+    : null;
+  const etag = entityTag(metadata, encoding);
+  const headers = {
+    ...commonHeaders(contentType, cacheControlFor(file)),
+    ETag: etag,
+    "Last-Modified": metadata.mtime.toUTCString(),
+    ...(compressible ? { Vary: "Accept-Encoding" } : {}),
+    ...(encoding ? { "Content-Encoding": encoding } : {}),
+  };
+
+  if (notModified(request, metadata, etag)) {
+    response.writeHead(304, headers).end();
+    return;
+  }
+
+  const body = encoding
+    ? await compressedFile(file, metadata, encoding, cache)
+    : null;
+  headers["Content-Length"] = body?.length ?? metadata.size;
+  response.writeHead(status, headers);
   if (request.method === "HEAD") {
     response.end();
+    return;
+  }
+  if (body) {
+    response.end(body);
     return;
   }
   const stream = createReadStream(file);
@@ -45,10 +116,10 @@ async function sendFile(request, response, file, status = 200) {
   stream.pipe(response);
 }
 
-async function sendNotFound(root, request, response) {
+async function sendNotFound(root, request, response, cache) {
   const notFound = resolve(root, "404.html");
   try {
-    await sendFile(request, response, notFound, 404);
+    await sendFile(request, response, notFound, cache, 404);
   } catch {
     response
       .writeHead(404, commonHeaders("text/plain; charset=utf-8"))
@@ -73,6 +144,7 @@ export function createAppServer({
   rateLimit,
   rateWindowMs,
 } = {}) {
+  const staticCache = new Map();
   const feedback = createFeedbackReceiver({
     apiUrl: env.FEEDBACK_PAPERCLIP_API_URL ?? env.PAPERCLIP_API_URL,
     apiKey: env.FEEDBACK_PAPERCLIP_API_KEY ?? env.PAPERCLIP_API_KEY,
@@ -95,6 +167,7 @@ export function createAppServer({
       if (host === "www.nownowgames.co.za") {
         response
           .writeHead(308, {
+            ...STATIC_SECURITY_HEADERS,
             "Cache-Control": "no-store",
             Location: `https://nownowgames.co.za${url.pathname}${url.search}`,
           })
@@ -137,6 +210,7 @@ export function createAppServer({
       ) {
         response
           .writeHead(308, {
+            ...STATIC_SECURITY_HEADERS,
             "Cache-Control": "no-store",
             Location: `/games/before-midnight/${url.search}`,
           })
@@ -155,10 +229,11 @@ export function createAppServer({
 
       const metadata = await stat(file);
       if (metadata.isDirectory()) file = resolve(file, "index.html");
-      await sendFile(request, response, file);
+      await sendFile(request, response, file, staticCache);
     } catch {
-      if (!response.headersSent) await sendNotFound(root, request, response);
-      else response.destroy();
+      if (!response.headersSent) {
+        await sendNotFound(root, request, response, staticCache);
+      } else response.destroy();
     }
   });
 

@@ -104,6 +104,8 @@ runtime configuration at deploy time:
 
 - `FEEDBACK_PAPERCLIP_API_URL`: Paperclip base URL (with or without `/api`).
 - `FEEDBACK_PAPERCLIP_API_KEY`: least-privilege queue comment credential.
+- Existing environments may provide the equivalent `PAPERCLIP_API_URL` and
+  `PAPERCLIP_API_KEY` names; the dedicated feedback names take precedence.
 - `FEEDBACK_QUEUE_ISSUE_ID`: optional destination override; defaults to the
   Feedback Inbox id above.
 - `FEEDBACK_TRUST_PROXY`: defaults to trusted-proxy mode; set to `0` only when

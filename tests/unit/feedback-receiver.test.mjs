@@ -205,8 +205,8 @@ test("accepts feedback only after the monitored queue stores it", async (t) => {
   const queue = await startQueue(t);
   const url = await startApp(t, {
     env: {
-      FEEDBACK_PAPERCLIP_API_URL: `${queue.url}/api`,
-      FEEDBACK_PAPERCLIP_API_KEY: "queue-secret",
+      PAPERCLIP_API_URL: `${queue.url}/api`,
+      PAPERCLIP_API_KEY: "queue-secret",
       FEEDBACK_QUEUE_ISSUE_ID: "queue-issue",
     },
     idFactory: () => "fb-receipt42",

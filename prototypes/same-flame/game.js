@@ -40,12 +40,10 @@ let run;
 let frame;
 let lastAt;
 let controller;
-let currentSync = 0;
 const pauses = new Set();
 
 function showFlame(node, level) {
   node.style.setProperty("--level", level.toFixed(3));
-  node.dataset.level = level.toFixed(3);
 }
 
 function render() {
@@ -126,7 +124,6 @@ function showResults() {
   controller?.destroy();
   controller = null;
   const result = summarize(run);
-  currentSync = result.sync;
   const best = saveBest(localStorage, result.sync);
   resultCard.dataset.outcome = result.merged ? "merged" : "apart";
   resultTitle.textContent = result.merged
@@ -166,7 +163,7 @@ function startRun() {
 
 async function shareResult() {
   const url = document.querySelector('[rel="canonical"]').href;
-  const data = createShareData(currentSync || readBest(localStorage), url);
+  const data = createShareData(run.sync || readBest(localStorage), url);
   try {
     if (navigator.share) {
       await navigator.share(data);

@@ -311,6 +311,19 @@ main {
   background: var(--sky); box-shadow: 0 0 0.8rem rgb(126 215 255 / 45%);
 }
 
+/* Same Flame: two distinct fires meeting across one shared ember line. */
+.card-art--same-flame { background: radial-gradient(circle at 50% 60%, #6b291a, #170e0b 65%); }
+.card-art--same-flame .preview-shape-a,
+.card-art--same-flame .preview-shape-b {
+  width: 4.6rem; height: 6.4rem; border-radius: 70% 35% 65% 40%;
+  background: linear-gradient(135deg, #ffcf58, #ff633f 72%);
+  filter: drop-shadow(0 0 1.2rem rgb(255 107 53 / 55%));
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.card-art--same-flame .preview-shape-a { margin-left: -4rem; }
+.card-art--same-flame .preview-shape-b { margin-left: 4rem; background: linear-gradient(135deg, #ffe17d, #e84d3b 72%); }
+.card-art--same-flame .preview-shape-c { width: 7rem; border-top: 2px dotted #ffcf58; transform: translateX(-50%); }
+
 .preview-label {
   position: absolute;
   bottom: 1rem;

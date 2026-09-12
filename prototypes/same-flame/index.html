@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game." />
+    <meta property="og:title" content="Same Flame | NowNow Games" />
+    <meta property="og:description" content="Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nownowgames.co.za/prototypes/same-flame/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Same Flame | NowNow Games" />
+    <meta name="twitter:description" content="Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game." />
+    <meta name="theme-color" content="#180f0c" />
+    <link rel="canonical" href="https://nownowgames.co.za/prototypes/same-flame/" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23ffb23f'/%3E%3Cpath d='M32 11c7 11-2 13 6 22 4 5 3 15-6 20-11-4-14-14-8-22 5-6 3-12 8-20z' fill='%235b1c19'/%3E%3C/svg%3E" />
+    <title>Same Flame | NowNow Games</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Same Flame",
+        "url": "https://nownowgames.co.za/prototypes/same-flame/",
+        "description": "Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game.",
+        "gamePlatform": "Web browser",
+        "playMode": "SinglePlayer",
+        "inLanguage": "en-ZA",
+        "isAccessibleForFree": true,
+        "publisher": { "@type": "Organization", "name": "NowNow Games", "url": "https://nownowgames.co.za/" }
+      }
+    </script>
+    <meta name="nownow-feedback-context" content="same-flame@1" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="../../shared/feedback.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="../../" aria-label="Back to NowNow Games">&larr; All games</a>
+      <span>Available through 24 Sep 2026</span>
+    </header>
+
+    <main>
+      <section class="title-block" aria-labelledby="game-title">
+        <p class="kicker">A Heritage Day rhythm</p>
+        <h1 id="game-title">Same<br />Flame</h1>
+        <p class="intro">Two fires, one shared beat. No sound required.</p>
+      </section>
+
+      <section id="game-panel" class="game-panel" aria-label="Same Flame game">
+        <div class="score-line">
+          <p>Time <strong><span id="time-left">36.0</span>s</strong></p>
+          <p>Sync <strong id="sync-text">100%</strong></p>
+        </div>
+
+        <div id="sync-meter" class="sync-meter" role="progressbar" aria-label="Fire sync" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+          <span></span>
+        </div>
+
+        <div class="fires" aria-label="Guide fire and your fire">
+          <figure>
+            <div id="guide-flame" class="flame guide" data-level="0.280" aria-hidden="true"><i></i></div>
+            <figcaption>Guide fire</figcaption>
+          </figure>
+          <div class="link" aria-hidden="true"></div>
+          <figure>
+            <div id="player-flame" class="flame player" data-level="0.280" aria-hidden="true"><i></i></div>
+            <figcaption>Your fire</figcaption>
+          </figure>
+        </div>
+
+        <p id="pulse-cue" class="cue">HOLD · RISING</p>
+        <button id="pulse-control" class="pulse-control" type="button" aria-describedby="instructions" aria-keyshortcuts="Space Enter" aria-pressed="false">
+          <strong id="control-label">Hold to lift your flame</strong>
+          <span>Release as the guide settles</span>
+        </button>
+        <p id="instructions" class="instructions">Match the left fire for 36 seconds. Press and hold the button, then release. Keyboard: hold and release <kbd>Space</kbd> or <kbd>Enter</kbd>. Reach 80% sync to join the flames.</p>
+        <p id="pause-note" class="pause-note" role="status" hidden>Paused · return when you are ready.</p>
+      </section>
+
+      <section id="result-card" class="result-card" tabindex="-1" aria-labelledby="result-title" hidden>
+        <div id="merged-flame" class="merged-flame" aria-hidden="true" hidden><i></i></div>
+        <p class="kicker">Your shared rhythm</p>
+        <h2 id="result-title">Two fires. One shared glow.</h2>
+        <p id="result-message" class="result-message"></p>
+        <dl>
+          <div><dt>Final sync</dt><dd id="final-sync">0%</dd></div>
+          <div><dt>Personal best</dt><dd id="personal-best">0%</dd></div>
+        </dl>
+        <button id="share-result" class="action share" type="button">Share your rhythm</button>
+        <button id="retry" class="action" type="button">Try the flame again</button>
+        <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="expiry-card" class="expiry-card" tabindex="-1" aria-labelledby="expiry-title" hidden>
+        <p class="kicker">The gathering has ended</p>
+        <h2 id="expiry-title">This flame rested after 24 September.</h2>
+        <p>The game has closed, but the stories and traditions we carry are still ours to share.</p>
+        <a class="action" href="../../">Play another NowNow game</a>
+      </section>
+
+      <nav class="more-games" aria-label="More NowNow Games">
+        <p>More original browser games</p>
+        <a href="../../games/before-midnight/">Play Before Midnight</a>
+        <a href="../latch/">Play Latch!</a>
+      </nav>
+    </main>
+
+    <script type="module" src="../../shared/analytics.js"></script>
+    <script type="module" src="../../shared/feedback.js"></script>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

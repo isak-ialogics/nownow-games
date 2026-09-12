@@ -12,7 +12,7 @@ const pages = [
     canonical: `${origin}/`,
     title: "Original Mobile Browser Games | NowNow Games",
     description:
-      "Play three original, mobile-first browser games from NowNow Games: Before Midnight, Latch!, and Safe Passage.",
+      "Play four original, mobile-first browser games from NowNow Games, including Same Flame, Before Midnight, Latch!, and Safe Passage.",
     schemaTypes: ["Organization", "WebSite"],
   },
   {
@@ -29,6 +29,14 @@ const pages = [
     title: "Latch! | NowNow Games",
     description:
       "Spot the real handle tug and secure the correct door in Latch!, an original one-minute browser reaction game.",
+    schemaTypes: ["VideoGame"],
+  },
+  {
+    path: "/prototypes/same-flame/",
+    canonical: `${origin}/prototypes/same-flame/`,
+    title: "Same Flame | NowNow Games",
+    description:
+      "Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game.",
     schemaTypes: ["VideoGame"],
   },
   {

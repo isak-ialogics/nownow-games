@@ -5,8 +5,9 @@ Each prototype is an independent static page under `prototypes/<slug>/`. The thr
 | Slug | Card order |
 | --- | ---: |
 | `before-midnight` | 1 |
-| `safe-passage` | 2 |
-| `latch` | 3 |
+| `latch` | 2 |
+| `safe-passage` | 3 |
+| `same-flame` | 4 |
 
 ## Required files
 
@@ -31,7 +32,7 @@ prototypes/<slug>/
 - Audio starts muted, has an obvious mute control if present, and is never required to understand or complete play.
 - Honor `prefers-reduced-motion`; reduced motion must not remove gameplay information.
 - Provide deterministic presets or seeds so tests can reproduce timing, scoring, and end states.
-- The post-game surface is a result card with a retry action only. Do not add sharing, signup, leaderboard, or retention funnels.
+- The post-game surface is a focused result card. Add sharing only when the accepted mechanic requires it; do not add signup, leaderboard, or retention funnels.
 
 ## Technical boundaries
 

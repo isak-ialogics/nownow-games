@@ -10,7 +10,7 @@ const pages = new Map([
     {
       title: "Original Mobile Browser Games | NowNow Games",
       description:
-        "Play three original, mobile-first browser games from NowNow Games: Before Midnight, Latch!, and Safe Passage.",
+        "Play four original, mobile-first browser games from NowNow Games, including Same Flame, Before Midnight, Latch!, and Safe Passage.",
       canonical: `${productionOrigin}/`,
       schema: ["Organization", "WebSite"],
     },
@@ -32,6 +32,16 @@ const pages = new Map([
       description:
         "Spot the real handle tug and secure the correct door in Latch!, an original one-minute browser reaction game.",
       canonical: `${productionOrigin}/prototypes/latch/`,
+      schema: ["VideoGame"],
+    },
+  ],
+  [
+    "prototypes/same-flame/index.html",
+    {
+      title: "Same Flame | NowNow Games",
+      description:
+        "Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game.",
+      canonical: `${productionOrigin}/prototypes/same-flame/`,
       schema: ["VideoGame"],
     },
   ],

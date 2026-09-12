@@ -136,7 +136,6 @@ test("background recovery, reduced motion, and expiry retain clear states", asyn
     ),
   ).toBe("none");
   await page.clock.runFor(400);
-  const before = await page.locator("#time-left").textContent();
   await page.evaluate(() => {
     Object.defineProperty(document, "hidden", {
       configurable: true,
@@ -144,8 +143,9 @@ test("background recovery, reduced motion, and expiry retain clear states", asyn
     });
     document.dispatchEvent(new Event("visibilitychange"));
   });
+  const pausedAt = await page.locator("#time-left").textContent();
   await page.clock.runFor(1000);
-  await expect(page.locator("#time-left")).toHaveText(before);
+  await expect(page.locator("#time-left")).toHaveText(pausedAt);
   await expect(page.locator("body")).toHaveAttribute("data-paused", "true");
 
   await page.clock.setFixedTime(new Date("2026-09-25T00:00:00+02:00"));

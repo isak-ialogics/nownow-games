@@ -74,8 +74,8 @@ export function createAppServer({
   rateWindowMs,
 } = {}) {
   const feedback = createFeedbackReceiver({
-    apiUrl: env.FEEDBACK_PAPERCLIP_API_URL,
-    apiKey: env.FEEDBACK_PAPERCLIP_API_KEY,
+    apiUrl: env.FEEDBACK_PAPERCLIP_API_URL ?? env.PAPERCLIP_API_URL,
+    apiKey: env.FEEDBACK_PAPERCLIP_API_KEY ?? env.PAPERCLIP_API_KEY,
     queueIssueId: env.FEEDBACK_QUEUE_ISSUE_ID,
     trustProxy: env.FEEDBACK_TRUST_PROXY !== "0",
     fetchImpl,

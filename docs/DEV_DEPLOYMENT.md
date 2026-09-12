@@ -31,7 +31,8 @@ and image digest. A green `main` build never promotes itself to production.
 
 The same application container serves the static games and `/feedback/submit`.
 The automatic environment must supply `FEEDBACK_PAPERCLIP_API_URL` and the
-secret `FEEDBACK_PAPERCLIP_API_KEY`; source and CI artifacts contain neither
+secret `FEEDBACK_PAPERCLIP_API_KEY`, or their established `PAPERCLIP_API_URL`
+and `PAPERCLIP_API_KEY` equivalents; source and CI artifacts contain neither
 value.
 `FEEDBACK_QUEUE_ISSUE_ID` can override the default monitored inbox. See
 [`FEEDBACK.md`](./FEEDBACK.md) for validation, privacy, and live acceptance.

@@ -1,5 +1,7 @@
-import { readdir, stat } from "node:fs/promises";
-import { extname, resolve } from "node:path";
+import { readFile, readdir, stat } from "node:fs/promises";
+import { dirname, extname, isAbsolute, relative, resolve } from "node:path";
+
+import { compressStaticBody } from "../server/static.mjs";
 
 const KIBIBYTE = 1024;
 const root = resolve(
@@ -11,6 +13,10 @@ const limits = Object.freeze({
     // Raised 8 -> 8.5 KiB for NOW-201: Before Midnight's own pause/resume
     // hook for the shared feedback dialog needed a little more room than the
     // other two games' event listeners.
+    javascript: 8.5 * KIBIBYTE,
+  }),
+  wire: Object.freeze({
+    total: 20 * KIBIBYTE,
     javascript: 8.5 * KIBIBYTE,
   }),
   shared: Object.freeze({
@@ -36,6 +42,68 @@ async function collect(directory) {
   return files;
 }
 
+function localPath(fromFile, reference) {
+  const clean = reference.split(/[?#]/u, 1)[0];
+  if (!clean || /^(?:data:|https?:|\/\/)/iu.test(clean)) return null;
+  const path = clean.startsWith("/")
+    ? resolve(root, `.${clean}`)
+    : resolve(dirname(fromFile), clean);
+  const pathFromRoot = relative(root, path);
+  return pathFromRoot.startsWith("..") || isAbsolute(pathFromRoot)
+    ? null
+    : path;
+}
+
+function attribute(markup, name) {
+  return markup.match(
+    new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, "iu"),
+  )?.[1];
+}
+
+function referencesIn(file, source) {
+  const references = [];
+  const extension = extname(file);
+  if (extension === ".html") {
+    for (const match of source.matchAll(/<(script|link)\b[^>]*>/giu)) {
+      const tag = match[1].toLowerCase();
+      if (tag === "script") {
+        const sourceReference = attribute(match[0], "src");
+        if (sourceReference) references.push(sourceReference);
+      } else {
+        const rel = attribute(match[0], "rel")?.toLowerCase().split(/\s+/u);
+        const href = attribute(match[0], "href");
+        if (href && rel?.includes("stylesheet")) references.push(href);
+      }
+    }
+  }
+  if (extension === ".js" || extension === ".mjs") {
+    const imports = /(?:import|export)\s+(?:[^"'()]*?\s+from\s*)?["']([^"']+)["']/gu;
+    for (const match of source.matchAll(imports)) references.push(match[1]);
+  }
+  if (extension === ".css") {
+    for (const match of source.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/giu)) {
+      references.push(match[1]);
+    }
+  }
+  return references;
+}
+
+async function collectPageResources(entry) {
+  const files = new Set();
+  const pending = [entry];
+  while (pending.length > 0) {
+    const file = pending.pop();
+    if (files.has(file)) continue;
+    files.add(file);
+    const source = await readFile(file, "utf8");
+    for (const reference of referencesIn(file, source)) {
+      const dependency = localPath(file, reference);
+      if (dependency && !files.has(dependency)) pending.push(dependency);
+    }
+  }
+  return [...files];
+}
+
 async function measure(label, files, bucketLimits) {
   const sizes = await Promise.all(
     files.map(async (file) => ({ file, bytes: (await stat(file)).size })),
@@ -45,6 +113,39 @@ async function measure(label, files, bucketLimits) {
     .filter((item) => [".js", ".mjs"].includes(extname(item.file)))
     .reduce((sum, item) => sum + item.bytes, 0);
 
+  return Object.freeze({
+    label,
+    total,
+    javascript,
+    limits: bucketLimits,
+    fileCount: files.length,
+  });
+}
+
+async function measureWire(label, files, bucketLimits) {
+  const sizes = await Promise.all(
+    files.map(async (file) => {
+      const compressible = [
+        ".css",
+        ".html",
+        ".js",
+        ".json",
+        ".mjs",
+        ".txt",
+        ".xml",
+      ].includes(extname(file));
+      return {
+        file,
+        bytes: compressible
+          ? (await compressStaticBody(await readFile(file), "br")).length
+          : (await stat(file)).size,
+      };
+    }),
+  );
+  const total = sizes.reduce((sum, item) => sum + item.bytes, 0);
+  const javascript = sizes
+    .filter((item) => [".js", ".mjs"].includes(extname(item.file)))
+    .reduce((sum, item) => sum + item.bytes, 0);
   return Object.freeze({
     label,
     total,
@@ -80,6 +181,17 @@ for (const directory of prototypeDirectories) {
   );
 }
 
+for (const directory of prototypeDirectories) {
+  const entry = resolve(prototypeRoot, directory.name, "index.html");
+  buckets.push(
+    await measureWire(
+      `wire/prototypes/${directory.name}`,
+      await collectPageResources(entry),
+      limits.wire,
+    ),
+  );
+}
+
 const failures = [];
 for (const bucket of buckets) {
   const totalExceeded = bucket.total > bucket.limits.total;
@@ -101,7 +213,7 @@ for (const bucket of buckets) {
 }
 
 console.log(
-  `Checked ${prototypeDirectories.length} prototype budget bucket${prototypeDirectories.length === 1 ? "" : "s"}.`,
+  `Checked ${prototypeDirectories.length} prototype source and wire budget bucket${prototypeDirectories.length === 1 ? "" : "s"}.`,
 );
 
 if (failures.length > 0) {

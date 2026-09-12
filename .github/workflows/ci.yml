@@ -59,6 +59,15 @@ jobs:
             http://127.0.0.1:8080/feedback/submit)" = 503
           curl --silent --fail http://127.0.0.1:8080/robots.txt | grep --fixed-strings 'Allow: /'
           curl --silent --show-error --head http://127.0.0.1:8080/sitemap.xml | grep --ignore-case '^Content-Type: application/xml'
+          curl --silent --show-error --head --header 'Accept-Encoding: br' \
+            http://127.0.0.1:8080/prototypes/same-flame/ > /tmp/same-flame-headers.txt
+          grep --ignore-case '^Content-Encoding: br' /tmp/same-flame-headers.txt
+          grep --ignore-case '^Content-Length: [0-9]' /tmp/same-flame-headers.txt
+          grep --ignore-case '^Cache-Control: no-cache' /tmp/same-flame-headers.txt
+          grep --ignore-case '^Content-Security-Policy:.*frame-ancestors' /tmp/same-flame-headers.txt
+          grep --ignore-case '^Strict-Transport-Security:' /tmp/same-flame-headers.txt
+          grep --ignore-case '^X-Content-Type-Options: nosniff' /tmp/same-flame-headers.txt
+          grep --ignore-case '^X-Frame-Options: DENY' /tmp/same-flame-headers.txt
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/games/before-midnight/)" = 200
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' 'http://127.0.0.1:8080/prototypes/before-midnight/?from=ci')" = 308
           test "$(curl --silent --output /dev/null --write-out '%{redirect_url}' 'http://127.0.0.1:8080/prototypes/before-midnight/?from=ci')" = 'http://127.0.0.1:8080/games/before-midnight/?from=ci'

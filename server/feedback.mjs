@@ -1,7 +1,5 @@
-import { randomBytes } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 
-export const DEFAULT_QUEUE_ISSUE_ID =
-  "7212ea0b-d8a1-4070-a46f-593258404c61";
 export const MAX_BODY_BYTES = 8 * 1024;
 export const MAX_MESSAGE_LENGTH = 1000;
 export const RATE_LIMIT = 5;
@@ -184,18 +182,12 @@ function sendJson(response, status, value, headers = {}) {
     .end(JSON.stringify(value));
 }
 
-function normalizeApiBase(value) {
-  const withoutSlash = value.replace(/\/+$/u, "");
-  return withoutSlash.endsWith("/api")
-    ? withoutSlash.slice(0, -4)
-    : withoutSlash;
-}
-
 async function postToQueue({
-  apiUrl,
-  apiKey,
-  queueIssueId,
+  webhookUrl,
+  webhookSecret,
   body,
+  id,
+  timestamp,
   fetchImpl,
   timeoutMs,
 }) {
@@ -203,29 +195,38 @@ async function postToQueue({
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   timeout.unref?.();
   try {
-    const response = await fetchImpl(
-      `${normalizeApiBase(apiUrl)}/api/issues/${queueIssueId}/comments`,
-      {
-        method: "POST",
-        redirect: "error",
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ body, resume: true }),
+    const payload = JSON.stringify({ feedbackRef: id, body });
+    const signature = createHmac("sha256", webhookSecret)
+      .update(`${timestamp}.`)
+      .update(payload)
+      .digest("hex");
+    const response = await fetchImpl(webhookUrl, {
+      method: "POST",
+      redirect: "error",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": id,
+        "X-Paperclip-Signature": `sha256=${signature}`,
+        "X-Paperclip-Timestamp": timestamp,
       },
+      body: payload,
+    });
+    if (!response.ok) return false;
+    const result = await response.json();
+    return (
+      result?.status === "issue_created" &&
+      typeof result.linkedIssueId === "string" &&
+      result.linkedIssueId.length > 0
     );
-    return response.ok;
   } finally {
     clearTimeout(timeout);
   }
 }
 
 export function createFeedbackReceiver({
-  apiUrl,
-  apiKey,
-  queueIssueId = DEFAULT_QUEUE_ISSUE_ID,
+  webhookUrl,
+  webhookSecret,
   trustProxy = true,
   fetchImpl = fetch,
   idFactory = () => `fb-${randomBytes(8).toString("base64url")}`,
@@ -299,7 +300,7 @@ export function createFeedbackReceiver({
         return;
       }
 
-      if (!apiUrl || !apiKey || !queueIssueId) {
+      if (!webhookUrl || !webhookSecret) {
         sendJson(response, 503, { error: "receiver_unavailable" });
         return;
       }
@@ -310,10 +311,11 @@ export function createFeedbackReceiver({
       let stored = false;
       try {
         stored = await postToQueue({
-          apiUrl,
-          apiKey,
-          queueIssueId,
+          webhookUrl,
+          webhookSecret,
           body,
+          id,
+          timestamp: String(Math.floor(Date.parse(receivedAt) / 1000)),
           fetchImpl,
           timeoutMs,
         });

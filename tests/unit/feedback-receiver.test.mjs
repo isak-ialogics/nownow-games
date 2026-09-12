@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer, request as sendHttpRequest } from "node:http";
 import { tmpdir } from "node:os";
@@ -42,17 +43,30 @@ async function createStaticRoot(t) {
   return root;
 }
 
-async function startQueue(t, status = 201) {
+async function startQueue(
+  t,
+  {
+    status = 202,
+    result = { status: "issue_created", linkedIssueId: "feedback-item" },
+  } = {},
+) {
   const requests = [];
   const server = createServer(async (request, response) => {
     const chunks = [];
     for await (const chunk of request) chunks.push(chunk);
+    const rawBody = Buffer.concat(chunks).toString("utf8");
     requests.push({
       authorization: request.headers.authorization,
+      idempotencyKey: request.headers["idempotency-key"],
       path: request.url,
-      value: JSON.parse(Buffer.concat(chunks).toString("utf8")),
+      rawBody,
+      signature: request.headers["x-paperclip-signature"],
+      timestamp: request.headers["x-paperclip-timestamp"],
+      value: JSON.parse(rawBody),
     });
-    response.writeHead(status, { "Content-Type": "application/json" }).end("{}");
+    response
+      .writeHead(status, { "Content-Type": "application/json" })
+      .end(JSON.stringify(result));
   });
   const url = await listen(server);
   t.after(() => close(server));
@@ -205,9 +219,9 @@ test("accepts feedback only after the monitored queue stores it", async (t) => {
   const queue = await startQueue(t);
   const url = await startApp(t, {
     env: {
-      PAPERCLIP_API_URL: `${queue.url}/api`,
-      PAPERCLIP_API_KEY: "queue-secret",
-      FEEDBACK_QUEUE_ISSUE_ID: "queue-issue",
+      FEEDBACK_QUEUE_WEBHOOK_URL:
+        `${queue.url}/api/routine-triggers/public/test-trigger/fire`,
+      FEEDBACK_QUEUE_WEBHOOK_SECRET: "queue-secret",
     },
     idFactory: () => "fb-receipt42",
     now: () => Date.parse("2026-09-12T12:00:00.000Z"),
@@ -220,20 +234,36 @@ test("accepts feedback only after the monitored queue stores it", async (t) => {
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { id: "fb-receipt42" });
   assert.equal(queue.requests.length, 1);
-  assert.equal(queue.requests[0].authorization, "Bearer queue-secret");
-  assert.equal(queue.requests[0].path, "/api/issues/queue-issue/comments");
-  assert.equal(queue.requests[0].value.resume, true);
-  assert.match(queue.requests[0].value.body, /fb-receipt42/u);
-  assert.match(queue.requests[0].value.body, /&#64;Studio/u);
-  assert.doesNotMatch(queue.requests[0].value.body, /<b>/u);
+  const queued = queue.requests[0];
+  assert.equal(
+    queued.path,
+    "/api/routine-triggers/public/test-trigger/fire",
+  );
+  assert.equal(queued.authorization, undefined);
+  assert.equal(queued.idempotencyKey, "fb-receipt42");
+  assert.equal(
+    queued.timestamp,
+    String(Math.floor(Date.parse("2026-09-12T12:00:00.000Z") / 1000)),
+  );
+  assert.equal(queued.value.feedbackRef, "fb-receipt42");
+  assert.match(queued.value.body, /fb-receipt42/u);
+  assert.match(queued.value.body, /&#64;Studio/u);
+  assert.doesNotMatch(queued.value.body, /<b>/u);
+  const expectedSignature = createHmac("sha256", "queue-secret")
+    .update(`${queued.timestamp}.`)
+    .update(queued.rawBody)
+    .digest("hex");
+  assert.equal(queued.signature, `sha256=${expectedSignature}`);
 });
 
 test("fails closed when the queue rejects or is not configured", async (t) => {
-  const rejectedQueue = await startQueue(t, 500);
+  const rejectedQueue = await startQueue(t, {
+    result: { status: "failed", linkedIssueId: null },
+  });
   const rejectedUrl = await startApp(t, {
     env: {
-      FEEDBACK_PAPERCLIP_API_URL: rejectedQueue.url,
-      FEEDBACK_PAPERCLIP_API_KEY: "queue-secret",
+      FEEDBACK_QUEUE_WEBHOOK_URL: rejectedQueue.url,
+      FEEDBACK_QUEUE_WEBHOOK_SECRET: "queue-secret",
     },
   });
   assert.equal((await post(rejectedUrl, validFeedback)).status, 502);
@@ -246,8 +276,8 @@ test("enforces media type, payload shape, body size, and per-source rate", async
   const queue = await startQueue(t);
   const url = await startApp(t, {
     env: {
-      FEEDBACK_PAPERCLIP_API_URL: queue.url,
-      FEEDBACK_PAPERCLIP_API_KEY: "queue-secret",
+      FEEDBACK_QUEUE_WEBHOOK_URL: queue.url,
+      FEEDBACK_QUEUE_WEBHOOK_SECRET: "queue-secret",
     },
     rateLimit: 10,
   });
@@ -271,8 +301,8 @@ test("enforces media type, payload shape, body size, and per-source rate", async
 
   const rateUrl = await startApp(t, {
     env: {
-      FEEDBACK_PAPERCLIP_API_URL: queue.url,
-      FEEDBACK_PAPERCLIP_API_KEY: "queue-secret",
+      FEEDBACK_QUEUE_WEBHOOK_URL: queue.url,
+      FEEDBACK_QUEUE_WEBHOOK_SECRET: "queue-secret",
     },
     rateLimit: 2,
   });

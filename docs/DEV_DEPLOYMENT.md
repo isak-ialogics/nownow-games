@@ -30,12 +30,12 @@ and image digest. A green `main` build never promotes itself to production.
 ## Feedback receiver configuration
 
 The same application container serves the static games and `/feedback/submit`.
-The automatic environment must supply `FEEDBACK_PAPERCLIP_API_URL` and the
-secret `FEEDBACK_PAPERCLIP_API_KEY`, or their established `PAPERCLIP_API_URL`
-and `PAPERCLIP_API_KEY` equivalents; source and CI artifacts contain neither
-value.
-`FEEDBACK_QUEUE_ISSUE_ID` can override the default monitored inbox. See
-[`FEEDBACK.md`](./FEEDBACK.md) for validation, privacy, and live acceptance.
+The automatic environment must supply `FEEDBACK_QUEUE_WEBHOOK_URL` and
+`FEEDBACK_QUEUE_WEBHOOK_SECRET` from the target-company HMAC routine trigger;
+source and CI artifacts contain neither value. This trigger is scoped to create
+one Studio Lead-owned queue child under the Feedback Inbox and is not a
+Paperclip agent or board credential. See [`FEEDBACK.md`](./FEEDBACK.md) for the
+exact target-company setup request, validation, privacy, and live acceptance.
 
 ## Verification evidence
 
@@ -48,7 +48,8 @@ For every release record:
 5. change-specific live smoke evidence.
 
 For feedback, DEV acceptance additionally requires one real anonymous submit,
-the browser receipt id, and a matching readable item in the Studio Lead queue.
+the browser receipt id, and a matching readable child item in the Studio Lead
+queue.
 
 ## Rollback
 

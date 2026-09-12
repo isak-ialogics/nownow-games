@@ -65,7 +65,7 @@ export function initFeedback(d = document, w = window) {
         rows="4"
       ></textarea>
       <label class="feedback-tech">
-        <input id="feedback-tech" type="checkbox" checked />
+        <input id="feedback-tech" type="checkbox" />
         Include browser &amp; screen details to help us debug
       </label>
       <p id="feedback-status" role="status" aria-live="polite"></p>

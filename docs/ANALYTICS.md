@@ -52,8 +52,8 @@ This is an engineering privacy posture, not legal advice.
 
 ## IAL deployment contract
 
-IAL owns the collector and route because the game image remains a static nginx
-artifact.
+The analytics collector and route remain separate from the NowNow application
+container; adding the feedback receiver does not move or replace them.
 
 1. Deploy a pinned GoatCounter release and record its immutable image digest.
 2. Use SQLite on a named persistent volume; keep individual pageviews disabled.

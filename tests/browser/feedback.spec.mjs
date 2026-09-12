@@ -69,7 +69,7 @@ test.describe("Before Midnight feedback control", () => {
     });
     await page.goto("/games/before-midnight/");
     await openFeedback(page);
-    await page.locator("#feedback-tech").uncheck();
+    await expect(page.locator("#feedback-tech")).not.toBeChecked();
     await page
       .locator("#feedback-message")
       .fill("The pump control felt unresponsive on iPhone.");

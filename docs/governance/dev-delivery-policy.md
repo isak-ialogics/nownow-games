@@ -56,8 +56,9 @@ The board has removed that per-PR human approval gate for **routine DEV delivery
   privacy/security/rights/spend controls all remain in force.
 - Automated **CI / security / build** checks are retained in full.
 - The ICMS **Postmaster stays paused**; nothing here un-pauses it. The DEV
-  container path publishes to GHCR and IAL DevOps automation deploys from the
-  GHCR `:dev` tag — it does not depend on an ICMS message per release.
+  container path publishes to GHCR and the existing environment automation
+  deploys from the GHCR `:dev` tag — it does not depend on an ICMS message or
+  infrastructure handoff per release.
 - Secrets are never placed in issues, comments, artifacts, source, or logs.
 
 ## Who owns what
@@ -67,11 +68,12 @@ The board has removed that per-PR human approval gate for **routine DEV delivery
 | Product code + PR | Game Engineer |
 | Merge when green (no human approval) | Owner of the change (routine DEV) |
 | Container build + GHCR publish | GitHub Actions (`Publish DEV image`) |
-| DEV host deploy from GHCR `:dev` | IAL DevOps automation |
+| DEV host deploy from GHCR `:dev` | Existing CI/CD automation |
 | Post-deploy independent QA on the deployed artifact | QA & Release Reviewer |
 | Post-DEV release acceptance (live scrutiny of deployed DEV) | Hermes (delegated by Isak) |
 | Authorise PROD promotion of the verified artifact | Hermes |
-| Perform the promotion merge + run the `prod` pipeline | Studio Lead + IAL DevOps |
+| Perform the approved promotion merge | NowNow release owner |
+| Run the `prod` pipeline and deploy | Existing CI/CD automation |
 | Verify live PROD and notify Isak | Hermes |
 
 ## Amendment 2026-09-09 — post-DEV acceptance delegated to Hermes; governed PROD promotion
@@ -98,9 +100,9 @@ control above stays in force.
    Promotion is pinned to the **immutable source SHA and image digest** that
    Hermes verified on DEV — the same bits, never a rebuild of "latest".
 4. **Promotion is a deliberate, Hermes-authorised act.** On that authorisation
-   the Studio Lead promotes the verified SHA to the `prod` branch, which triggers
-   `deploy-prod.yml` to publish the `:prod` image **at the same digest**; IAL
-   DevOps performs the production deploy. **No automatic PROD on green CI alone** —
+   the NowNow release owner promotes the verified SHA to the `prod` branch,
+   which triggers `deploy-prod.yml` and the existing automatic production
+   deployment. **No automatic PROD on green CI alone** —
    a green pipeline never promotes; only Hermes' explicit authorisation does.
 5. **Hermes verifies live PROD and emails Isak** to inspect it. No further Isak
    per-release approval wait is required beyond this delegated flow.
@@ -114,7 +116,8 @@ control above stays in force.
   remain in full force.
 - The ICMS **Postmaster stays paused.**
 - **Hermes does not implement, merge, or deploy** — Hermes accepts, authorises,
-  and verifies; engineering/IAL execute.
+  and verifies; NowNow engineering executes the merge and existing CI/CD
+  deploys it.
 - Secrets are never placed in issues, comments, artifacts, source, or logs.
 
 ## Amendment 2026-09-09 (b) — DEV and PROD only; GitHub Pages removed from delivery

@@ -1,55 +1,31 @@
 # In-game feedback ("Something wrong?")
 
-NOW-201: every game and its results screen carries a small, always-reachable
-**Feedback** control, placed in the page header — outside the play/touch
-surface — so it never interferes with active controls (this was prompted by
-an iPhone control-interference report that could only be filed because
-someone was standing next to the player). Opening it pauses play. It is
-text-first: tap, type, send. No account, no email, and the player never
-leaves the game.
+Every game and results screen carries a small, always-reachable **Feedback**
+control in the page header, outside the play surface. Opening it pauses play.
+The path is text-first: tap, type, send. No account, email, or navigation away
+from the game is required.
 
-This document is the delivery contract for the collector this control talks
-to. **Text is shipped in this change; the collector described below is not
-implemented in this repository.** Like the analytics collector documented in
-`docs/ANALYTICS.md`, the receiving service is infrastructure IAL deploys and
-operates on existing capacity — the game image stays a static nginx artifact
-and does not gain a backend of its own. Until the collector exists, submits
-in DEV/PROD hit an unmatched route and the client's own network-error/retry
-path handles it (the draft is never lost — see below); this is a real,
-first-class blocker on the "real submit → persisted receipt" acceptance
-criterion, not a design gap in the browser code.
+The same NowNow container now serves the static game build and the
+`/feedback/submit` receiver. Existing CI/CD deploys that container; there is no
+separate service, manual infrastructure handoff, Pages fallback, or paid
+dependency.
 
-## What ships in this change (application code)
+## Browser behaviour
 
-- A small header-level "Feedback" button on Before Midnight, Latch!, and Safe
-  Passage — outside `#game-panel`/`#game`, reachable on both the live game and
-  its results screen because the header persists across both.
-- Opening the dialog dispatches a `nownow-feedback` event; each game's own
-  pause primitive (existing `visibilitychange` handling for Latch! and Safe
-  Passage, a new pause/resume for Before Midnight) freezes its clock while
-  the dialog is open and resumes it on close, adjusting for the paused
-  duration. No round or run time is lost or unfairly consumed by typing.
-- Text-only submission: a `<textarea>` (1000-character limit), an optional
-  "include browser & screen details" checkbox (unchecked content never sent
-  unless the player opts in), Send/Cancel, and an `aria-live` status region.
-- A network error (or non-2xx response) keeps the typed draft in place and
-  re-enables Send after a short client-side cooldown — nothing is lost, no
-  retype required. The draft is **not** written to `localStorage` or
-  `sessionStorage`; it only lives in the open dialog for the current page
-  session, which is both simpler and avoids adding a new place free-text
-  feedback could linger in the browser.
-- Accessibility: a native `<dialog>` (focus management, Escape-to-dismiss,
-  inert background), labelled form controls, 44px+ tap targets, and a
-  post-open `axe-core` scan with zero violations (`tests/browser/feedback.spec.mjs`).
-- Voice notes are **explicitly out of scope for this change** — text ships
-  first per the issue's own instruction that voice must not block it. A
-  follow-up will add: user-initiated recording permission (never
-  always-on mic), stop/playback/delete before sending, a duration and file-size
-  limit, and a clear-text fallback if recording is denied or unsupported.
+- The control remains reachable during play and on results screens.
+- A native `<dialog>` provides focus management, Escape dismissal, labelled
+  controls, 44px+ tap targets, and an `aria-live` status region.
+- The message is required, trimmed, and capped at 1000 characters.
+- Browser, viewport, and language details are sent only when the player selects
+  the unchecked opt-in box. No automatic screenshot or identity is collected.
+- A network error or non-2xx response keeps the draft in memory and re-enables
+  Send after a short cooldown. Drafts are never written to browser storage.
+- Voice notes remain out of scope for this text-first delivery and do not block
+  it.
 
 ## Request contract
 
-```
+```http
 POST /feedback/submit
 Content-Type: application/json
 ```
@@ -67,80 +43,88 @@ Content-Type: application/json
 }
 ```
 
-- `message` — required, 1–1000 characters, trimmed. Free text only.
-- `path` — the canonical in-game route the player was on.
-- `context` — a short, hardcoded `game@version` tag from a
-  `<meta name="nownow-feedback-context">` tag per game (`before-midnight@1`,
-  `latch@1`, `safe-passage@1`); bumped by hand when a game's feedback-relevant
-  behaviour changes meaningfully. It is not a build SHA and carries no
-  identity.
-- `tech` — present only if the player opted in. Browser `User-Agent`,
-  viewport size, and language — the same class of data every request already
-  exposes to the server, just disclosed and optional here rather than
-  silently logged.
-- Request uses `credentials: "omit"` and `referrerPolicy: "no-referrer"`, the
-  same posture as `shared/analytics.js`. No cookies, no analytics identifier,
-  no query string beyond the JSON body.
+- `message`: required, 1-1000 characters after trimming.
+- `path`: a canonical `/games/<slug>/` or `/prototypes/<slug>/` route.
+- `context`: a short hardcoded `game@version` value from the page's
+  `nownow-feedback-context` meta tag.
+- `tech`: optional and allowlisted to `ua`, `viewport`, and `lang`.
+- Requests use `credentials: "omit"` and `referrerPolicy: "no-referrer"`.
 
-**Never included:** name, email, account/session identifiers, exact
-geolocation, screenshots (automatic or otherwise), clipboard contents, or any
-value not listed above.
+Unknown fields are rejected. Names, email, account/session identifiers,
+geolocation, screenshots, clipboard data, cookies, analytics identifiers, and
+query strings are never accepted or stored.
 
 ## Response contract
 
-- `200` with `{"id": "<short opaque string>"}` — the client shows
-  `Thanks — received (ref <id>).` The `id` only needs to be short and unique
-  enough for the team to find the item again; it is not shown or used as an
-  identifier for the player.
-- Any non-2xx status, a malformed body, or a network failure — the client
-  treats it as a delivery failure: it shows a retry prompt and keeps the
-  draft untouched.
+- `200 {"id":"<short opaque reference>"}` means the monitored queue accepted
+  the item. Only then does the browser show `Thanks - received (ref <id>).`
+- Invalid JSON or fields return `400`; bodies over 8 KiB return `413`; non-JSON
+  requests return `415`; throttled sources return `429` with `Retry-After`.
+- Missing receiver configuration returns `503`. A queue timeout or rejection
+  returns `502`. Every non-2xx path preserves the player's draft for retry.
 
-## Required collector behaviour (IAL infrastructure, not built here)
+## Receiver and monitored queue
 
-Reusing the same posture already established for the analytics collector in
-`docs/ANALYTICS.md`:
+`server/feedback.mjs` validates and sanitizes the request, generates an opaque
+reference, and posts one comment to the Studio Lead-owned Feedback Inbox
+(`NOW-210`, issue id `7212ea0b-d8a1-4070-a46f-593258404c61`). The comment
+contains only the allowlisted payload, server timestamp, and receipt reference.
+The POST uses Paperclip's structured `resume: true` flag so a new item wakes the
+owner even when the inbox issue was previously completed.
 
-1. **Real, monitored destination.** Persist each submission and surface it as
-   a task/item in a queue an actual team member owns and reads — not a
-   `mailto:` link, not a dead endpoint, not client-side storage. The Studio
-   Lead owns feedback triage ownership per NOW-201; route or notify
-   accordingly (the paused ICMS Postmaster stays paused — do not use it or
-   any other channel that requires unpausing a channel the board has closed;
-   use a small, IAL-operated persistence + notification path instead, the
-   same shape as the GoatCounter deployment).
-2. **Abuse, rate, and size controls.** Reject or throttle by source IP at the
-   edge; cap body size well above 1000 characters of text plus the small
-   `tech` object (e.g. 8 KB) and reject larger bodies outright; a sensible
-   per-IP rate limit (e.g. no more than a handful of submissions per minute)
-   returned as a normal non-2xx (the client already retries safely on any
-   failure).
-3. **Sanitize before storage/display.** Treat `message` and `tech.ua` as
-   untrusted text: store as plain text, escape on any HTML render, strip
-   control characters. Never execute or interpret it.
-4. **No silent identity retention.** Do not persist source IP or additional
-   fingerprinting beyond what is operationally necessary to rate-limit abuse,
-   and do not retain it longer than that operational need requires — same
-   privacy bar as `docs/ANALYTICS.md`'s edge-log guidance.
-5. **Retention and privacy notice.** Define and document a retention window
-   for stored submissions (e.g. resolved/triaged items pruned after a fixed
-   period); the in-dialog copy already tells the player what is sent and
-   why — keep the two in sync if either changes.
-6. **Safe audio formats (future voice-note work only).** Not required for
-   this text-only change; when voice notes ship, accept only a small set of
-   safe, compressed formats (e.g. Opus/WebM or AAC/M4A) with an explicit
-   duration and file-size ceiling, and apply the same abuse/rate/retention
-   controls as text.
-7. **Existing capacity, no new cost.** Deploy on IAL's existing capacity, the
-   same constraint already in force for the analytics collector; stop for
-   Studio Lead approval before incurring any cost.
-8. **Acknowledge receipt.** Return the `200 {"id": ...}` shape above so the
-   player sees a real confirmation, not a guess.
+The receiver returns success only after Paperclip accepts the comment. Queue
+messages render untrusted values as encoded plain text; control characters,
+raw HTML, and raw `@` mentions cannot execute markup or trigger arbitrary agent
+wakes.
+
+The Studio Lead classifies each queue item as bug, idea, abuse/spam, or noise,
+records the disposition, and creates a linked work item when action is needed.
+The ICMS Postmaster remains paused and is not part of this path.
+
+## Abuse, privacy, and retention
+
+- The receiver accepts at most five requests per source key per minute and
+  rejects a sixth with `429`. The existing trusted proxy's right-most
+  `X-Forwarded-For` value is used; direct deployments can set
+  `FEEDBACK_TRUST_PROXY=0` to use the socket address.
+- Rate-limit keys live only in memory, are pruned after the one-minute window,
+  and are never attached to queue comments. The application emits no request
+  access log.
+- The total request body is capped at 8 KiB. All objects and fields are
+  allowlisted and length-bounded before queue delivery.
+- Stored submissions are retained for at most 90 days. The Studio Lead prunes
+  items after triage/resolution and in all cases by that limit.
+- Delivery uses existing capacity and adds no service, account, or recurring
+  cost.
+
+## Runtime configuration
+
+The receiver requires the automatic DEV and PROD environments to inject this
+runtime configuration at deploy time:
+
+- `FEEDBACK_PAPERCLIP_API_URL`: Paperclip base URL (with or without `/api`).
+- `FEEDBACK_PAPERCLIP_API_KEY`: least-privilege queue comment credential.
+- `FEEDBACK_QUEUE_ISSUE_ID`: optional destination override; defaults to the
+  Feedback Inbox id above.
+- `FEEDBACK_TRUST_PROXY`: defaults to trusted-proxy mode; set to `0` only when
+  the container is directly exposed.
+
+Secrets must never appear in source, logs, issue comments, or artifacts.
+
+## Delivery and acceptance
+
+- A merge to `main` runs `Verify static harness`, publishes the immutable image,
+  and the existing automation deploys DEV at
+  `https://nownow.dev.mplace.co.za/`.
+- Independent QA must submit one real DEV message and match the browser receipt
+  id to the new Feedback Inbox item before any production-triggering merge.
+- PROD remains a deliberate, independently approved merge to `prod`; its
+  existing workflow and automatic deployment are not triggered by this change.
 
 ## Rollback
 
-Revert the application commit to remove the control and stop client
-submissions. If a collector has been deployed per this contract, IAL removes
-the `/feedback/submit` route and stops the collector while retaining stored
-submissions for the agreed retention window, mirroring the analytics
-rollback in `docs/ANALYTICS.md`.
+Revert the application commit on the affected environment branch. Existing
+CI/CD then deploys the prior application behaviour. For an urgent runtime
+rollback, use the deployment system's recorded previous immutable image digest.
+Do not delete stored feedback during rollback; keep it for the 90-day maximum
+retention window and revoke the receiver credential if the route is retired.

@@ -1,41 +1,64 @@
-# NowNow Games DEV deployment
+# NowNow Games automatic delivery
 
-## Delivery policy (board-authorised, NOW-187)
+## Branch mapping
 
-Routine DEV merges and deployments are **automatic when machine checks are
-green** — no human, board, or Hermes approval gate. `Verify static harness`
-(and the container smoke coverage in CI) is the gate; a red pipeline never
-publishes or deploys. PRs are traceability artifacts, not approval queues.
-Independent QA runs against the *deployed* DEV artifact, not as a pre-merge
-line-by-line gate. Failed DEV health triggers a single bounded stop/rollback
-(below), not a recovery loop. DEV automation never touches production:
-`deploy-prod.yml` is gated on `prod` only, and no green CI run promotes on its
-own. Production changes only through the Hermes-authorised DEV→PROD promotion
-gate (post-DEV acceptance delegated to Hermes, 2026-09-09 amendment). Full
-rationale, promotion flow, and governance record:
-[`docs/governance/dev-delivery-policy.md`](./governance/dev-delivery-policy.md).
+| Environment | Trigger branch | Public route |
+| --- | --- | --- |
+| DEV | `main` | `https://nownow.dev.mplace.co.za/` |
+| PROD | `prod` | `https://nownowgames.co.za/` |
 
-## Pipeline
+`Verify static harness` runs on pushes and pull requests for both branches. A
+successful branch push triggers the corresponding publish workflow:
 
-The DEV workflow runs only after `Verify static harness` succeeds on `main`.
-It publishes `ghcr.io/isak-ialogics/nownow-games:<commit-sha>`, resolves the
-GHCR manifest digest, and deploys the combined tag-and-digest reference through
-`/opt/ial-deploy/deploy.sh nownow-games --env dev` on the DEV Swarm runner.
+- `.github/workflows/deploy-dev.yml` publishes the immutable commit tag and the
+  moving `dev` tag after a green `main` run.
+- `.github/workflows/deploy-prod.yml` publishes the immutable commit tag and the
+  moving `prod` tag after a green `prod` run.
 
-`workflow_dispatch` is for recovery only: select a ref that has already passed
-verification. Do not use floating tags, Watchtower, or polling automation.
+The existing environment automation watches those GHCR packages and performs
+the matching deployment. Routine DEV delivery therefore needs no manual
+deployment gate or infrastructure handoff. GitHub Pages is not an environment
+or fallback.
 
-The deployment verifies `dev-nownow-games_static` is `1/1`, that its container
-health check is healthy, and that the internal Traefik HTTPS route returns 200.
+## Promotion policy
 
-## Manual rollback
+DEV is automatic after machine checks pass. Independent QA then validates the
+deployed DEV artifact. A production-triggering merge to `prod` is permitted only
+after independent DEV QA and release approval identify the accepted source SHA
+and image digest. A green `main` build never promotes itself to production.
 
-The deployer preserves the previous tag-and-digest image reference. Roll DEV
-back with:
+## Feedback receiver configuration
+
+The same application container serves the static games and `/feedback/submit`.
+The automatic environment must supply `FEEDBACK_PAPERCLIP_API_URL` and the
+secret `FEEDBACK_PAPERCLIP_API_KEY`; source and CI artifacts contain neither
+value.
+`FEEDBACK_QUEUE_ISSUE_ID` can override the default monitored inbox. See
+[`FEEDBACK.md`](./FEEDBACK.md) for validation, privacy, and live acceptance.
+
+## Verification evidence
+
+For every release record:
+
+1. source branch and commit SHA;
+2. successful verification and publish workflow runs;
+3. immutable GHCR digest;
+4. public route and container health;
+5. change-specific live smoke evidence.
+
+For feedback, DEV acceptance additionally requires one real anonymous submit,
+the browser receipt id, and a matching readable item in the Studio Lead queue.
+
+## Rollback
+
+The deployment system preserves the previous immutable tag-and-digest reference.
+For an urgent DEV rollback, use the existing rollback operation:
 
 ```sh
 /opt/ial-deploy/deploy.sh nownow-games --env dev --rollback
 ```
 
-After a rollback, recheck the Swarm replicas, container health, and
-`https://nownow.dev.mplace.co.za/` HTTP status.
+After rollback, verify the service replica and container health, public route,
+and affected feature. A normal corrective rollback may instead revert the
+application commit on the environment branch and use the same automatic CI/CD
+path. Never substitute Pages or rebuild an unverified ref.

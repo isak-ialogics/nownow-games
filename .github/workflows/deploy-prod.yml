@@ -1,8 +1,8 @@
 name: Publish PROD image
 
-# NowNow builds the PROD container and publishes it to GHCR only.
-# IAL DevOps performs the actual production deployment. NowNow does not run
-# the deploy step. This mirrors the DEV publish pipeline but is gated on the
+# A deliberately approved merge to `prod` publishes the PROD container and
+# the existing environment automation deploys it without a manual handoff.
+# This mirrors the DEV publish pipeline but is gated on the
 # `prod` branch and publishes the moving `:prod` tag alongside an immutable
 # per-commit `:<sha>` tag at the same digest.
 
@@ -100,5 +100,5 @@ jobs:
             echo "- Moving: \`$IMAGE_NAME:prod\`"
             echo "- Digest: \`$DIGEST\`"
             echo ""
-            echo "IAL DevOps deploys this image to the NowNow production host."
+            echo "Existing automation deploys this image to the NowNow production host."
           } >> "$GITHUB_STEP_SUMMARY"

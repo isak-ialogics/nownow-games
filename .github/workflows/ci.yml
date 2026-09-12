@@ -52,6 +52,11 @@ jobs:
             sleep 1
           done
 
+          curl --silent --fail http://127.0.0.1:8080/healthz | grep --fixed-strings '"ok":true'
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header 'Content-Type: application/json' \
+            --data '{"message":"CI receiver probe","path":"/games/before-midnight/","context":"before-midnight@1"}' \
+            http://127.0.0.1:8080/feedback/submit)" = 503
           curl --silent --fail http://127.0.0.1:8080/robots.txt | grep --fixed-strings 'Allow: /'
           curl --silent --show-error --head http://127.0.0.1:8080/sitemap.xml | grep --ignore-case '^Content-Type: application/xml'
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/games/before-midnight/)" = 200

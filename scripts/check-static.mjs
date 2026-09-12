@@ -59,7 +59,8 @@ const pages = new Map([
 const required = [
   "404.html",
   "assets/before-midnight-share.png",
-  "nginx.conf",
+  "server/app.mjs",
+  "server/feedback.mjs",
   "scripts/seo.mjs",
   "shared/analytics.js",
   "shared/input.js",
@@ -300,15 +301,15 @@ if (!notFound.includes("That page slipped away.") || /\bnoindex\b/i.test(notFoun
   throw new Error("Custom 404 must be helpful without an unnecessary noindex tag.");
 }
 
-const nginx = await readFile(resolve(root, "nginx.conf"), "utf8");
+const runtime = await readFile(resolve(root, "server/app.mjs"), "utf8");
 for (const rule of [
-  "server_name www.nownowgames.co.za;",
-  "return 308 https://nownowgames.co.za$request_uri;",
-  "error_page 404 /404.html;",
-  "return 308 /games/before-midnight/$is_args$args;",
-  "try_files $uri $uri/ =404;",
+  "www.nownowgames.co.za",
+  "https://nownowgames.co.za",
+  "/games/before-midnight/",
+  "404.html",
+  "relative(root, file)",
 ]) {
-  if (!nginx.includes(rule)) throw new Error(`nginx.conf lacks: ${rule}`);
+  if (!runtime.includes(rule)) throw new Error(`server/app.mjs lacks: ${rule}`);
 }
 
 console.log(

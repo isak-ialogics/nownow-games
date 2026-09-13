@@ -6,6 +6,25 @@ async function openFeedback(page) {
   return page.locator(".feedback-dialog");
 }
 
+const feedbackGames = [
+  {
+    name: "Before Midnight",
+    path: "/games/before-midnight/",
+    heldControl: "#pump",
+  },
+  { name: "Latch", path: "/prototypes/latch/" },
+  {
+    name: "Safe Passage",
+    path: "/prototypes/safe-passage/",
+    heldControl: "#sky",
+  },
+  {
+    name: "Same Flame",
+    path: "/prototypes/same-flame/",
+    heldControl: "#pulse-control",
+  },
+];
+
 test.describe("Before Midnight feedback control", () => {
   test("is reachable outside the play surface and pauses the round clock while open", async ({
     page,
@@ -88,13 +107,13 @@ test.describe("Before Midnight feedback control", () => {
     });
   });
 
-  test("keeps the draft after a network error and lets the player retry", async ({
+  test("keeps the draft after a server error and lets the player retry", async ({
     page,
   }) => {
     let attempts = 0;
     await page.route("**/feedback/submit", (route) => {
       attempts += 1;
-      if (attempts === 1) return route.fulfill({ status: 500 });
+      if (attempts === 1) return route.fulfill({ status: 503 });
       route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -108,7 +127,7 @@ test.describe("Before Midnight feedback control", () => {
     await page.getByRole("button", { name: "Send" }).click();
 
     await expect(page.locator("#feedback-status")).toHaveText(
-      "Could not send. Check your connection, then try again.",
+      "Feedback service unavailable. Your draft is saved; try again shortly.",
     );
     await expect(page.locator("#feedback-message")).toHaveValue(message);
 
@@ -127,6 +146,108 @@ test.describe("Before Midnight feedback control", () => {
     await openFeedback(page);
     const accessibility = await new AxeBuilder({ page }).analyze();
     expect(accessibility.violations).toEqual([]);
+  });
+});
+
+test.describe("Feedback keyboard isolation across every game", () => {
+  for (const game of feedbackGames) {
+    test(`${game.name} accepts real keyboard typing without gameplay input`, async ({
+      page,
+    }) => {
+      await page.goto(game.path);
+      await openFeedback(page);
+      const textarea = page.locator("#feedback-message");
+      const reproducedMessage = "QA test was sad and slow\nsecond line";
+
+      // Deliberately use real key events: locator.fill() bypasses the global
+      // gameplay handlers that caused the live regression.
+      await page.keyboard.type("QA test was sad and slow");
+      await page.keyboard.press("Enter");
+      await page.keyboard.type("second line");
+      await expect(textarea).toHaveValue(reproducedMessage);
+
+      // Latch also has 1-4 shortcuts; these must remain text inside the modal.
+      await page.keyboard.type(" 1234");
+      await page.keyboard.press("ArrowLeft");
+      await page.keyboard.type("!");
+      await expect(textarea).toHaveValue(`${reproducedMessage} 123!4`);
+      await expect(textarea).toBeFocused();
+
+      if (game.heldControl) {
+        await expect(page.locator(game.heldControl)).toHaveAttribute(
+          "aria-pressed",
+          "false",
+        );
+      }
+    });
+  }
+
+  test("preserves selection, clipboard, Tab, checkbox Space, Escape, and draft", async ({
+    page,
+  }) => {
+    await page.goto("/games/before-midnight/");
+    const dialog = await openFeedback(page);
+    const textarea = page.locator("#feedback-message");
+    await textarea.evaluate((element) => {
+      element.addEventListener("copy", (event) => {
+        element.dataset.copyPrevented = String(event.defaultPrevented);
+      });
+    });
+
+    await page.keyboard.type("draft");
+    await page.keyboard.press("Control+A");
+    await page.keyboard.press("Control+C");
+    await expect(textarea).toHaveAttribute("data-copy-prevented", "false");
+
+    await page.keyboard.press("End");
+    await page.keyboard.press("Shift+ArrowLeft");
+    await page.keyboard.type("T");
+    await expect(textarea).toHaveValue("drafT");
+
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#feedback-tech")).toBeFocused();
+    await page.keyboard.press("Space");
+    await expect(page.locator("#feedback-tech")).toBeChecked();
+    await page.keyboard.press("Shift+Tab");
+    await expect(textarea).toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await openFeedback(page);
+    await expect(textarea).toHaveValue("drafT");
+  });
+
+  test("clears a held gameplay key, resumes once, and accepts a fresh key after close", async ({
+    page,
+  }) => {
+    await page.goto("/prototypes/same-flame/");
+    await page.evaluate(() => {
+      window.__feedbackTransitions = [];
+      document.addEventListener("nownow-feedback", (event) => {
+        window.__feedbackTransitions.push(event.detail);
+      });
+    });
+
+    const control = page.locator("#pulse-control");
+    await control.focus();
+    await page.keyboard.down("Space");
+    await expect(control).toHaveAttribute("aria-pressed", "true");
+
+    const dialog = await openFeedback(page);
+    await expect(control).toHaveAttribute("aria-pressed", "false");
+    await page.keyboard.up("Space");
+    await expect(page.locator("#feedback-message")).toBeFocused();
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog).toBeHidden();
+    expect(
+      await page.evaluate(() => window.__feedbackTransitions),
+    ).toEqual([true, false]);
+
+    await control.focus();
+    await page.keyboard.down("Space");
+    await expect(control).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.up("Space");
+    await expect(control).toHaveAttribute("aria-pressed", "false");
   });
 });
 

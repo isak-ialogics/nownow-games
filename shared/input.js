@@ -62,8 +62,7 @@ export function createInputController(
 
   const onKeyDown = (event) => {
     const action = actionForKey(event.key);
-    if (!action) return;
-    if (isEditableTarget(event.target)) return;
+    if (!action || isEditableTarget(event.target)) return;
 
     event.preventDefault();
     pressedKeys.add(event.key);

@@ -146,9 +146,8 @@ export function createAppServer({
 } = {}) {
   const staticCache = new Map();
   const feedback = createFeedbackReceiver({
-    apiUrl: env.FEEDBACK_PAPERCLIP_API_URL ?? env.PAPERCLIP_API_URL,
-    apiKey: env.FEEDBACK_PAPERCLIP_API_KEY ?? env.PAPERCLIP_API_KEY,
-    queueIssueId: env.FEEDBACK_QUEUE_ISSUE_ID,
+    webhookUrl: env.FEEDBACK_QUEUE_WEBHOOK_URL,
+    webhookSecret: env.FEEDBACK_QUEUE_WEBHOOK_SECRET,
     trustProxy: env.FEEDBACK_TRUST_PROXY !== "0",
     fetchImpl,
     idFactory,

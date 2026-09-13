@@ -84,9 +84,18 @@ export function initFeedback(d = document, w = window) {
   const sendBtn = dialog.querySelector("#feedback-send");
   const cancelBtn = dialog.querySelector("#feedback-cancel");
   let sent = false;
+  let away = false;
 
-  const setAway = (away) =>
+  ["keydown", "keyup"].forEach((type) =>
+    dialog.addEventListener(type, (event) => event.stopPropagation()),
+  );
+
+  const setAway = (nextAway) => {
+    const next = Boolean(nextAway);
+    if (away === next) return;
+    away = next;
     d.dispatchEvent(new CustomEvent("nownow-feedback", { detail: away }));
+  };
 
   function reset() {
     sent = false;
@@ -146,6 +155,7 @@ export function initFeedback(d = document, w = window) {
         : undefined,
     });
 
+    let failureStatus;
     try {
       const response = await w.fetch(ENDPOINT, {
         method: "POST",
@@ -154,7 +164,10 @@ export function initFeedback(d = document, w = window) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(report),
       });
-      if (!response.ok) throw new Error(String(response.status));
+      if (!response.ok) {
+        failureStatus = response.status;
+        throw new Error(String(response.status));
+      }
       const ack = parseAck(await response.json().catch(() => ({})));
       sent = true;
       status.textContent = ack.id
@@ -167,8 +180,9 @@ export function initFeedback(d = document, w = window) {
     } catch {
       // Network error or non-2xx: keep the draft exactly as typed and let
       // the player retry without retyping anything.
-      status.textContent =
-        "Could not send. Check your connection, then try again.";
+      status.textContent = failureStatus
+        ? "Feedback service unavailable. Your draft is saved; try again shortly."
+        : "Could not reach feedback service. Your draft is saved; check your connection and retry.";
       setTimeout(() => {
         sendBtn.disabled = false;
       }, RESEND_COOLDOWN_MS);

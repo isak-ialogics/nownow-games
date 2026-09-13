@@ -36,7 +36,7 @@ jobs:
       - name: Install browser
         run: npx playwright install --with-deps chromium
 
-      - name: Run mobile browser and accessibility checks
+      - name: Run mobile and desktop browser and accessibility checks
         run: npm run test:e2e
 
       - name: Build and smoke-test production container

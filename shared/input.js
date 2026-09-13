@@ -23,6 +23,9 @@ export function actionForKey(key) {
   return KEY_ACTIONS[key] ?? null;
 }
 
+export const isEditableTarget = (target) =>
+  Boolean(target?.isContentEditable || target?.matches?.("input,textarea,select"));
+
 export function relativePoint(surface, event) {
   const bounds = surface.getBoundingClientRect();
   const width = Math.max(1, bounds.width);
@@ -60,6 +63,7 @@ export function createInputController(
   const onKeyDown = (event) => {
     const action = actionForKey(event.key);
     if (!action) return;
+    if (isEditableTarget(event.target)) return;
 
     event.preventDefault();
     pressedKeys.add(event.key);
@@ -73,6 +77,10 @@ export function createInputController(
   const onKeyUp = (event) => {
     const action = actionForKey(event.key);
     if (!action) return;
+    if (isEditableTarget(event.target)) {
+      if (pressedKeys.has(event.key)) resetActiveInput("editing");
+      return;
+    }
 
     event.preventDefault();
     pressedKeys.delete(event.key);

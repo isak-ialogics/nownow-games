@@ -37,6 +37,14 @@ one Studio Lead-owned queue child under the Feedback Inbox and is not a
 Paperclip agent or board credential. See [`FEEDBACK.md`](./FEEDBACK.md) for the
 exact target-company setup request, validation, privacy, and live acceptance.
 
+`deploy-dev.yml` only publishes the verified image; it does not bind runtime
+configuration. Do not mint the one-time trigger secret until the hosting
+control plane identifies both (1) its secure write path for the
+`dev-nownow-games_static` service and (2) the actor authorised to use that path.
+GitHub repository secrets and Paperclip execution-environment secrets are not
+substitutes unless the deployment owner proves that the running service
+consumes them. The inspected configuration currently contains no such link.
+
 ## Verification evidence
 
 For every release record:

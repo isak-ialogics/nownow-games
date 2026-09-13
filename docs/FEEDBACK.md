@@ -164,9 +164,11 @@ Content-Type: application/json
 ```
 
 The `201` response returns `secretMaterial.webhookUrl` and
-`secretMaterial.webhookSecret`. Capture those once into the existing
-environment secret store; never print or paste either value into source,
-workflow logs, issue comments, or artifacts. The trigger can be disabled with
+`secretMaterial.webhookSecret`. Do not create the trigger until the receiving
+runtime's secure binding target and the actor authorised to update it are both
+identified. Capture the returned material once through that path; never print
+or paste either value into source, workflow logs, issue comments, or artifacts.
+The trigger can be disabled with
 `PATCH /api/routine-triggers/{triggerId}` and `{ "enabled": false }`, or its
 secret can be invalidated immediately with
 `POST /api/routine-triggers/{triggerId}/rotate-secret`.
@@ -187,6 +189,27 @@ runtime configuration at deploy time:
   the container is directly exposed.
 
 Secrets must never appear in source, logs, issue comments, or artifacts.
+
+### Secure binding prerequisite
+
+The repository's automatic DEV workflow publishes the verified image to GHCR;
+it does not configure the running service. Its only repository secret is the
+GHCR publishing credential, and it references no DEV environment variables or
+runtime secret store. The corresponding GitHub repository has no `DEV`
+environment and no Actions variables.
+
+Paperclip company secrets are also not the deployed application binding path.
+They can be projected into Paperclip execution environments, but creating or
+updating such an environment is restricted to a board instance administrator.
+The configured Local execution environment is not the external
+`dev-nownow-games_static` Swarm service.
+
+Before issuing the one-time routine secret, the hosting control plane must
+identify the exact secure write path and authorised owner that can bind the two
+values above into `dev-nownow-games_static`. If no such existing path is
+available, that missing binding is an infrastructure prerequisite; do not work
+around it with an agent key, board token, workflow output, source file, or issue
+comment.
 
 ## Delivery and acceptance
 

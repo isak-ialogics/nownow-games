@@ -380,6 +380,8 @@ kbd {
   cursor: pointer;
 }
 .result-card button:focus-visible { outline: 4px solid var(--amber); outline-offset: 3px; }
+#share-result { color: var(--mint); background: transparent; border: 1px solid var(--mint); }
+#share-status { min-height: 1.4rem; margin: .5rem 0 0; color: var(--mint); }
 
 .more-games {
   display: flex;

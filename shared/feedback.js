@@ -1,12 +1,3 @@
-// NOW-201: a small, always-reachable "Something wrong?" control for every
-// game and results screen. Text-first: tap, type, send — no account, no
-// email, no leaving the page. Opening the dialog dispatches a
-// "nownow-feedback" event so each game can pause play while it is open; see
-// docs/FEEDBACK.md for the full contract, privacy notice, and the required
-// backend delivery this module deliberately does not implement itself.
-//
-// Voice notes are intentionally out of scope for this module (staged as a
-// follow-up per NOW-201): text must not wait on it.
 
 const ENDPOINT = "/feedback/submit";
 export const MAX_MESSAGE_LENGTH = 1000;
@@ -18,9 +9,6 @@ export function validateMessage(message) {
   if (trimmed.length > MAX_MESSAGE_LENGTH) return { ok: false, reason: "long" };
   return { ok: true, message: trimmed };
 }
-
-// No identifiers, no location, no automatic screenshot. Technical details
-// are only attached when the player opts in via the checkbox.
 export function buildReport({ message, path, context, tech }) {
   const report = { message, path, context };
   if (tech) report.tech = tech;
@@ -121,9 +109,6 @@ export function initFeedback(d = document, w = window) {
 
   trigger.addEventListener("click", open);
   cancelBtn.addEventListener("click", close);
-  // Native Escape/backdrop dismissal fires "cancel" then "close"; resume play
-  // either way. The textarea is never cleared here, so an unsent draft
-  // survives a cancelled close and reopening the dialog.
   dialog.addEventListener("cancel", () => setAway(false));
   dialog.addEventListener("close", () => setAway(false));
 
@@ -178,8 +163,6 @@ export function initFeedback(d = document, w = window) {
       techBox.parentElement.hidden = true;
       cancelBtn.textContent = "Done";
     } catch {
-      // Network error or non-2xx: keep the draft exactly as typed and let
-      // the player retry without retyping anything.
       status.textContent = failureStatus
         ? "Feedback service unavailable. Your draft is saved; try again shortly."
         : "Could not reach feedback service. Your draft is saved; check your connection and retry.";

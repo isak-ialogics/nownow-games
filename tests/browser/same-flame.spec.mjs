@@ -6,6 +6,13 @@ import { join } from "node:path";
 const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 const evidenceDir = process.env.EVIDENCE_DIR;
 
+function eventPaths(requests) {
+  return requests
+    .map((request) => new URL(request))
+    .filter((url) => url.pathname === "/analytics/count")
+    .map((url) => url.searchParams.get("p"));
+}
+
 test("mobile play exposes equivalent touch and keyboard controls without external calls", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const requests = [];
@@ -73,7 +80,11 @@ test("a 36-second matched rhythm merges, persists, shares, and retries", async (
       },
     });
   });
+  const requests = [];
+  page.on("request", (request) => requests.push(request.url()));
   await page.goto("/prototypes/same-flame/");
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/same-flame/play-started/new").length).toBe(1);
   const control = page.locator("#pulse-control");
   for (let pulse = 0; pulse < 12; pulse += 1) {
     await control.focus();
@@ -85,6 +96,8 @@ test("a 36-second matched rhythm merges, persists, shares, and retries", async (
 
   const result = page.locator("#result-card");
   await expect(result).toBeVisible();
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/same-flame/play-completed/new").length).toBe(1);
   const browserSync = Number(
     (await page.locator("#final-sync").textContent()).replace("%", ""),
   );
@@ -105,6 +118,8 @@ test("a 36-second matched rhythm merges, persists, shares, and retries", async (
 
   await page.getByRole("button", { name: "Share your rhythm" }).click();
   await expect(page.locator("#share-status")).toHaveText("Shared.");
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/same-flame/share-triggered/new").length).toBe(1);
   expect(await page.evaluate(() => globalThis.__sharedResult)).toEqual({
     title: "Same Flame",
     text: `I found ${browserSync}% sync in Same Flame. Bring your rhythm.`,
@@ -118,9 +133,13 @@ test("a 36-second matched rhythm merges, persists, shares, and retries", async (
     });
   }
 
+  const startsBeforeRetry = eventPaths(requests).filter((path) =>
+    path === "/event/same-flame/play-started/new").length;
   await page.getByRole("button", { name: "Try the flame again" }).click();
   await expect(page.locator("#game-panel")).toBeVisible();
   await expect(page.locator("#time-left")).toHaveText("36.0");
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/same-flame/play-started/new").length).toBe(startsBeforeRetry + 1);
 });
 
 test("background recovery, reduced motion, and expiry retain clear states", async ({ page }) => {

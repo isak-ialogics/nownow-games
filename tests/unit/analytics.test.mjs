@@ -4,77 +4,51 @@ import test from "node:test";
 import {
   countUrl,
   initAnalytics,
+  trackGameEvent,
   visitorType,
 } from "../../shared/analytics.js";
 
-test("analytics URLs contain only aggregate, non-identifying fields", () => {
-  const pageview = new URL(
-    countUrl("/", "NowNow Games", { nonce: "fixed" }),
-    "https://nownowgames.co.za",
-  );
-  assert.equal(pageview.pathname, "/analytics/count");
-  assert.deepEqual([...pageview.searchParams.keys()].sort(), ["p", "rnd", "t"]);
-  assert.equal(pageview.searchParams.get("p"), "/");
+function pathOf(url) {
+  return new URL(url, "https://nownowgames.co.za").searchParams.get("p");
+}
 
-  const event = new URL(
-    countUrl(
-      "/event/before-midnight/play-started/returning",
-      "Before Midnight: play-started",
-      { event: true, noSession: true, nonce: "fixed" },
-    ),
-    "https://nownowgames.co.za",
-  );
-  assert.deepEqual([...event.searchParams.keys()].sort(), [
-    "e",
-    "ns",
-    "p",
-    "rnd",
-    "t",
+function fixture(path, { readyState = "complete", storage = { getItem: () => "0" }, title = "Latch! | NowNow Games", href = "https://dev.invalid/ignored" } = {}) {
+  const listeners = new Map();
+  const view = { hidden: false };
+  const result = { hidden: true };
+  const button = (selector) => ({
+    addEventListener(type, callback) {
+      listeners.set(`${selector}:${type}`, callback);
+    },
+  });
+  const nodes = new Map([
+    ['[rel="canonical"]', { href: `https://nownowgames.co.za${path}` }],
+    ["#game-panel,#game", view],
+    ["#result-card,#result", result],
+    ["#retry", button("#retry")],
+    ["#share-best,#share-result", button("#share")],
   ]);
-  assert.equal(event.searchParams.get("e"), "1");
-  assert.equal(event.searchParams.get("ns"), "1");
-  for (const excluded of ["q", "r", "s", "score", "user", "visitorId"]) {
-    assert.equal(event.searchParams.has(excluded), false);
-  }
-});
-
-test("returning status reuses the gameplay best without writing storage", () => {
-  let writes = 0;
-  const storage = {
-    getItem(key) {
-      assert.equal(key, "nownow-before-midnight-best-v1");
-      return "12.5";
+  const document = {
+    readyState,
+    title,
+    addEventListener(type, callback) {
+      listeners.set(`document:${type}`, callback);
     },
-    setItem() {
-      writes += 1;
-    },
+    querySelector: (selector) => nodes.get(selector),
   };
-  assert.equal(visitorType(storage), "returning");
-  assert.equal(writes, 0);
-  assert.equal(visitorType({ getItem: () => "0" }), "new");
-  assert.equal(visitorType({ getItem: () => "not-a-score" }), "new");
-  assert.equal(
-    visitorType({
-      getItem() {
-        throw new Error("blocked storage");
-      },
-    }),
-    "new",
-  );
-});
+  return {
+    document,
+    fire: (key) => listeners.get(key)?.(),
+    result,
+    view,
+    window: { localStorage: storage, location: { href } },
+  };
+}
 
-test("canonical game route initializes the unchanged event counters", (t) => {
+function stubTransport(t) {
   const originalFetch = globalThis.fetch;
   const originalMutationObserver = globalThis.MutationObserver;
-  t.after(() => {
-    globalThis.fetch = originalFetch;
-    globalThis.MutationObserver = originalMutationObserver;
-  });
-
   const requests = [];
-  const listeners = new Map();
-  const result = { hidden: true };
-  let observeOptions;
   let mutationCallback;
   globalThis.fetch = (url, options) => {
     requests.push({ options, url });
@@ -84,60 +58,112 @@ test("canonical game route initializes the unchanged event counters", (t) => {
     constructor(callback) {
       mutationCallback = callback;
     }
-
     observe(target, options) {
-      assert.equal(target, result);
-      observeOptions = options;
+      assert.ok(target);
+      assert.deepEqual(options, {
+        attributes: true,
+        attributeFilter: ["hidden"],
+      });
     }
   };
-
-  const button = (selector) => ({
-    addEventListener(type, callback) {
-      listeners.set(`${selector}:${type}`, callback);
-    },
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    globalThis.MutationObserver = originalMutationObserver;
   });
-  const nodes = new Map([
-    [
-      '[rel="canonical"]',
-      { href: "https://nownowgames.co.za/games/before-midnight/" },
-    ],
-    ["#result-card", result],
-    ["#retry", button("#retry")],
-    ["#share-best", button("#share-best")],
-  ]);
-  const document = {
-    title: "Before Midnight | NowNow Games",
-    querySelector: (selector) => nodes.get(selector),
-  };
-  const window = {
-    localStorage: { getItem: () => "0" },
-    location: { href: "https://dev.invalid/ignored" },
-  };
+  return { mutate: () => mutationCallback(), requests };
+}
 
-  initAnalytics(document, window);
-  listeners.get("#retry:click")();
-  listeners.get("#share-best:click")();
-  result.hidden = false;
-  mutationCallback();
-
-  assert.deepEqual(observeOptions, {
-    attributes: true,
-    attributeFilter: ["hidden"],
-  });
-  assert.deepEqual(
-    requests.map(({ url }) =>
-      new URL(url, "https://nownowgames.co.za").searchParams.get("p"),
-    ),
-    [
-      "/games/before-midnight/",
-      "/event/before-midnight/play-started/new",
-      "/event/before-midnight/play-started/new",
-      "/event/before-midnight/share-triggered/new",
-      "/event/before-midnight/play-completed/new",
-    ],
+test("analytics URLs contain only aggregate, non-identifying fields", () => {
+  const pageview = new URL(
+    countUrl("/", "NowNow Games", { nonce: "fixed" }),
+    "https://nownowgames.co.za",
   );
+  assert.equal(pageview.pathname, "/analytics/count");
+  assert.deepEqual([...pageview.searchParams.keys()].sort(), ["p", "rnd", "t"]);
+
+  const event = new URL(
+    countUrl("/event/latch/play-started/returning", "Latch!: play-started", {
+      event: true,
+      noSession: true,
+      nonce: "fixed",
+    }),
+    "https://nownowgames.co.za",
+  );
+  assert.deepEqual([...event.searchParams.keys()].sort(), ["e", "ns", "p", "rnd", "t"]);
+  assert.equal(event.searchParams.get("e"), "1");
+  assert.equal(event.searchParams.get("ns"), "1");
+  for (const excluded of ["q", "r", "s", "score", "user", "visitorId"]) {
+    assert.equal(event.searchParams.has(excluded), false);
+  }
+});
+
+test("returning status reads existing gameplay progress without writing storage", () => {
+  let writes = 0;
+  const stored = new Map([
+    ["nownow-before-midnight-best-v1", "0"],
+    ["nownow-same-flame-best-v1", "88"],
+  ]);
+  const storage = {
+    getItem: (key) => stored.get(key),
+    setItem() {
+      writes += 1;
+    },
+  };
+  assert.equal(visitorType(storage), "returning");
+  assert.equal(writes, 0);
+  assert.equal(visitorType({ getItem: () => "0" }), "new");
+  assert.equal(visitorType({ getItem: () => "not-a-score" }), "new");
+  assert.equal(visitorType({ getItem: () => { throw new Error("blocked storage"); } }), "new");
+});
+
+test("real lifecycle hooks keep historical paths and deduplicate each run", (t) => {
+  const { mutate, requests } = stubTransport(t);
+  const page = fixture("/games/before-midnight/", {
+    storage: { getItem: (key) => key === "nownow-before-midnight-best-v1" ? "12.5" : "0" },
+    title: "Before Midnight | NowNow Games",
+  });
+  initAnalytics(page.document, page.window);
+  assert.equal(trackGameEvent("before-midnight", "play-started", page.document), false);
+  assert.equal(trackGameEvent("latch", "share-triggered", page.document), false);
+  assert.equal(trackGameEvent("before-midnight", "unknown", page.document), false);
+
+  page.view.hidden = true;
+  page.result.hidden = false;
+  mutate();
+  mutate();
+  page.fire("#share:click");
+  page.fire("#retry:click");
+  assert.equal(trackGameEvent("before-midnight", "play-started", page.document), false);
+
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/games/before-midnight/",
+    "/event/before-midnight/play-started/returning",
+    "/event/before-midnight/play-completed/returning",
+    "/event/before-midnight/share-triggered/returning",
+    "/event/before-midnight/play-started/returning",
+  ]);
   for (const { options } of requests) {
     assert.equal(options.credentials, "omit");
     assert.equal(options.referrerPolicy, "no-referrer");
   }
+});
+
+test("synthetic QA uses a fixed separate audience and waits for an initialized game", (t) => {
+  const { requests } = stubTransport(t);
+  const page = fixture("/prototypes/safe-passage/", {
+    href: "https://dev.invalid/prototypes/safe-passage/?nng_audience=synthetic-qa&name=private",
+    readyState: "interactive",
+    title: "Safe Passage | NowNow Games",
+  });
+  initAnalytics(page.document, page.window);
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/synthetic-qa/prototypes/safe-passage/",
+  ]);
+  page.fire("document:DOMContentLoaded");
+  page.fire("document:DOMContentLoaded");
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/synthetic-qa/prototypes/safe-passage/",
+    "/synthetic-qa/event/safe-passage/play-started/new",
+  ]);
+  assert.equal(requests.some(({ url }) => url.includes("private")), false);
 });

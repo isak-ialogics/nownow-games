@@ -97,7 +97,7 @@ test("analytics URLs contain only aggregate, non-identifying fields", () => {
   }
 });
 
-test("returning status reads existing gameplay progress without writing storage", () => {
+test("returning status is scoped to the current game's own best-score key (NOW-221)", () => {
   let writes = 0;
   const stored = new Map([
     ["nownow-before-midnight-best-v1", "0"],
@@ -109,11 +109,23 @@ test("returning status reads existing gameplay progress without writing storage"
       writes += 1;
     },
   };
-  assert.equal(visitorType(storage), "returning");
+  // Same Flame has its own positive best → returning for Same Flame.
+  assert.equal(visitorType(storage, "same-flame"), "returning");
+  // A positive Same Flame best must NOT leak into a first-ever Before Midnight
+  // visit (its own key is 0/absent) — this was the cross-game misclassification.
+  assert.equal(visitorType(storage, "before-midnight"), "new");
   assert.equal(writes, 0);
-  assert.equal(visitorType({ getItem: () => "0" }), "new");
-  assert.equal(visitorType({ getItem: () => "not-a-score" }), "new");
-  assert.equal(visitorType({ getItem: () => { throw new Error("blocked storage"); } }), "new");
+  // Games without a persistent best-score key are intentionally always "new".
+  assert.equal(visitorType(storage, "latch"), "new");
+  assert.equal(visitorType(storage, "safe-passage"), "new");
+  assert.equal(visitorType(storage, undefined), "new");
+  // Same-game returning still works when only that game's own best is set.
+  const bmStored = { getItem: (key) => (key === "nownow-before-midnight-best-v1" ? "12.5" : "0") };
+  assert.equal(visitorType(bmStored, "before-midnight"), "returning");
+  // Non-positive / non-numeric / throwing storage all fall back to "new".
+  assert.equal(visitorType({ getItem: () => "0" }, "same-flame"), "new");
+  assert.equal(visitorType({ getItem: () => "not-a-score" }, "same-flame"), "new");
+  assert.equal(visitorType({ getItem: () => { throw new Error("blocked storage"); } }, "same-flame"), "new");
 });
 
 test("real lifecycle hooks keep historical paths and deduplicate each run", (t) => {

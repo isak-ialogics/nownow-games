@@ -12,7 +12,7 @@ const pages = [
     canonical: `${origin}/`,
     title: "Original Mobile Browser Games | NowNow Games",
     description:
-      "Play five original, mobile-first browser games from NowNow Games, including Surface Signal, Same Flame, Before Midnight, Latch!, and Safe Passage.",
+      "Play six original, mobile-first browser games from NowNow Games, including One Lucky Bloom, Surface Signal, Same Flame, Before Midnight, Latch!, and Safe Passage.",
     schemaTypes: ["Organization", "WebSite"],
   },
   {
@@ -53,6 +53,14 @@ const pages = [
     title: "Surface Signal | NowNow Games",
     description:
       "Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game.",
+    schemaTypes: ["VideoGame"],
+  },
+  {
+    path: "/games/one-lucky-bloom/",
+    canonical: `${origin}/games/one-lucky-bloom/`,
+    title: "One Lucky Bloom | NowNow Games",
+    description:
+      "Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game.",
     schemaTypes: ["VideoGame"],
   },
 ];
@@ -167,7 +175,7 @@ test("crawl files enumerate public pages without blocking bots", async ({
   expect(source).not.toContain("404.html");
 });
 
-test("the legacy Before Midnight route redirects permanently", async ({
+test("legacy canonical game routes redirect permanently", async ({
   page,
   request,
 }) => {
@@ -184,6 +192,16 @@ test("the legacy Before Midnight route redirects permanently", async ({
   expect(page.url()).toBe(
     `${localOrigin}/games/before-midnight/`,
   );
+
+  const bloomLegacy = await request.get("/prototypes/one-lucky-bloom/", {
+    maxRedirects: 0,
+  });
+  expect(bloomLegacy.status()).toBe(308);
+  expect(bloomLegacy.headers().location).toBe("/games/one-lucky-bloom/");
+
+  const bloomResponse = await page.goto("/prototypes/one-lucky-bloom/");
+  expect(bloomResponse?.status()).toBe(200);
+  expect(page.url()).toBe(`${localOrigin}/games/one-lucky-bloom/`);
 });
 
 test("unknown routes return the friendly page with HTTP 404", async ({ page }) => {

@@ -325,6 +325,7 @@ main {
 .card-art--same-flame .c { width: 7rem; border-top: 2px dotted #ffcf58; transform: translateX(-50%); }
 .card-art--surface-signal{background:linear-gradient(#16485a 49%,#07303d 50%)}
 .card-art--surface-signal .a{width:9rem;height:3rem;border-top:.5rem solid #74d8d2;border-radius:50%;transform:translate(-50%,-50%)}
+.card-art--one-lucky-bloom{background:radial-gradient(circle,#c697d4 0 12%,#52325f 13%,#21172b 70%)}
 
 .preview-label {
   position: absolute;

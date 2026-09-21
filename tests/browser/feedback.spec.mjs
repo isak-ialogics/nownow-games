@@ -24,6 +24,7 @@ const feedbackGames = [
     heldControl: "#pulse-control",
   },
   { name: "Surface Signal", path: "/prototypes/surface-signal/" },
+  { name: "One Lucky Bloom", path: "/games/one-lucky-bloom/" },
 ];
 
 test.describe("Before Midnight feedback control", () => {

@@ -98,17 +98,16 @@ function renderCard(card, index) {
   return `        <article class="prototype-card">
           <div class="card-preview card-art--${escapeHtml(card.slug)}" aria-hidden="true">
             <i class="a"></i><i class="b"></i><i class="c"></i>
-            <span class="preview-label">GAME / ${cardNumber}</span>
           </div>
           <div class="card-content">
             <p class="card-kicker">${escapeHtml(card.kicker)}</p>
             <h3>${escapeHtml(card.title)}</h3>
             <p>${escapeHtml(card.description)}</p>
-            <ul class="feature-list" aria-label="Game features">
+            <ul class="feature-list">
 ${features}
             </ul>
             <a class="play-link" href="./${escapeHtml(publicPathForCard(card))}/">
-              Play now <span aria-hidden="true">&rarr;</span>
+              Play now →
             </a>
           </div>
         </article>`;

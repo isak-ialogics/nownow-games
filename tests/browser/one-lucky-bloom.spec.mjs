@@ -11,6 +11,14 @@ const paths = (requests) => requests.map((value) => new URL(value))
   .filter((url) => url.pathname === "/analytics/count")
   .map((url) => url.searchParams.get("p"));
 
+async function advanceUntil(page, predicate, { step = 100, limit = 8_000 } = {}) {
+  for (let elapsed = 0; elapsed <= limit; elapsed += step) {
+    if (await predicate()) return;
+    await page.clock.runFor(step);
+  }
+  throw new Error(`Timed out advancing the game clock after ${limit}ms.`);
+}
+
 test("first play teaches, stays mobile/reduced-motion accessible, and separates selection from lock", async ({ page }) => {
   await page.clock.install();
   await page.addInitScript(() => {
@@ -76,14 +84,25 @@ test("perfect keyboard play persists, emits bounded telemetry, shares exact copy
   await page.getByRole("button", { name: "Try your luck" }).click();
   await page.getByRole("button", { name: "Skip and play" }).click();
 
-  for (const answer of answers) {
-    await page.clock.runFor(2_000);
+  for (const [index, answer] of answers.entries()) {
+    const answerButton = page.getByRole("radio", { name: `Lane ${answer}` });
+    await advanceUntil(page, async () => !(await answerButton.isDisabled()));
     await page.keyboard.press(String(answer));
+    await advanceUntil(page, async () => await page.locator("#k").isEnabled());
     await page.locator("#k").focus();
     await page.keyboard.press("Enter");
-    await page.clock.runFor(5_000);
+    await expect(page.locator("#k")).toBeDisabled();
+    await page.clock.runFor(4_500);
+    if (index < answers.length - 1) {
+      await advanceUntil(page, async () => {
+        const next = `Bloom ${index + 2} of 6`;
+        return await page.locator("#p").textContent() === next &&
+          !(await page.getByRole("radio", { name: "Lane 3" }).isDisabled());
+      }, { step: 250, limit: 1_000 });
+    }
   }
 
+  await advanceUntil(page, async () => await page.locator("#rc").isVisible());
   await expect(page.locator("#rc")).toBeVisible();
   await expect(page.locator("#rt")).toHaveText("Full page of luck");
   await expect(page.locator("#fs")).toHaveText("600 / 600");

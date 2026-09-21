@@ -203,15 +203,18 @@ export function createAppServer({
       }
 
       const pathname = decodeURIComponent(url.pathname);
-      if (
-        pathname === "/prototypes/before-midnight" ||
-        pathname === "/prototypes/before-midnight/"
-      ) {
+      const legacyGame = pathname.match(
+        /^\/prototypes\/(before-midnight|one-lucky-bloom)\/?$/u,
+      )?.[1];
+      if (legacyGame) {
+        const legacyLocation = legacyGame === "before-midnight"
+          ? "/games/before-midnight/"
+          : "/games/one-lucky-bloom/";
         response
           .writeHead(308, {
             ...STATIC_SECURITY_HEADERS,
             "Cache-Control": "no-store",
-            Location: `/games/before-midnight/${url.search}`,
+            Location: `${legacyLocation}${url.search}`,
           })
           .end();
         return;

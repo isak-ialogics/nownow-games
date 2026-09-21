@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game." />
+    <meta property="og:title" content="One Lucky Bloom | NowNow Games" />
+    <meta property="og:description" content="Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nownowgames.co.za/games/one-lucky-bloom/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="One Lucky Bloom | NowNow Games" />
+    <meta name="twitter:description" content="Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game." />
+    <meta name="theme-color" content="#21172b" />
+    <link rel="canonical" href="https://nownowgames.co.za/games/one-lucky-bloom/" />
+    <title>One Lucky Bloom | NowNow Games</title>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"VideoGame","name":"One Lucky Bloom","url":"https://nownowgames.co.za/games/one-lucky-bloom/","description":"Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game.","gamePlatform":"Web browser","playMode":"SinglePlayer","inLanguage":"en-ZA","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"NowNow Games","url":"https://nownowgames.co.za/"}}
+    </script>
+    <meta name="nownow-feedback-context" content="one-lucky-bloom@1" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="../../shared/feedback.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="../../" aria-label="Back to NowNow Games">← All games</a>
+      <span>Six blooms · under a minute</span>
+    </header>
+    <main id="page-main">
+      <section class="title-block">
+        <p class="kicker">A tiny spring prediction game</p>
+        <h1 id="game-title">One Lucky<br />Bloom</h1>
+        <p class="deck">Read the branches. Watch the wind. Lock in one landing lane.</p>
+      </section>
+
+      <div class="settings">
+        <button id="sound" type="button" aria-pressed="false">Sound off</button>
+        <button id="motion" type="button" aria-pressed="false">Reduced motion off</button>
+        <button id="reset-data" type="button">Reset local data</button>
+      </div>
+      <p id="storage-note" class="notice" role="status" hidden>You can still play. Personal bests won’t persist on this device.</p>
+
+      <section id="intro" class="card" aria-labelledby="intro-title">
+        <h2 id="intro-title">Choose where luck lands.</h2>
+        <p>There’s a local exam-season fable about a jacaranda blossom choosing your luck. It’s a fable — not study advice.</p>
+        <p class="care">Enjoy the canopy. Please leave real trees and blossoms alone.</p>
+        <button id="start" class="primary" type="button">Try your luck</button>
+      </section>
+
+      <section id="tutorial" class="card" aria-labelledby="tutorial-title" hidden>
+        <p class="kicker">Four-second field note</p>
+        <h2 id="tutorial-title">Each cue moves the bloom one lane.</h2>
+        <p><strong>Start 3 + upper left + calm + lower straight = lane 2.</strong></p>
+        <p>Pick a landing lane, then lock it.</p>
+        <button id="skip-tutorial" class="primary" type="button">Skip and play</button>
+      </section>
+
+      <section id="game-panel" class="game" aria-label="One Lucky Bloom game" hidden>
+        <div class="score-line">
+          <p>Progress <strong id="progress">Bloom 1 of 6</strong></p>
+          <p>Score <strong id="score">0</strong></p>
+        </div>
+        <div id="canopy" class="canopy">
+          <svg viewBox="0 0 500 560" aria-hidden="true">
+            <path class="trunk" d="M250 20v120M250 100 90 215M250 100l160 115M90 215l80 115m240-115-80 115M170 330 70 435m100-105 80 105m80-105-80 105m80-105 100 105" />
+            <path class="twigs" d="M70 435v65m90-65v65m90-65v65m90-65v65m90-65v65" />
+          </svg>
+          <div class="cue upper" aria-hidden="true"><span id="upper-arrow">←</span><b id="upper-label">BENDS LEFT</b></div>
+          <div class="cue wind" aria-hidden="true"><span id="wind-arrow">→</span><b id="wind-label">RIGHT GUST</b></div>
+          <div class="cue lower" aria-hidden="true"><b id="lower-label">STRAIGHT TWIG</b></div>
+          <span id="bloom" class="bloom" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <div id="lanes" class="lanes" role="radiogroup" aria-label="Choose one landing lane">
+            <button type="button" role="radio" aria-checked="false" aria-label="Lane 1"><span>1</span></button>
+            <button type="button" role="radio" aria-checked="false" aria-label="Lane 2"><span>2</span></button>
+            <button type="button" role="radio" aria-checked="true" aria-label="Lane 3"><span>3</span></button>
+            <button type="button" role="radio" aria-checked="false" aria-label="Lane 4"><span>4</span></button>
+            <button type="button" role="radio" aria-checked="false" aria-label="Lane 5"><span>5</span></button>
+          </div>
+        </div>
+        <button id="lock" class="primary lock" type="button" disabled>Lock lane 3</button>
+        <p id="game-status" class="status" role="status" aria-live="polite">Read the canopy.</p>
+        <p id="resume-note" class="resume" role="status" hidden></p>
+        <p id="instructions" class="instructions">Tap a lane, then Lock. Keyboard: <kbd>1</kbd>–<kbd>5</kbd>, <kbd>←</kbd> <kbd>→</kbd>, <kbd>Home</kbd>/<kbd>End</kbd>, then <kbd>Tab</kbd> to Lock and press <kbd>Space</kbd> or <kbd>Enter</kbd>.</p>
+      </section>
+
+      <section id="result-card" class="card result" aria-labelledby="result-title" hidden>
+        <p class="kicker">Your luck ledger</p>
+        <h2 id="result-title">Still reading the branches</h2>
+        <p class="total"><strong id="final-score">0 / 600</strong><span id="final-catches">0 of 6 blossoms found your lane.</span></p>
+        <ol id="ledger" class="ledger"></ol>
+        <p id="best-note"></p>
+        <button id="retry" class="primary" type="button">Play again</button>
+        <button id="share-result" class="action" type="button">Share ledger</button>
+        <button id="copy-challenge" class="action" type="button" hidden>Copy challenge</button>
+        <a class="action link" href="../../">Back to games</a>
+        <p id="share-status" class="notice" role="status" aria-live="polite"></p>
+      </section>
+
+      <nav class="more-games" aria-label="More NowNow Games">
+        <p>More original browser games</p>
+        <a href="../../prototypes/surface-signal/">Play Surface Signal</a>
+        <a href="../../games/before-midnight/">Play Before Midnight</a>
+      </nav>
+    </main>
+    <script type="module" src="../../shared/analytics.js"></script>
+    <script type="module" src="../../shared/feedback.js"></script>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

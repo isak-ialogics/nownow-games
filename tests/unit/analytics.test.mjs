@@ -103,6 +103,7 @@ test("returning status is scoped to the current game's own best-score key (NOW-2
     ["nownow-before-midnight-best-v1", "0"],
     ["nownow-same-flame-best-v1", "88"],
     ["nownow-surface-signal-best-v1", "5"],
+    ["nownow-one-lucky-bloom-best-v1", JSON.stringify({ version: 1, playsCompleted: 2 })],
   ]);
   const storage = {
     getItem: (key) => stored.get(key),
@@ -113,6 +114,7 @@ test("returning status is scoped to the current game's own best-score key (NOW-2
   // Same Flame has its own positive best → returning for Same Flame.
   assert.equal(visitorType(storage, "same-flame"), "returning");
   assert.equal(visitorType(storage, "surface-signal"), "returning");
+  assert.equal(visitorType(storage, "one-lucky-bloom"), "returning");
   // A positive Same Flame best must NOT leak into a first-ever Before Midnight
   // visit (its own key is 0/absent) — this was the cross-game misclassification.
   assert.equal(visitorType(storage, "before-midnight"), "new");
@@ -127,6 +129,10 @@ test("returning status is scoped to the current game's own best-score key (NOW-2
   // Non-positive / non-numeric / throwing storage all fall back to "new".
   assert.equal(visitorType({ getItem: () => "0" }, "same-flame"), "new");
   assert.equal(visitorType({ getItem: () => "not-a-score" }, "same-flame"), "new");
+  assert.equal(visitorType({ getItem: () => JSON.stringify({ version: 1, playsCompleted: 0 }) }, "one-lucky-bloom"), "new");
+  assert.equal(visitorType({ getItem: () => JSON.stringify({ version: 2, playsCompleted: 2 }) }, "one-lucky-bloom"), "new");
+  assert.equal(visitorType({ getItem: () => JSON.stringify({ version: 1, playsCompleted: "2" }) }, "one-lucky-bloom"), "new");
+  assert.equal(visitorType({ getItem: () => "not-json" }, "one-lucky-bloom"), "new");
   assert.equal(visitorType({ getItem: () => { throw new Error("blocked storage"); } }, "same-flame"), "new");
 });
 

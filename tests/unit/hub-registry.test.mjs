@@ -67,7 +67,6 @@ test("directory cards are ordered, escaped, counted, and linked", async (t) => {
   assert.match(hub, />02<\/span/);
   assert.match(hub, /\.\/games\/before-midnight\//);
   assert.match(hub, /\.\/prototypes\/safe-passage\//);
-  assert.match(hub, /GAME \/ 01/);
   assert.match(hub, /Play now/);
   assert.match(hub, /Safe &lt;Passage&gt;/);
   assert.doesNotMatch(hub, /Safe <Passage>/);

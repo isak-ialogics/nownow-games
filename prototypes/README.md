@@ -9,6 +9,7 @@ Each prototype is an independent static page under `prototypes/<slug>/`. The res
 | `safe-passage` | 3 |
 | `same-flame` | 4 |
 | `surface-signal` | 5 |
+| `one-lucky-bloom` | 6 |
 
 ## Required files
 

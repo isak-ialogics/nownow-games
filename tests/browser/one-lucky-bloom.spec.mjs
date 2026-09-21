@@ -133,8 +133,13 @@ test("perfect keyboard play persists, emits bounded telemetry, shares exact copy
   await expect.poll(() => paths(requests).filter((path) => path === "/event/one-lucky-bloom/play-started/returning").length).toBe(1);
 });
 
-test("feedback isolates gameplay keys, freezes active time, and resumes through the accessible cue", async ({ page }) => {
+test("successful feedback isolates gameplay keys, freezes active time, and resumes through the accessible cue", async ({ page }) => {
   await page.clock.install();
+  await page.route("**/feedback/submit", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ id: "resume-1" }),
+  }));
   await page.addInitScript(({ storageKey }) => localStorage.setItem(storageKey, JSON.stringify({
     version: 1, bestScore: 100, bestCatches: 1, playsCompleted: 1,
     tutorialSeen: true, soundEnabled: false, reduceMotionOverride: false,
@@ -155,7 +160,9 @@ test("feedback isolates gameplay keys, freezes active time, and resumes through 
   await expect(page.locator("#b")).toHaveAttribute("style", bloomBefore);
   await expect(page.locator("#feedback-message")).toHaveValue("1234\n5");
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.locator("#feedback-status")).toContainText("resume-1");
+  await page.getByRole("button", { name: "Done" }).click();
   await expect(page.locator("#pm")).not.toHaveAttribute("aria-hidden", "true");
   await expect(page.locator("#rn")).toHaveText("3");
   await page.keyboard.press("1");
@@ -163,6 +170,7 @@ test("feedback isolates gameplay keys, freezes active time, and resumes through 
   await expect(page.locator("#k")).toBeDisabled();
   await page.clock.runFor(3_300);
   await expect(page.locator("#rn")).toBeHidden();
+  await expect(page.locator("#k")).toBeEnabled();
   await page.keyboard.press("1");
   await expect(page.getByRole("radio", { name: "Lane 1" })).toHaveAttribute("aria-checked", "true");
 });

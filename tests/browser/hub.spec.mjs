@@ -68,14 +68,14 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     scrollWidth: document.documentElement.scrollWidth,
   }));
   expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
-  await expect(page.locator("[data-prototype-count]")).toHaveText("04");
+  await expect(page.locator("[data-prototype-count]")).toHaveText("05");
   await expect(page.locator("[data-prototype-count]")).toHaveAttribute(
     "aria-label",
-    "4 games",
+    "5 games",
   );
-  await expect(page.locator(".prototype-card")).toHaveCount(4);
+  await expect(page.locator(".prototype-card")).toHaveCount(5);
   const playLinks = page.getByRole("link", { name: /Play now/ });
-  await expect(playLinks).toHaveCount(4);
+  await expect(playLinks).toHaveCount(5);
   await expect(playLinks.nth(0)).toHaveAttribute(
     "href",
     "./games/before-midnight/",
@@ -92,6 +92,10 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     "href",
     "./prototypes/same-flame/",
   );
+  await expect(playLinks.nth(4)).toHaveAttribute(
+    "href",
+    "./prototypes/surface-signal/",
+  );
   await expect(
     page.getByRole("heading", { level: 3, name: "Before Midnight", exact: true }),
   ).toBeVisible();
@@ -104,6 +108,9 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   await expect(page.getByText("Latch!")).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 3, name: "Same Flame" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Surface Signal" }),
   ).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
   await expect(page.getByText("No login. No ads. Privacy-safe analytics.")).toBeVisible();

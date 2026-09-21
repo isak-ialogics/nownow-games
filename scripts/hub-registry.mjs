@@ -97,9 +97,7 @@ function renderCard(card, index) {
 
   return `        <article class="prototype-card">
           <div class="card-preview card-art--${escapeHtml(card.slug)}" aria-hidden="true">
-            <span class="preview-shape preview-shape-a"></span>
-            <span class="preview-shape preview-shape-b"></span>
-            <span class="preview-shape preview-shape-c"></span>
+            <i class="a"></i><i class="b"></i><i class="c"></i>
             <span class="preview-label">GAME / ${cardNumber}</span>
           </div>
           <div class="card-content">

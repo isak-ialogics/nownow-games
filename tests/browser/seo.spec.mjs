@@ -12,7 +12,7 @@ const pages = [
     canonical: `${origin}/`,
     title: "Original Mobile Browser Games | NowNow Games",
     description:
-      "Play four original, mobile-first browser games from NowNow Games, including Same Flame, Before Midnight, Latch!, and Safe Passage.",
+      "Play five original, mobile-first browser games from NowNow Games, including Surface Signal, Same Flame, Before Midnight, Latch!, and Safe Passage.",
     schemaTypes: ["Organization", "WebSite"],
   },
   {
@@ -45,6 +45,14 @@ const pages = [
     title: "Safe Passage | NowNow Games",
     description:
       "Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game.",
+    schemaTypes: ["VideoGame"],
+  },
+  {
+    path: "/prototypes/surface-signal/",
+    canonical: `${origin}/prototypes/surface-signal/`,
+    title: "Surface Signal | NowNow Games",
+    description:
+      "Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game.",
     schemaTypes: ["VideoGame"],
   },
 ];

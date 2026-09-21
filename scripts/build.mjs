@@ -24,6 +24,79 @@ function compactCss(source) {
     .trim()}\n`;
 }
 
+function compactJs(source) {
+  let output = "";
+  let index = 0;
+  let space = false;
+  const word = (value) => /[A-Za-z0-9_$]/.test(value ?? "");
+  while (index < source.length) {
+    let current = source[index];
+    const next = source[index + 1];
+    if (["'", '"', "`"].includes(current)) {
+      const quote = current;
+      output += current;
+      index += 1;
+      while (index < source.length) {
+        current = source[index];
+        output += current;
+        index += 1;
+        if (current.charCodeAt(0) === 92 && index < source.length) {
+          output += source[index];
+          index += 1;
+        } else if (current === quote) break;
+      }
+      space = false;
+      continue;
+    }
+    if (current === "/" && next === "/") {
+      index += 2;
+      while (index < source.length && source[index] !== "\n") index += 1;
+      space = true;
+      continue;
+    }
+    if (current === "/" && next === "*") {
+      index += 2;
+      while (
+        index < source.length - 1 &&
+        !(source[index] === "*" && source[index + 1] === "/")
+      ) index += 1;
+      index += 2;
+      space = true;
+      continue;
+    }
+    if (/\s/.test(current)) {
+      space = true;
+      index += 1;
+      continue;
+    }
+    const previous = output.at(-1);
+    if (
+      space &&
+      ((word(previous) && word(current)) ||
+        (previous === "+" && current === "+") ||
+        (previous === "-" && current === "-"))
+    ) output += " ";
+    space = false;
+    output += current;
+    index += 1;
+  }
+  return `${output.replace(/;}/g, "}")}\n`;
+}
+
+const surfaceSignalNames = Object.entries({
+  CUE_MS: "A", CHOICE_END_MS: "B", REVEAL_AT_MS: "D", ROUND_MS: "E",
+  RUN_MS: "F", SECTOR_COUNT: "G", CUES: "H", commitGuess: "I",
+  createGame: "J", createShareData: "K", phaseAt: "L", readBest: "M",
+  saveBest: "N", clearBest: "O", summarize: "P", updateGame: "Q",
+});
+
+function compactSurfaceSignalJs(source) {
+  for (const [name, compact] of surfaceSignalNames) {
+    source = source.replace(new RegExp(`\\b${name}\\b`, "g"), compact);
+  }
+  return compactJs(source);
+}
+
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
 
@@ -65,6 +138,10 @@ for (const card of cards) {
     const outputPath = resolve(destination, path);
     await writeFile(outputPath, compactCss(await readFile(outputPath, "utf8")));
   }
+}
+for (const file of ["game.js", "state.js"]) {
+  const outputPath = resolve(destination, "prototypes", "surface-signal", file);
+  await writeFile(outputPath, compactSurfaceSignalJs(await readFile(outputPath, "utf8")));
 }
 // Shared CSS ships to every game; compact it the same way per-game stylesheets
 // already are (NOW-201 needed the reclaimed headroom for the feedback control).

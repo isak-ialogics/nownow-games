@@ -23,6 +23,7 @@ const feedbackGames = [
     path: "/prototypes/same-flame/",
     heldControl: "#pulse-control",
   },
+  { name: "Surface Signal", path: "/prototypes/surface-signal/" },
 ];
 
 test.describe("Before Midnight feedback control", () => {

@@ -102,6 +102,7 @@ test("returning status is scoped to the current game's own best-score key (NOW-2
   const stored = new Map([
     ["nownow-before-midnight-best-v1", "0"],
     ["nownow-same-flame-best-v1", "88"],
+    ["nownow-surface-signal-best-v1", "5"],
   ]);
   const storage = {
     getItem: (key) => stored.get(key),
@@ -111,6 +112,7 @@ test("returning status is scoped to the current game's own best-score key (NOW-2
   };
   // Same Flame has its own positive best → returning for Same Flame.
   assert.equal(visitorType(storage, "same-flame"), "returning");
+  assert.equal(visitorType(storage, "surface-signal"), "returning");
   // A positive Same Flame best must NOT leak into a first-ever Before Midnight
   // visit (its own key is 0/absent) — this was the cross-game misclassification.
   assert.equal(visitorType(storage, "before-midnight"), "new");

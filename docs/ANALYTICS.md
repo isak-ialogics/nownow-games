@@ -12,8 +12,8 @@ events use this fixed taxonomy:
 
 `/event/{game-id}/{play-started|play-completed|share-triggered}/{new|returning}`
 
-The four game IDs are `before-midnight`, `latch`, `safe-passage`, and
-`same-flame`. Before Midnight's historical `/event/before-midnight/...` counter
+The five game IDs are `before-midnight`, `latch`, `safe-passage`, `same-flame`,
+and `surface-signal`. Before Midnight's historical `/event/before-midnight/...` counter
 keys are unchanged.
 
 - `play-started` fires after the game modules have initialized a playable game,
@@ -27,8 +27,8 @@ keys are unchanged.
   two fallback paths. Latch and Safe Passage expose a result-page share action;
   Before Midnight and Same Flame retain their existing result sharing.
 - `new` or `returning` is fixed when the page loads. `returning` means the
-  browser already has a positive gameplay best for Before Midnight or Same
-  Flame; otherwise it is `new`. This deliberately privacy-limited signal is a
+  browser already has a positive gameplay best for Before Midnight, Same
+  Flame, or Surface Signal; otherwise it is `new`. This deliberately privacy-limited signal is a
   returning-player proxy, not a unique-person count. Analytics reads existing
   gameplay progress but creates no identifier and writes no browser storage.
 

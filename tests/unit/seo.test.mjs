@@ -12,6 +12,7 @@ const cards = [
   { slug: "latch" },
   { slug: "safe-passage" },
   { slug: "same-flame" },
+  { slug: "surface-signal" },
 ];
 
 test("sitemap follows the discovered game registry", () => {
@@ -26,6 +27,7 @@ test("sitemap follows the discovered game registry", () => {
       `${PRODUCTION_ORIGIN}/prototypes/latch/`,
       `${PRODUCTION_ORIGIN}/prototypes/safe-passage/`,
       `${PRODUCTION_ORIGIN}/prototypes/same-flame/`,
+      `${PRODUCTION_ORIGIN}/prototypes/surface-signal/`,
     ],
   );
   assert.doesNotMatch(sitemap, /404\.html/);

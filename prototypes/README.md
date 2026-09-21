@@ -1,6 +1,6 @@
 # Prototype contract
 
-Each prototype is an independent static page under `prototypes/<slug>/`. The three reserved directories and card orders are:
+Each prototype is an independent static page under `prototypes/<slug>/`. The reserved directories and card orders are:
 
 | Slug | Card order |
 | --- | ---: |
@@ -8,6 +8,7 @@ Each prototype is an independent static page under `prototypes/<slug>/`. The thr
 | `latch` | 2 |
 | `safe-passage` | 3 |
 | `same-flame` | 4 |
+| `surface-signal` | 5 |
 
 ## Required files
 

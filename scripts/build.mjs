@@ -88,6 +88,7 @@ const surfaceSignalNames = Object.entries({
   RUN_MS: "F", SECTOR_COUNT: "G", CUES: "H", commitGuess: "I",
   createGame: "J", createShareData: "K", phaseAt: "L", readBest: "M",
   saveBest: "N", clearBest: "O", summarize: "P", updateGame: "Q",
+  markPlayed: "R", safeGameStorage: "S",
 });
 
 function compactSurfaceSignalJs(source) {
@@ -143,13 +144,17 @@ for (const file of ["game.js", "state.js"]) {
   const outputPath = resolve(destination, "prototypes", "surface-signal", file);
   await writeFile(outputPath, compactSurfaceSignalJs(await readFile(outputPath, "utf8")));
 }
-// Shared CSS ships to every game; compact it the same way per-game stylesheets
-// already are (NOW-201 needed the reclaimed headroom for the feedback control).
+// Shared assets ship to every game; compact text payloads after copying them.
 const sharedDir = resolve(destination, "shared");
 for (const entry of await readdir(sharedDir, { withFileTypes: true })) {
-  if (!entry.isFile() || !entry.name.endsWith(".css")) continue;
-  const cssPath = resolve(sharedDir, entry.name);
-  await writeFile(cssPath, compactCss(await readFile(cssPath, "utf8")));
+  if (!entry.isFile()) continue;
+  const path = resolve(sharedDir, entry.name);
+  if (entry.name.endsWith(".css")) {
+    await writeFile(path, compactCss(await readFile(path, "utf8")));
+  }
+  if (entry.name.endsWith(".js")) {
+    await writeFile(path, compactJs(await readFile(path, "utf8")));
+  }
 }
 
 await writeFile(resolve(destination, "robots.txt"), buildRobots());

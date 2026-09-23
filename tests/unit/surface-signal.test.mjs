@@ -12,8 +12,10 @@ import {
   confidenceAt,
   createGame,
   createShareData,
+  markPlayed,
   phaseAt,
   readBest,
+  safeGameStorage,
   saveBest,
   summarize,
   updateGame,
@@ -118,6 +120,16 @@ test("best reads persist defensively and sharing stays bounded", () => {
     correct: 0,
     early: 0,
   });
+  const target = { localStorage: storage };
+  assert.equal(safeGameStorage(target), storage);
+  assert.equal(
+    safeGameStorage({ get localStorage() { throw new Error("denied"); } }),
+    null,
+  );
+  assert.equal(markPlayed(storage), true);
+  assert.equal(values.get("nownow-surface-signal-played-v1"), "1");
+  assert.equal(markPlayed({ setItem() { throw new Error("quota"); } }), false);
+  assert.equal(markPlayed(null), false);
   assert.deepEqual(
     createShareData(
       { correct: 5, early: 3 },

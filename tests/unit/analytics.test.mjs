@@ -12,9 +12,21 @@ function pathOf(url) {
   return new URL(url, "https://nownowgames.co.za").searchParams.get("p");
 }
 
-function fixture(path, { readyState = "complete", storage = { getItem: () => "0" }, title = "Latch! | NowNow Games", href = "https://dev.invalid/ignored" } = {}) {
+function fixture(
+  path,
+  {
+    readyState = "complete",
+    storage = { getItem: () => null },
+    title = "Latch! | NowNow Games",
+    href = "https://dev.invalid/ignored",
+    explicitStart = false,
+  } = {},
+) {
   const listeners = new Map();
-  const view = { hidden: false };
+  const view = {
+    hidden: false,
+    hasAttribute: (name) => explicitStart && name === "data-explicit-start",
+  };
   const result = { hidden: true };
   const button = (selector) => ({
     addEventListener(type, callback) {
@@ -97,43 +109,40 @@ test("analytics URLs contain only aggregate, non-identifying fields", () => {
   }
 });
 
-test("returning status is scoped to the current game's own best-score key (NOW-221)", () => {
+test("returning status uses only durable state for the current game", () => {
   let writes = 0;
   const stored = new Map([
     ["nownow-before-midnight-best-v1", "0"],
     ["nownow-same-flame-best-v1", "88"],
-    ["nownow-surface-signal-best-v1", "5"],
+    ["nownow-surface-signal-played-v1", "1"],
   ]);
   const storage = {
-    getItem: (key) => stored.get(key),
-    setItem() {
-      writes += 1;
-    },
+    getItem: (key) => stored.get(key) ?? null,
+    setItem() { writes += 1; },
   };
-  // Same Flame has its own positive best → returning for Same Flame.
+
+  assert.equal(visitorType(storage, "before-midnight"), "returning");
   assert.equal(visitorType(storage, "same-flame"), "returning");
   assert.equal(visitorType(storage, "surface-signal"), "returning");
-  // A positive Same Flame best must NOT leak into a first-ever Before Midnight
-  // visit (its own key is 0/absent) — this was the cross-game misclassification.
-  assert.equal(visitorType(storage, "before-midnight"), "new");
-  assert.equal(writes, 0);
-  // Games without a persistent best-score key are intentionally always "new".
   assert.equal(visitorType(storage, "latch"), "new");
   assert.equal(visitorType(storage, "safe-passage"), "new");
   assert.equal(visitorType(storage, undefined), "new");
-  // Same-game returning still works when only that game's own best is set.
-  const bmStored = { getItem: (key) => (key === "nownow-before-midnight-best-v1" ? "12.5" : "0") };
-  assert.equal(visitorType(bmStored, "before-midnight"), "returning");
-  // Non-positive / non-numeric / throwing storage all fall back to "new".
-  assert.equal(visitorType({ getItem: () => "0" }, "same-flame"), "new");
+  assert.equal(writes, 0);
+
+  assert.equal(visitorType({ getItem: () => null }, "same-flame"), "new");
   assert.equal(visitorType({ getItem: () => "not-a-score" }, "same-flame"), "new");
-  assert.equal(visitorType({ getItem: () => { throw new Error("blocked storage"); } }, "same-flame"), "new");
+  assert.equal(
+    visitorType({ getItem: () => { throw new Error("blocked storage"); } }, "same-flame"),
+    "new",
+  );
 });
 
-test("real lifecycle hooks keep historical paths and deduplicate each run", (t) => {
+test("legacy game lifecycle hooks keep historical paths and deduplicate each run", (t) => {
   const { mutate, requests } = stubTransport(t);
   const page = fixture("/games/before-midnight/", {
-    storage: { getItem: (key) => key === "nownow-before-midnight-best-v1" ? "12.5" : "0" },
+    storage: {
+      getItem: (key) => key === "nownow-before-midnight-best-v1" ? "12.5" : null,
+    },
     title: "Before Midnight | NowNow Games",
   });
   initAnalytics(page.document, page.window);
@@ -162,7 +171,85 @@ test("real lifecycle hooks keep historical paths and deduplicate each run", (t) 
   }
 });
 
-test("synthetic QA uses a fixed separate audience and waits for an initialized game", (t) => {
+test("legacy games retain their page-load visitor class across retry", (t) => {
+  const { mutate, requests } = stubTransport(t);
+  const page = fixture("/prototypes/latch/");
+  initAnalytics(page.document, page.window);
+  page.result.hidden = false;
+  mutate();
+  page.fire("#retry:click");
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/prototypes/latch/",
+    "/event/latch/play-started/new",
+    "/event/latch/play-completed/new",
+    "/event/latch/play-started/new",
+  ]);
+});
+
+test("explicit lifecycle stays paused and bounds every funnel event per run", (t) => {
+  const { requests } = stubTransport(t);
+  const page = fixture("/prototypes/surface-signal/", {
+    explicitStart: true,
+    readyState: "interactive",
+    title: "Surface Signal | NowNow Games",
+  });
+  initAnalytics(page.document, page.window);
+  page.fire("document:DOMContentLoaded");
+
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/prototypes/surface-signal/",
+  ]);
+  assert.equal(trackGameEvent("surface-signal", "first-input", page.document), false);
+  assert.equal(trackGameEvent("surface-signal", "play-completed", page.document), false);
+  assert.equal(trackGameEvent("surface-signal", "play-started", page.document), true);
+  assert.equal(trackGameEvent("surface-signal", "play-started", page.document), false);
+
+  for (const action of [
+    "first-input",
+    "round-2-reached",
+    "round-4-reached",
+    "round-6-reached",
+  ]) {
+    assert.equal(trackGameEvent("surface-signal", action, page.document), true);
+    assert.equal(trackGameEvent("surface-signal", action, page.document), false);
+  }
+  assert.equal(trackGameEvent("surface-signal", "play-completed", page.document), true);
+  assert.equal(trackGameEvent("surface-signal", "play-completed", page.document), false);
+  assert.equal(trackGameEvent("surface-signal", "play-started", page.document), true);
+
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/prototypes/surface-signal/",
+    "/event/surface-signal/play-started/new",
+    "/event/surface-signal/first-input/new",
+    "/event/surface-signal/round-2-reached/new",
+    "/event/surface-signal/round-4-reached/new",
+    "/event/surface-signal/round-6-reached/new",
+    "/event/surface-signal/play-completed/new",
+    "/event/surface-signal/play-started/returning",
+  ]);
+});
+
+test("throwing localStorage cannot stop lifecycle telemetry", (t) => {
+  const { requests } = stubTransport(t);
+  const page = fixture("/prototypes/surface-signal/", {
+    explicitStart: true,
+    title: "Surface Signal | NowNow Games",
+  });
+  Object.defineProperty(page.window, "localStorage", {
+    configurable: true,
+    get() { throw new Error("storage denied"); },
+  });
+  assert.doesNotThrow(() => initAnalytics(page.document, page.window));
+  assert.equal(trackGameEvent("surface-signal", "play-started", page.document), true);
+  assert.equal(trackGameEvent("surface-signal", "play-completed", page.document), true);
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/prototypes/surface-signal/",
+    "/event/surface-signal/play-started/new",
+    "/event/surface-signal/play-completed/new",
+  ]);
+});
+
+test("synthetic QA uses a fixed separate audience and waits for an initialized legacy game", (t) => {
   const { requests } = stubTransport(t);
   const page = fixture("/prototypes/safe-passage/", {
     href: "https://dev.invalid/prototypes/safe-passage/?nng_audience=synthetic-qa&name=private",

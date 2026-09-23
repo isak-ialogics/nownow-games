@@ -18,6 +18,7 @@ import {
 const runtimeIdentity = IMAGE_NAME + ":prod@" + PREVIOUS_PROD_DIGEST;
 
 function workflowJob(source, jobName) {
+  source = source.replace(/\r\n/gu, '\n');
   const lines = source.split("\n");
   const start = lines.findIndex((line) => line === `  ${jobName}:`);
   assert.notEqual(start, -1, `workflow job ${jobName} must exist`);

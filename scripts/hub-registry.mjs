@@ -27,10 +27,22 @@ function assertCard(card, slug) {
     throw new Error(`Prototype directory has an invalid slug: ${slug}`);
   }
 
-  for (const field of ["title", "kicker", "description"]) {
+  for (const field of [
+    "title",
+    "kicker",
+    "description",
+    "pageTitle",
+    "pageDescription",
+    "socialImage",
+    "socialImageAlt",
+  ]) {
     if (typeof card[field] !== "string" || card[field].trim() === "") {
       throw new Error(`${slug}/card.json requires a non-empty ${field}.`);
     }
+  }
+
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*\.png$/.test(card.socialImage)) {
+    throw new Error(`${slug}/card.json has an invalid socialImage.`);
   }
 
   if (!Number.isInteger(card.order) || card.order < 1) {

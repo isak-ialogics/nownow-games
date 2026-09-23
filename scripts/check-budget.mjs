@@ -9,7 +9,9 @@ const root = resolve(
 );
 const limits = Object.freeze({
   prototype: Object.freeze({
-    total: 20 * KIBIBYTE,
+    // NOW-249 adds complete social metadata plus retry-adjacent discovery
+    // markup. The shipped Brotli wire ceiling below remains unchanged.
+    total: 21 * KIBIBYTE,
     // Raised 8 -> 8.5 KiB for NOW-201: Before Midnight's own pause/resume
     // hook for the shared feedback dialog needed a little more room than the
     // other two games' event listeners.
@@ -35,7 +37,10 @@ const limits = Object.freeze({
     total: 24 * KIBIBYTE,
     javascript: 14 * KIBIBYTE,
   }),
-  hub: Object.freeze({ total: 7 * KIBIBYTE }),
+  hub: Object.freeze({
+    // NOW-249 gives the hub its own truthful social image contract.
+    total: 7.5 * KIBIBYTE,
+  }),
 });
 
 async function collect(directory) {

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { expectResultDiscovery } from "./result-discovery.mjs";
 
 const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 import { mkdir } from "node:fs/promises";
@@ -104,6 +105,11 @@ test("touch, mouse, number key, focus activation, results, and retry work", asyn
 
   const result = page.locator("#result-card");
   await expect(result).toBeVisible({ timeout: 10000 });
+  await expectResultDiscovery(page, result, {
+    crossGameName: "One Lucky Bloom",
+    crossGamePath: "/games/one-lucky-bloom/",
+    retryName: "Retry Latch!",
+  });
   await expect(page.locator("#final-hits")).toHaveText("4");
   await expect(page.locator("#final-false")).toHaveText("1");
   await expect(result).toContainText(/keep your distance/i);

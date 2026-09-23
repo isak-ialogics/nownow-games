@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { expectResultDiscovery } from "./result-discovery.mjs";
 
 const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 const evidenceDir = process.env.EVIDENCE_DIR;
@@ -157,6 +158,11 @@ test("six scored rounds emit the bounded funnel once, complete, persist, and sha
   }
 
   await expect(page.locator("#result-card")).toBeVisible();
+  await expectResultDiscovery(page, page.locator("#result-card"), {
+    crossGameName: "One Lucky Bloom",
+    crossGamePath: "/games/one-lucky-bloom/",
+    retryName: "Watch another six",
+  });
   await expect(page.locator("#final-correct")).toHaveText("6/6");
   await expect(page.locator("#final-early")).toHaveText("6");
   const browserScore = Number(await page.locator("#final-score").textContent());

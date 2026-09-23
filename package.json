@@ -6,6 +6,7 @@
   "description": "Static, mobile-first NowNow Games prototype harness",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "assets:social": "npm run build && node scripts/capture-social.mjs",
     "budget": "node scripts/check-budget.mjs",
     "check": "node scripts/check-static.mjs",
     "serve:dist": "node server/app.mjs",

@@ -27,7 +27,7 @@
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Before Midnight timing game artwork from NowNow Games"
+      content="Before Midnight timing game artwork with a fictional rand cap"
     />
     <meta
       property="og:url"
@@ -39,6 +39,9 @@
       name="twitter:description"
       content="Hold, release, and stop under the fictional cap across seven fast rounds in Before Midnight, an original browser game."
     />
+    <meta name="twitter:url" content="https://nownowgames.co.za/games/before-midnight/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/before-midnight-share.png" />
+    <meta name="twitter:image:alt" content="Before Midnight timing game artwork with a fictional rand cap" />
     <meta name="theme-color" content="#111515" />
     <link
       rel="canonical"
@@ -81,9 +84,10 @@
       <section class="title-block" aria-labelledby="game-title">
         <p class="kicker">Seven fills. One exacting cap.</p>
         <h1 id="game-title">Before <br />Midnight</h1>
-        <p class="fiction">
-          Fictional arcade values. This is not a price calculator.
+        <p class="fiction" data-page-description>
+          Hold, release, and stop under the fictional cap across seven fast rounds in Before Midnight, an original browser game.
         </p>
+        <p class="fiction">Fictional arcade values. This is not a price calculator.</p>
       </section>
 
       <section id="game-panel" class="game-panel" aria-label="Game">
@@ -141,6 +145,7 @@
         id="result-card"
         class="result-card"
         aria-labelledby="result-title"
+        data-result-screen
         tabindex="-1"
         hidden
       >
@@ -164,13 +169,12 @@
           role="status"
           aria-live="polite"
         ></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../../prototypes/surface-signal/">Play Surface Signal</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
       </section>
-
-      <nav class="more-games" aria-label="More NowNow Games">
-        <p>More original browser games</p>
-        <a href="../../prototypes/latch/">Play Latch!</a>
-        <a href="../../prototypes/safe-passage/">Play Safe Passage</a>
-      </nav>
     </main>
 
     <script type="module" src="../../shared/analytics.js"></script>

@@ -64,6 +64,36 @@ const pages = [
     schemaTypes: ["VideoGame"],
   },
 ];
+const social = new Map([
+  ["/", {
+    image: `${origin}/assets/hub-share.png`,
+    alt: "NowNow Games home page showing six original browser games",
+  }],
+  ["/games/before-midnight/", {
+    image: `${origin}/assets/before-midnight-share.png`,
+    alt: "Before Midnight timing game artwork with a fictional rand cap",
+  }],
+  ["/prototypes/latch/", {
+    image: `${origin}/assets/latch-share.png`,
+    alt: "Latch! door-defence game with four illustrated doors",
+  }],
+  ["/prototypes/same-flame/", {
+    image: `${origin}/assets/same-flame-share.png`,
+    alt: "Same Flame rhythm game with two stylised fires",
+  }],
+  ["/prototypes/safe-passage/", {
+    image: `${origin}/assets/safe-passage-share.png`,
+    alt: "Safe Passage game with two abstract craft inside a green safety corridor",
+  }],
+  ["/prototypes/surface-signal/", {
+    image: `${origin}/assets/surface-signal-share.png`,
+    alt: "Surface Signal shore-view game with five abstract observation sectors",
+  }],
+  ["/games/one-lucky-bloom/", {
+    image: `${origin}/assets/one-lucky-bloom-share.png`,
+    alt: "One Lucky Bloom canopy game with five blossom landing lanes",
+  }],
+]);
 
 function schemaTypes(value) {
   const nodes = Array.isArray(value?.["@graph"]) ? value["@graph"] : [value];
@@ -77,11 +107,24 @@ test("every public page has unique truthful metadata and structured data", async
 }) => {
   const titles = new Set();
   const descriptions = new Set();
+  const visibleDescriptions = new Set();
+  const socialImages = new Set();
+  const runtimeErrors = [];
+  page.on("pageerror", (error) => runtimeErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") runtimeErrors.push(message.text());
+  });
 
   for (const expected of pages) {
+    runtimeErrors.length = 0;
     const response = await page.goto(expected.path);
+    const socialExpected = social.get(expected.path);
     expect(response?.status(), expected.path).toBe(200);
+    expect(socialExpected, expected.path).toBeDefined();
     expect(await page.title()).toBe(expected.title);
+    await expect(page.locator("[data-page-description]")).toContainText(
+      expected.description,
+    );
     await expect(page.locator('meta[name="description"]')).toHaveAttribute(
       "content",
       expected.description,
@@ -90,29 +133,35 @@ test("every public page has unique truthful metadata and structured data", async
       "href",
       expected.canonical,
     );
-    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-      "content",
-      expected.title,
-    );
-    await expect(
-      page.locator('meta[property="og:description"]'),
-    ).toHaveAttribute("content", expected.description);
-    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
-      "content",
-      expected.canonical,
-    );
-    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute(
-      "content",
-      "website",
-    );
-    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
-      "content",
-      /summary/,
-    );
+
+    for (const [selector, content] of [
+      ['meta[property="og:title"]', expected.title],
+      ['meta[property="og:description"]', expected.description],
+      ['meta[property="og:url"]', expected.canonical],
+      ['meta[property="og:type"]', "website"],
+      ['meta[property="og:image"]', socialExpected.image],
+      ['meta[property="og:image:width"]', "1200"],
+      ['meta[property="og:image:height"]', "630"],
+      ['meta[property="og:image:alt"]', socialExpected.alt],
+      ['meta[name="twitter:card"]', "summary_large_image"],
+      ['meta[name="twitter:title"]', expected.title],
+      ['meta[name="twitter:description"]', expected.description],
+      ['meta[name="twitter:url"]', expected.canonical],
+      ['meta[name="twitter:image"]', socialExpected.image],
+      ['meta[name="twitter:image:alt"]', socialExpected.alt],
+    ]) {
+      await expect(page.locator(selector)).toHaveAttribute("content", content);
+    }
+
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
     expect(await page.locator('script[type="application/ld+json"]').count()).toBe(
       1,
     );
+    const socialResponse = await page.context().request.get(
+      new URL(socialExpected.image).pathname,
+    );
+    expect(socialResponse.status(), socialExpected.image).toBe(200);
+    expect(socialResponse.headers()["content-type"]).toContain("image/png");
 
     const structuredData = await page
       .locator('script[type="application/ld+json"]')
@@ -136,9 +185,9 @@ test("every public page has unique truthful metadata and structured data", async
       expect(structuredData.gamePlatform).toBe("Web browser");
       expect(structuredData.playMode).toBe("SinglePlayer");
       expect(structuredData.isAccessibleForFree).toBe(true);
-      await expect(
-        page.getByRole("navigation", { name: "More NowNow Games" }),
-      ).toBeVisible();
+      expect(
+        await page.locator('nav[aria-label="More NowNow Games"]').count(),
+      ).toBeGreaterThanOrEqual(1);
     }
 
     for (const image of await page.locator("img").all()) {
@@ -149,10 +198,15 @@ test("every public page has unique truthful metadata and structured data", async
 
     titles.add(expected.title);
     descriptions.add(expected.description);
+    visibleDescriptions.add(expected.description);
+    socialImages.add(socialExpected.image);
+    expect(runtimeErrors, expected.path).toEqual([]);
   }
 
   expect(titles.size).toBe(pages.length);
   expect(descriptions.size).toBe(pages.length);
+  expect(visibleDescriptions.size).toBe(pages.length);
+  expect(socialImages.size).toBe(pages.length);
 });
 
 test("crawl files enumerate public pages without blocking bots", async ({

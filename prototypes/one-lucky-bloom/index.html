@@ -7,10 +7,17 @@
     <meta property="og:title" content="One Lucky Bloom | NowNow Games" />
     <meta property="og:description" content="Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game." />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nownowgames.co.za/assets/one-lucky-bloom-share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="One Lucky Bloom canopy game with five blossom landing lanes" />
     <meta property="og:url" content="https://nownowgames.co.za/games/one-lucky-bloom/" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="One Lucky Bloom | NowNow Games" />
     <meta name="twitter:description" content="Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game." />
+    <meta name="twitter:url" content="https://nownowgames.co.za/games/one-lucky-bloom/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/one-lucky-bloom-share.png" />
+    <meta name="twitter:image:alt" content="One Lucky Bloom canopy game with five blossom landing lanes" />
     <meta name="theme-color" content="#21172b" />
     <link rel="canonical" href="https://nownowgames.co.za/games/one-lucky-bloom/" />
     <title>One Lucky Bloom | NowNow Games</title>
@@ -30,7 +37,7 @@
       <section class="title-block">
         <p class="kicker">A tiny spring prediction game</p>
         <h1 id="game-title">One Lucky<br />Bloom</h1>
-        <p class="deck">Read the branches. Watch the wind. Lock in one landing lane.</p>
+        <p class="deck" data-page-description>Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game.</p>
       </section>
 
       <div class="settings">
@@ -83,7 +90,7 @@
         <p id="instructions" class="instructions">Tap a lane, then Lock. Keyboard: <kbd>1</kbd>–<kbd>5</kbd>, <kbd>←</kbd> <kbd>→</kbd>, <kbd>Home</kbd>/<kbd>End</kbd>, then <kbd>Tab</kbd> to Lock and press <kbd>Space</kbd> or <kbd>Enter</kbd>.</p>
       </section>
 
-      <section id="result-card" class="card result" aria-labelledby="result-title" hidden>
+      <section id="result-card" class="card result" aria-labelledby="result-title" data-result-screen hidden>
         <p class="kicker">Your luck ledger</p>
         <h2 id="result-title">Still reading the branches</h2>
         <p class="total"><strong id="final-score">0 / 600</strong><span id="final-catches">0 of 6 blossoms found your lane.</span></p>
@@ -92,15 +99,13 @@
         <button id="retry" class="primary" type="button">Play again</button>
         <button id="share-result" class="action" type="button">Share ledger</button>
         <button id="copy-challenge" class="action" type="button" hidden>Copy challenge</button>
-        <a class="action link" href="../../">Back to games</a>
         <p id="share-status" class="notice" role="status" aria-live="polite"></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../../prototypes/surface-signal/">Play Surface Signal</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
       </section>
-
-      <nav class="more-games" aria-label="More NowNow Games">
-        <p>More original browser games</p>
-        <a href="../../prototypes/surface-signal/">Play Surface Signal</a>
-        <a href="../../games/before-midnight/">Play Before Midnight</a>
-      </nav>
     </main>
     <script type="module" src="../../shared/analytics.js"></script>
     <script type="module" src="../../shared/feedback.js"></script>

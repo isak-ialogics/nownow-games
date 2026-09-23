@@ -7,10 +7,17 @@
     <meta property="og:title" content="Surface Signal | NowNow Games" />
     <meta property="og:description" content="Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game." />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nownowgames.co.za/assets/surface-signal-share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Surface Signal shore-view game with five abstract observation sectors" />
     <meta property="og:url" content="https://nownowgames.co.za/prototypes/surface-signal/" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Surface Signal | NowNow Games" />
     <meta name="twitter:description" content="Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game." />
+    <meta name="twitter:url" content="https://nownowgames.co.za/prototypes/surface-signal/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/surface-signal-share.png" />
+    <meta name="twitter:image:alt" content="Surface Signal shore-view game with five abstract observation sectors" />
     <meta name="theme-color" content="#071d2b" />
     <link rel="canonical" href="https://nownowgames.co.za/prototypes/surface-signal/" />
     <title>Surface Signal | NowNow Games</title>
@@ -42,7 +49,7 @@
       <section class="title-block" aria-labelledby="game-title">
         <p class="kicker">Watch from shore</p>
         <h1 id="game-title">Surface<br />Signal</h1>
-        <p class="intro">Read the brief blow and wake. Call where the next abstract arc will surface.</p>
+        <p class="intro" data-page-description>Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game.</p>
       </section>
 
       <section id="launch-card" class="launch-card" aria-labelledby="launch-title">
@@ -114,7 +121,7 @@
         <p id="pause-note" class="pause-note" role="status" hidden>Paused &middot; return when you are ready.</p>
       </section>
 
-      <section id="result-card" class="result-card" tabindex="-1" aria-labelledby="result-title" hidden>
+      <section id="result-card" class="result-card" tabindex="-1" aria-labelledby="result-title" data-result-screen hidden>
         <p class="kicker">Your horizon trace</p>
         <h2 id="result-title">Signals read.</h2>
         <p>Each mark shows your call and the revealed sector.</p>
@@ -129,13 +136,12 @@
         <button id="retry" class="action" type="button">Watch another six</button>
         <button id="reset-best" class="action" type="button">Reset saved best</button>
         <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../../games/one-lucky-bloom/">Play One Lucky Bloom</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
       </section>
-
-      <nav class="more-games" aria-label="More NowNow Games">
-        <p>More original browser games</p>
-        <a href="../../games/before-midnight/">Play Before Midnight</a>
-        <a href="../same-flame/">Play Same Flame</a>
-      </nav>
     </main>
 
     <script type="module" src="../../shared/analytics.js"></script>

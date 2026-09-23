@@ -2,8 +2,8 @@ name: Promote approved OCI manifest to PROD
 
 # Manual only: this workflow retags an already accepted immutable manifest.
 # It never checks out an application ref for a rebuild and never runs on a
-# branch event. Keep execute=false for preflight; execute=true is restricted to
-# main and still requires release approval plus an authorised owner.
+# branch event. The entire secret-bearing job is restricted to main. Keep
+# execute=false for preflight; execute=true still requires release approval.
 
 on:
   workflow_dispatch:
@@ -39,7 +39,7 @@ concurrency:
 
 jobs:
   promote:
-    if: github.ref == 'refs/heads/main' || inputs.execute == false
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

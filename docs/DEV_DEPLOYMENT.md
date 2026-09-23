@@ -66,8 +66,12 @@ private GHCR package is user-owned and has no linked repository, so the
 repository-scoped `GITHUB_TOKEN` used by the first preflight could authenticate
 but failed closed with `permission_denied: read_package`. Reusing the existing
 publisher authority is the narrow correction: it adds no credential and changes
-no runtime authority. A correction branch may run `execute=false` to prove read
-access without mutation, while `execute=true` remains restricted to `main`.
+no runtime authority. The entire secret-bearing job remains restricted to
+`main`: review correction branches with static and focused tests, merge only
+after independent QA, and then run `execute=false` from merged `main` to prove
+read access without mutation. Never inject the write-capable secret into
+branch-controlled workflow code. `execute=true` remains a separately approved
+manual action.
 The checked-in fixture receipt is
 [`evidence/now-255/promotion-fixture-receipt.json`](./evidence/now-255/promotion-fixture-receipt.json).
 

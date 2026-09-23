@@ -199,8 +199,9 @@ test("promotion tooling contains no image build path", async () => {
   assert.match(workflow, /workflow_dispatch:/u);
   assert.match(
     workflow,
-    /github\.ref == 'refs\/heads\/main' \|\| inputs\.execute == false/u,
+    /^\s*if: github\.ref == 'refs\/heads\/main'\s*$/mu,
   );
+  assert.doesNotMatch(workflow, /\|\|\s*inputs\.execute/u);
   assert.match(workflow, /username: isak-ialogics/u);
   assert.match(workflow, /secrets\.IAL_GHCR_TOKEN/u);
   assert.doesNotMatch(workflow, /secrets\.GITHUB_TOKEN/u);

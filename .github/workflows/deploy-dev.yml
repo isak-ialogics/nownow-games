@@ -1,8 +1,8 @@
 name: Publish DEV image
 
-# NowNow builds the DEV container and publishes it to GHCR only.
-# IAL DevOps automation watches this GHCR package and performs the actual
-# deployment to nownow.dev.mplace.co.za. NowNow does not run the deploy step.
+# A green `main` verification publishes the DEV container to GHCR. The existing
+# environment automation watches that package and deploys it to
+# nownow.dev.mplace.co.za; routine releases require no infrastructure handoff.
 
 on:
   workflow_run:
@@ -98,5 +98,5 @@ jobs:
             echo "- Moving: \`$IMAGE_NAME:dev\`"
             echo "- Digest: \`$DIGEST\`"
             echo ""
-            echo "IAL DevOps automation deploys this image to https://nownow.dev.mplace.co.za."
+            echo "Existing automation deploys this image to https://nownow.dev.mplace.co.za."
           } >> "$GITHUB_STEP_SUMMARY"

@@ -1,11 +1,57 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
+
 test("game hub is responsive, accessible, and has no retired route", async ({
+  context,
   page,
 }) => {
+  await context.addCookies([
+    {
+      name: "should-not-leave-browser",
+      value: "private",
+      url: localOrigin,
+    },
+  ]);
+  const analyticsRequests = [];
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (url.pathname === "/analytics/count") {
+      analyticsRequests.push({ headers: request.headers(), url });
+    }
+  });
   const response = await page.goto("/");
   expect(response?.ok()).toBe(true);
+  await expect.poll(() => analyticsRequests.length).toBeGreaterThan(0);
+  const pageview = analyticsRequests.find(
+    ({ url }) => url.searchParams.get("p") === "/",
+  );
+  expect(pageview).toBeTruthy();
+  expect([...pageview.url.searchParams.keys()].sort()).toEqual(["p", "rnd", "t"]);
+  expect(pageview.headers.cookie).toBeUndefined();
+  expect(pageview.headers.referer).toBeFalsy();
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://nownowgames.co.za/",
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    "https://nownowgames.co.za/",
+  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://nownowgames.co.za/assets/hub-share.png",
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+  const shareImage = await page.request.get(
+    "/assets/hub-share.png",
+  );
+  expect(shareImage.ok()).toBe(true);
+  expect(shareImage.headers()["content-type"]).toBe("image/png");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     /Small game\.\s*Big nerve\.\s*Play Before Midnight\./,
   );
@@ -16,23 +62,23 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   await expect(launchNote).toContainText("Share your best time.");
   await expect(
     launchNote.getByRole("link", { name: "Play Before Midnight" }),
-  ).toHaveAttribute("href", "./prototypes/before-midnight/");
+  ).toHaveAttribute("href", "./games/before-midnight/");
   const viewport = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }));
   expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
-  await expect(page.locator("[data-prototype-count]")).toHaveText("03");
+  await expect(page.locator("[data-prototype-count]")).toHaveText("06");
   await expect(page.locator("[data-prototype-count]")).toHaveAttribute(
     "aria-label",
-    "3 games",
+    "6 games",
   );
-  await expect(page.locator(".prototype-card")).toHaveCount(3);
+  await expect(page.locator(".prototype-card")).toHaveCount(6);
   const playLinks = page.getByRole("link", { name: /Play now/ });
-  await expect(playLinks).toHaveCount(3);
+  await expect(playLinks).toHaveCount(6);
   await expect(playLinks.nth(0)).toHaveAttribute(
     "href",
-    "./prototypes/before-midnight/",
+    "./games/before-midnight/",
   );
   await expect(playLinks.nth(1)).toHaveAttribute(
     "href",
@@ -42,6 +88,18 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     "href",
     "./prototypes/safe-passage/",
   );
+  await expect(playLinks.nth(3)).toHaveAttribute(
+    "href",
+    "./prototypes/same-flame/",
+  );
+  await expect(playLinks.nth(4)).toHaveAttribute(
+    "href",
+    "./prototypes/surface-signal/",
+  );
+  await expect(playLinks.nth(5)).toHaveAttribute(
+    "href",
+    "./games/one-lucky-bloom/",
+  );
   await expect(
     page.getByRole("heading", { level: 3, name: "Before Midnight", exact: true }),
   ).toBeVisible();
@@ -50,9 +108,23 @@ test("game hub is responsive, accessible, and has no retired route", async ({
       "Hold, release, and outsmart the coast. Can you stop just under the rand cap?",
     ),
   ).toBeVisible();
-  await expect(page.getByText("Safe Passage")).toBeVisible();
-  await expect(page.getByText("Latch!")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Safe Passage" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Latch!" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Same Flame" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Surface Signal" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "One Lucky Bloom" }),
+  ).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
+  await expect(page.getByText("No login. No ads. Privacy-safe analytics.")).toBeVisible();
 
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to games" })).toBeFocused();

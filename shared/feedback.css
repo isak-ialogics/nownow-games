@@ -1,0 +1,143 @@
+/* NOW-201: a fixed-palette dialog so the control looks and reads the same
+   across every game, regardless of each game's own theme. */
+
+.feedback-trigger {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  margin-left: auto;
+  color: #f5f4ef;
+  background: #2a2f2c;
+  border: 1px solid #4b5550;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.feedback-trigger:hover,
+.feedback-trigger:focus-visible {
+  background: #384039;
+  outline: 3px solid #c8ff3d88;
+  outline-offset: 2px;
+}
+
+.feedback-dialog {
+  box-sizing: border-box;
+  width: min(92vw, 26rem);
+  padding: 1.4rem;
+  color: #f5f4ef;
+  background: #14171a;
+  border: 1px solid #3a423d;
+  border-radius: 1rem;
+}
+
+.feedback-dialog::backdrop {
+  background: rgb(6 8 7 / 72%);
+}
+
+.feedback-form h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.feedback-note {
+  margin: 0 0 1rem;
+  color: #a7aaa6;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.feedback-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.feedback-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 0.85rem;
+  color: inherit;
+  background: #0d0f11;
+  border: 1px solid #3a423d;
+  border-radius: 0.6rem;
+  font: inherit;
+  resize: vertical;
+}
+
+.feedback-tech {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.feedback-tech input {
+  margin-top: 0.2rem;
+}
+
+#feedback-status {
+  min-height: 1.2rem;
+  margin: 0 0 0.85rem;
+  color: #c8ff3d;
+  font-size: 0.8rem;
+}
+
+.feedback-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.feedback-actions button {
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#feedback-cancel {
+  color: #f5f4ef;
+  background: transparent;
+  border: 1px solid #4b5550;
+}
+
+#feedback-send {
+  color: #101211;
+  background: #c8ff3d;
+}
+
+#feedback-send:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.feedback-actions button:focus-visible {
+  outline: 3px solid #7ed7ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 26rem) {
+  .feedback-dialog {
+    padding: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback-dialog,
+  .feedback-dialog::backdrop {
+    transition: none !important;
+  }
+}

@@ -23,6 +23,9 @@ export function actionForKey(key) {
   return KEY_ACTIONS[key] ?? null;
 }
 
+export const isEditableTarget = (target) =>
+  Boolean(target?.isContentEditable || target?.matches?.("input,textarea,select"));
+
 export function relativePoint(surface, event) {
   const bounds = surface.getBoundingClientRect();
   const width = Math.max(1, bounds.width);
@@ -59,7 +62,7 @@ export function createInputController(
 
   const onKeyDown = (event) => {
     const action = actionForKey(event.key);
-    if (!action) return;
+    if (!action || isEditableTarget(event.target)) return;
 
     event.preventDefault();
     pressedKeys.add(event.key);
@@ -73,6 +76,10 @@ export function createInputController(
   const onKeyUp = (event) => {
     const action = actionForKey(event.key);
     if (!action) return;
+    if (isEditableTarget(event.target)) {
+      if (pressedKeys.has(event.key)) resetActiveInput("editing");
+      return;
+    }
 
     event.preventDefault();
     pressedKeys.delete(event.key);
@@ -167,11 +174,14 @@ export function createInputController(
   const onPointerUp = (event) => finishPointer(event, "end");
   const onPointerCancel = (event) => finishPointer(event, "cancel");
   const onBlur = () => resetActiveInput("blur");
+  // iOS fires contextmenu on long-press; suppress the system share/copy sheet.
+  const onContextMenu = (event) => event.preventDefault();
 
   surface.addEventListener("pointerdown", onPointerDown);
   surface.addEventListener("pointermove", onPointerMove);
   surface.addEventListener("pointerup", onPointerUp);
   surface.addEventListener("pointercancel", onPointerCancel);
+  surface.addEventListener("contextmenu", onContextMenu);
   keyboardTarget.addEventListener("keydown", onKeyDown);
   keyboardTarget.addEventListener("keyup", onKeyUp);
   keyboardTarget.addEventListener("blur", onBlur);
@@ -183,6 +193,7 @@ export function createInputController(
       surface.removeEventListener("pointermove", onPointerMove);
       surface.removeEventListener("pointerup", onPointerUp);
       surface.removeEventListener("pointercancel", onPointerCancel);
+      surface.removeEventListener("contextmenu", onContextMenu);
       keyboardTarget.removeEventListener("keydown", onKeyDown);
       keyboardTarget.removeEventListener("keyup", onKeyUp);
       keyboardTarget.removeEventListener("blur", onBlur);

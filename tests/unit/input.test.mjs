@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   actionForKey,
   createInputController,
+  isEditableTarget,
   relativePoint,
 } from "../../shared/input.js";
 
@@ -35,6 +36,19 @@ test("maps both Arrow and WASD keys to deterministic actions", () => {
   assert.equal(actionForKey("W"), "up");
   assert.equal(actionForKey(" "), "activate");
   assert.equal(actionForKey("Escape"), null);
+});
+
+test("recognizes text-entry targets and inherited contenteditable regions", () => {
+  const target = (selector, isContentEditable = false) => ({
+    isContentEditable,
+    matches: (candidate) => candidate.split(",").includes(selector),
+  });
+  assert.equal(isEditableTarget(target("textarea")), true);
+  assert.equal(isEditableTarget(target("input")), true);
+  assert.equal(isEditableTarget(target("select")), true);
+  assert.equal(isEditableTarget(target("span", true)), true);
+  assert.equal(isEditableTarget(target("button")), false);
+  assert.equal(isEditableTarget(null), false);
 });
 
 test("normalizes and clamps pointer coordinates", () => {
@@ -103,4 +117,23 @@ test("emits pointer drag, keyboard, and blur recovery through one controller", (
   );
 
   controller.destroy();
+});
+
+test("contextmenu is suppressed on the surface to prevent iOS long-press system UI", () => {
+  const surface = new Surface();
+  const keyboard = new EventTarget();
+  const controller = createInputController(surface, {
+    keyboardTarget: keyboard,
+    onInput: () => {},
+  });
+
+  const cm = event("contextmenu");
+  surface.dispatchEvent(cm);
+  assert.equal(cm.defaultPrevented, true, "contextmenu should be prevented");
+
+  controller.destroy();
+  // After destroy, contextmenu should no longer be suppressed
+  const cm2 = event("contextmenu");
+  surface.dispatchEvent(cm2);
+  assert.equal(cm2.defaultPrevented, false, "contextmenu suppression removed after destroy");
 });

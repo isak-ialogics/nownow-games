@@ -34,6 +34,10 @@ test("directory cards are ordered, escaped, counted, and linked", async (t) => {
         title: "Safe <Passage>",
         kicker: "Quick & careful",
         description: "A deterministic route.",
+        pageTitle: "Safe Passage | Test",
+        pageDescription: "A deterministic route.",
+        socialImage: "safe-passage-share.png",
+        socialImageAlt: "Safe Passage fixture",
         features: ["Touch + keyboard"],
       },
     },
@@ -41,9 +45,14 @@ test("directory cards are ordered, escaped, counted, and linked", async (t) => {
       slug: "before-midnight",
       card: {
         order: 1,
+        publicPath: "games/before-midnight",
         title: "Before Midnight",
         kicker: "Beat the clock",
         description: "A deterministic dash.",
+        pageTitle: "Before Midnight | Test",
+        pageDescription: "A deterministic dash.",
+        socialImage: "before-midnight-share.png",
+        socialImageAlt: "Before Midnight fixture",
         features: ["Retry"],
       },
     },
@@ -64,10 +73,36 @@ test("directory cards are ordered, escaped, counted, and linked", async (t) => {
   const hub = populateHub(template, cards);
   assert.match(hub, /aria-label="2 games"/);
   assert.match(hub, />02<\/span/);
-  assert.match(hub, /\.\/prototypes\/before-midnight\//);
-  assert.match(hub, /GAME \/ 01/);
+  assert.match(hub, /\.\/games\/before-midnight\//);
+  assert.match(hub, /\.\/prototypes\/safe-passage\//);
   assert.match(hub, /Play now/);
   assert.match(hub, /Safe &lt;Passage&gt;/);
   assert.doesNotMatch(hub, /Safe <Passage>/);
   assert.ok(hub.indexOf("Before Midnight") < hub.indexOf("Safe &lt;Passage&gt;"));
+});
+
+test("unsafe public paths are rejected", async (t) => {
+  await mkdir(scratchRoot, { recursive: true });
+  const root = await mkdtemp(join(scratchRoot, "nownow-registry-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+
+  const directory = join(root, "before-midnight");
+  await mkdir(directory);
+  await writeFile(
+    join(directory, "card.json"),
+    JSON.stringify({
+      order: 1,
+      publicPath: "../outside",
+      title: "Before Midnight",
+      kicker: "Beat the clock",
+      description: "A deterministic dash.",
+      pageTitle: "Before Midnight | Test",
+      pageDescription: "A deterministic dash.",
+      socialImage: "before-midnight-share.png",
+      socialImageAlt: "Before Midnight fixture",
+      features: ["Retry"],
+    }),
+  );
+
+  await assert.rejects(readPrototypeCards(root), /invalid publicPath/);
 });

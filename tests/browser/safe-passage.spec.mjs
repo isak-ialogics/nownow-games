@@ -1,9 +1,19 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { expectResultDiscovery } from "./result-discovery.mjs";
+
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const evidenceDir = process.env.EVIDENCE_DIR;
+
+function eventPaths(requests) {
+  return requests
+    .map((request) => new URL(request))
+    .filter((url) => url.pathname === "/analytics/count")
+    .map((url) => url.searchParams.get("p"));
+}
 
 async function pointer(page, type, id) {
   const sky = page.locator("#sky");
@@ -24,6 +34,12 @@ async function key(page, value) {
 
 test("320px play supports pointer and keyboard parity, failure, and retry", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: async (data) => { globalThis.__sharedResult = data; },
+    });
+  });
   const requests = [];
   page.on("request", (request) => requests.push(request.url()));
   const response = await page.goto("/prototypes/safe-passage/");
@@ -68,11 +84,28 @@ test("320px play supports pointer and keyboard parity, failure, and retry", asyn
 
   const result = page.locator("#result");
   await expect(result).toBeVisible({ timeout: 3000 });
+  await expectResultDiscovery(page, result, {
+    crossGameName: "Before Midnight",
+    crossGamePath: "/games/before-midnight/",
+    retryName: "Retry passage",
+  });
   await expect(page.locator("#result-title")).toHaveText("Roofline crossed");
   await expect(page.locator("#announcement")).toContainText("Roofline breaches: 1");
-  await expect(page.locator("#result button")).toHaveCount(1);
+  await expect(page.locator("#result button")).toHaveCount(2);
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/safe-passage/play-completed/new").length).toBe(1);
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
-  expect(requests.every((url) => url.startsWith("http://127.0.0.1:4173/"))).toBe(true);
+  await page.getByRole("button", { name: "Share game link" }).click();
+  await expect(page.locator("#share-status")).toHaveText("Shared.");
+  const finalScore = await page.locator("#final-score").textContent();
+  expect(await page.evaluate(() => globalThis.__sharedResult)).toEqual({
+    title: "Safe Passage",
+    text: `I got ${finalScore} in Safe Passage. Fly the corridor:`,
+    url: "https://nownowgames.co.za/prototypes/safe-passage/",
+  });
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/safe-passage/share-triggered/new").length).toBe(1);
+  expect(requests.every((url) => url.startsWith(`${localOrigin}/`))).toBe(true);
 
   const resultAccessibility = await new AxeBuilder({ page }).analyze();
   expect(resultAccessibility.violations).toEqual([]);
@@ -81,10 +114,14 @@ test("320px play supports pointer and keyboard parity, failure, and retry", asyn
     await page.screenshot({ path: join(evidenceDir, "safe-passage-result-mobile.png"), fullPage: true });
   }
 
+  const startsBeforeRetry = eventPaths(requests).filter((path) =>
+    path === "/event/safe-passage/play-started/new").length;
   await page.getByRole("button", { name: "Retry passage" }).click();
   await expect(page.locator("#game")).toBeVisible();
   await expect(result).toBeHidden();
   await expect(page.locator("#time")).toHaveText("50.0");
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/safe-passage/play-started/new").length).toBe(startsBeforeRetry + 1);
 });
 
 test("reduced motion keeps identical route timing without decorative motion", async ({ page }) => {

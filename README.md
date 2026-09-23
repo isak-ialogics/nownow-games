@@ -1,12 +1,13 @@
 # NowNow Games
 
-NowNow Games is the home for small, original, mobile-first browser game prototypes. Each prototype is a self-contained static page that can be played with touch or a keyboard.
+NowNow Games is the home for small, original, mobile-first browser game prototypes. Each game is a self-contained static page that can be played with touch or a keyboard; a small dependency-free server delivers the build and the anonymous feedback receiver.
 
 ## Repository layout
 
 - `index.html` is the prototype hub template.
 - `prototypes/<slug>/` contains one self-contained prototype page, game logic, and card metadata.
 - `shared/` contains the small input and presentation modules shared by prototypes.
+- `server/` serves the production build and validates and forwards `/feedback/submit` to the monitored team queue.
 - `tests/` contains deterministic unit tests and mobile browser acceptance tests.
 
 The retired input-lab proof established touch and keyboard parity; reusable input coverage remains in `tests/unit/input.test.mjs`.
@@ -30,7 +31,7 @@ npm ci
 npm run verify
 ```
 
-The production build is emitted to `dist/`. The repository deliberately has no backend, accounts, analytics, persistence, or external game services.
+The production build is emitted to `dist/`. Games remain static and have no accounts. The first-party container adds only the feedback receiver described in [`docs/FEEDBACK.md`](./docs/FEEDBACK.md). Its small cookieless analytics client sends only aggregate same-origin counters; see [`docs/ANALYTICS.md`](./docs/ANALYTICS.md) for that separate event contract and privacy boundary.
 
 ## Performance budget
 
@@ -52,11 +53,12 @@ Copyright (c) 2026 NowNow Games. All rights reserved. See [LICENSE.md](./LICENSE
 
 ## DEV container deployment and rollback
 
-Successful `main` verification triggers the DEV deployment workflow. It publishes
-`ghcr.io/isak-ialogics/nownow-games:<commit-sha>` and deploys that exact tag plus
-its resolved manifest digest; floating tags and image polling are intentionally
-not used. `workflow_dispatch` is retained for an explicitly selected, already
-verified recovery ref.
+Successful `main` verification publishes the immutable DEV image and updates the
+moving `dev` tag. Existing environment automation deploys it to
+`https://nownow.dev.mplace.co.za/` with no routine infrastructure handoff.
+Production is separate: only an independently approved merge to `prod` triggers
+the PROD publication and automatic deployment path. `workflow_dispatch` is
+retained for an explicitly selected, already verified recovery ref.
 
 To roll back DEV on the Swarm runner, run:
 

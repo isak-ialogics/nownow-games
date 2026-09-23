@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { expectResultDiscovery } from "./result-discovery.mjs";
 
 const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 const evidenceDir = process.env.EVIDENCE_DIR;
@@ -96,6 +97,11 @@ test("a 36-second matched rhythm merges, persists, shares, and retries", async (
 
   const result = page.locator("#result-card");
   await expect(result).toBeVisible();
+  await expectResultDiscovery(page, result, {
+    crossGameName: "Safe Passage",
+    crossGamePath: "/prototypes/safe-passage/",
+    retryName: "Try the flame again",
+  });
   await expect.poll(() => eventPaths(requests).filter((path) =>
     path === "/event/same-flame/play-completed/new").length).toBe(1);
   const browserSync = Number(

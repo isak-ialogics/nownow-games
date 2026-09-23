@@ -7,10 +7,17 @@
     <meta property="og:title" content="Same Flame | NowNow Games" />
     <meta property="og:description" content="Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game." />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nownowgames.co.za/assets/same-flame-share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Same Flame rhythm game with two stylised fires" />
     <meta property="og:url" content="https://nownowgames.co.za/prototypes/same-flame/" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Same Flame | NowNow Games" />
     <meta name="twitter:description" content="Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game." />
+    <meta name="twitter:url" content="https://nownowgames.co.za/prototypes/same-flame/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/same-flame-share.png" />
+    <meta name="twitter:image:alt" content="Same Flame rhythm game with two stylised fires" />
     <meta name="theme-color" content="#180f0c" />
     <link rel="canonical" href="https://nownowgames.co.za/prototypes/same-flame/" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23ffb23f'/%3E%3Cpath d='M32 11c7 11-2 13 6 22 4 5 3 15-6 20-11-4-14-14-8-22 5-6 3-12 8-20z' fill='%235b1c19'/%3E%3C/svg%3E" />
@@ -43,7 +50,7 @@
       <section class="title-block" aria-labelledby="game-title">
         <p class="kicker">A Heritage Day rhythm</p>
         <h1 id="game-title">Same<br />Flame</h1>
-        <p class="intro">Two fires, one shared beat. No sound required.</p>
+        <p class="intro" data-page-description>Hold and release to bring two fires into rhythm in Same Flame, an original Heritage Day browser game.</p>
       </section>
 
       <section id="game-panel" class="game-panel" aria-label="Same Flame game">
@@ -77,7 +84,7 @@
         <p id="pause-note" class="pause-note" role="status" hidden>Paused · return when you are ready.</p>
       </section>
 
-      <section id="result-card" class="result-card" tabindex="-1" aria-labelledby="result-title" hidden>
+      <section id="result-card" class="result-card" tabindex="-1" aria-labelledby="result-title" data-result-screen hidden>
         <div id="merged-flame" class="merged-flame" aria-hidden="true" hidden><i></i></div>
         <p class="kicker">Your shared rhythm</p>
         <h2 id="result-title">Two fires. One shared glow.</h2>
@@ -89,20 +96,23 @@
         <button id="share-result" class="action share" type="button">Share your rhythm</button>
         <button id="retry" class="action" type="button">Try the flame again</button>
         <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../safe-passage/">Play Safe Passage</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
       </section>
 
       <section id="expiry-card" class="expiry-card" tabindex="-1" aria-labelledby="expiry-title" hidden>
         <p class="kicker">The gathering has ended</p>
         <h2 id="expiry-title">This flame rested after 24 September.</h2>
         <p>The game has closed, but the stories and traditions we carry are still ours to share.</p>
-        <a class="action" href="../../">Play another NowNow game</a>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../safe-passage/">Play Safe Passage</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
       </section>
-
-      <nav class="more-games" aria-label="More NowNow Games">
-        <p>More original browser games</p>
-        <a href="../../games/before-midnight/">Play Before Midnight</a>
-        <a href="../latch/">Play Latch!</a>
-      </nav>
     </main>
 
     <script type="module" src="../../shared/analytics.js"></script>

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { expectResultDiscovery } from "./result-discovery.mjs";
 
 const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 import { mkdir } from "node:fs/promises";
@@ -83,6 +84,11 @@ test("320px play supports pointer and keyboard parity, failure, and retry", asyn
 
   const result = page.locator("#result");
   await expect(result).toBeVisible({ timeout: 3000 });
+  await expectResultDiscovery(page, result, {
+    crossGameName: "Before Midnight",
+    crossGamePath: "/games/before-midnight/",
+    retryName: "Retry passage",
+  });
   await expect(page.locator("#result-title")).toHaveText("Roofline crossed");
   await expect(page.locator("#announcement")).toContainText("Roofline breaches: 1");
   await expect(page.locator("#result button")).toHaveCount(2);

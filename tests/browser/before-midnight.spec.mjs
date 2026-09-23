@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { expectResultDiscovery } from "./result-discovery.mjs";
 
 const evidenceDir = process.env.EVIDENCE_DIR;
 const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
@@ -157,6 +158,11 @@ test("seven fills support touch, mouse, Space, Enter, results, and retry", async
 
   const result = page.locator("#result-card");
   await expect(result).toBeVisible();
+  await expectResultDiscovery(page, result, {
+    crossGameName: "Surface Signal",
+    crossGamePath: "/prototypes/surface-signal/",
+    retryName: "Retry seven fills",
+  });
   await expect
     .poll(() => eventPaths(requests))
     .toContain("/event/before-midnight/play-completed/new");

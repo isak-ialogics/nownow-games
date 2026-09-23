@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
+import { expectResultDiscovery } from "./result-discovery.mjs";
 
 const origin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 const answers = [2, 3, 1, 5, 4, 3];
@@ -104,6 +105,11 @@ test("perfect keyboard play persists, emits bounded telemetry, shares exact copy
 
   await advanceUntil(page, async () => await page.locator("#rc").isVisible());
   await expect(page.locator("#rc")).toBeVisible();
+  await expectResultDiscovery(page, page.locator("#rc"), {
+    crossGameName: "Surface Signal",
+    crossGamePath: "/prototypes/surface-signal/",
+    retryName: "Play again",
+  });
   await expect(page.locator("#rt")).toHaveText("Full page of luck");
   await expect(page.locator("#fs")).toHaveText("600 / 600");
   await expect(page.locator("#e li.hit")).toHaveCount(6);

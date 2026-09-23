@@ -41,14 +41,14 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://nownowgames.co.za/assets/before-midnight-share.png",
+    "https://nownowgames.co.za/assets/hub-share.png",
   );
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
     "content",
     "summary_large_image",
   );
   const shareImage = await page.request.get(
-    "/assets/before-midnight-share.png",
+    "/assets/hub-share.png",
   );
   expect(shareImage.ok()).toBe(true);
   expect(shareImage.headers()["content-type"]).toBe("image/png");
@@ -108,8 +108,12 @@ test("game hub is responsive, accessible, and has no retired route", async ({
       "Hold, release, and outsmart the coast. Can you stop just under the rand cap?",
     ),
   ).toBeVisible();
-  await expect(page.getByText("Safe Passage")).toBeVisible();
-  await expect(page.getByText("Latch!")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Safe Passage" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Latch!" }),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 3, name: "Same Flame" }),
   ).toBeVisible();

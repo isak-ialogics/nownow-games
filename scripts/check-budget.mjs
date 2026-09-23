@@ -15,6 +15,13 @@ const limits = Object.freeze({
     // other two games' event listeners.
     javascript: 8.5 * KIBIBYTE,
   }),
+  surfaceSignal: Object.freeze({
+    // NOW-248 adds a first-run practice surface, explicit launch lifecycle,
+    // resilient persistence, and fixed funnel events. Keep the network-facing
+    // wire ceiling below unchanged; this limit covers uncompressed artifacts.
+    total: 27 * KIBIBYTE,
+    javascript: 12 * KIBIBYTE,
+  }),
   wire: Object.freeze({
     total: 20 * KIBIBYTE,
     javascript: 8.5 * KIBIBYTE,
@@ -176,7 +183,9 @@ for (const directory of prototypeDirectories) {
     await measure(
       `prototypes/${directory.name}`,
       await collect(resolve(prototypeRoot, directory.name)),
-      limits.prototype,
+      directory.name === "surface-signal"
+        ? limits.surfaceSignal
+        : limits.prototype,
     ),
   );
 }

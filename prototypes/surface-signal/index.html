@@ -45,7 +45,40 @@
         <p class="intro">Read the brief blow and wake. Call where the next abstract arc will surface.</p>
       </section>
 
-      <section id="game-panel" class="game-panel" aria-label="Surface Signal game">
+      <section id="launch-card" class="launch-card" aria-labelledby="launch-title">
+        <p class="kicker">One calm practice signal</p>
+        <h2 id="launch-title">Read the cue.</h2>
+        <p id="launch-copy" class="launch-copy">Practice once without a score or timer. The six-signal run stays paused until you start it.</p>
+        <div id="practice-panel" class="practice-panel">
+          <p class="practice-copy"><strong>Practice cue:</strong> a blow appears in sector 2 and its wake runs one sector right. Choose where the arc will surface.</p>
+          <div class="horizon practice-horizon" aria-label="Untimed practice signal">
+            <div class="signal practice-signal" aria-hidden="true">
+              <span class="plume"><i></i></span>
+              <span class="wake" data-direction="right">&rsaquo;</span>
+            </div>
+            <div id="practice-reveal" class="reveal" aria-hidden="true" hidden><i></i></div>
+            <div
+              id="practice-control"
+              class="sectors"
+              role="group"
+              aria-label="Choose a practice surfacing sector"
+              aria-describedby="practice-status"
+              aria-activedescendant="practice-sector-3"
+              tabindex="0"
+            >
+              <button id="practice-sector-1" type="button" tabindex="-1" aria-label="Practice sector 1" aria-pressed="false"><span>1</span></button>
+              <button id="practice-sector-2" type="button" tabindex="-1" aria-label="Practice sector 2" aria-pressed="false"><span>2</span></button>
+              <button id="practice-sector-3" type="button" tabindex="-1" aria-label="Practice sector 3" aria-pressed="true"><span>3</span></button>
+              <button id="practice-sector-4" type="button" tabindex="-1" aria-label="Practice sector 4" aria-pressed="false"><span>4</span></button>
+              <button id="practice-sector-5" type="button" tabindex="-1" aria-label="Practice sector 5" aria-pressed="false"><span>5</span></button>
+            </div>
+          </div>
+          <p id="practice-status" class="status" role="status" aria-live="polite">No clock is running. Make one practice choice when you are ready.</p>
+        </div>
+        <button id="start-run" class="action share" type="button" aria-describedby="launch-copy practice-status" disabled>Start six-signal run</button>
+      </section>
+
+      <section id="game-panel" class="game-panel" aria-label="Surface Signal game" data-explicit-start hidden>
         <div class="score-line">
           <p>Time <strong><span id="time-left">42.0</span>s</strong></p>
           <p>Signal <strong id="cue-count">1/6</strong></p>

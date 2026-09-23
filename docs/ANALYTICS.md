@@ -10,15 +10,25 @@ assets from a third party.
 Page visits use only the canonical pathname and static document title. Game
 events use this fixed taxonomy:
 
-`/event/{game-id}/{play-started|play-completed|share-triggered}/{new|returning}`
+`/event/{game-id}/{action}/{new|returning}`
 
 The six game IDs are `before-midnight`, `latch`, `safe-passage`, `same-flame`,
 `surface-signal`, and `one-lucky-bloom`. Before Midnight's historical `/event/before-midnight/...` counter
 keys are unchanged.
 
-- `play-started` fires after the game modules have initialized a playable game,
-  and again when Retry starts another run. An expired Same Flame page does not
-  count as a start.
+- `play-started` fires once when a scored run intentionally starts, and again
+  when Retry intentionally starts another run. Surface Signal does not emit it
+  on page load, launch-card initialization, or practice input. One Lucky Bloom
+  likewise waits for Try your luck or Play again. The other games retain their
+  existing playable-initialization behavior; an expired Same Flame page does
+  not count as a start.
+- Surface Signal adds four fixed funnel actions: `first-input` on its first
+  accepted scored choice, then `round-2-reached`, `round-4-reached`, and
+  `round-6-reached` when those authored rounds resolve. Each action has
+  cardinality zero-or-one per scored run. Practice emits none of them. The
+  action names contain no input type, coordinates, player text, score, or raw
+  timing, so aggregate counts distinguish start → first input → progression →
+  completion without creating an event-level behavioural record.
 - `play-completed` fires when the game's real result surface appears. The shared
   tracker accepts it only for an active run and suppresses repeated result
   mutations.
@@ -26,11 +36,20 @@ keys are unchanged.
   Share or the clipboard fallback. A single activation cannot double-count its
   two fallback paths. Latch and Safe Passage expose a result-page share action;
   Before Midnight and Same Flame retain their existing result sharing.
-- `new` or `returning` is fixed when the page loads. `returning` means the
-  browser already has a positive gameplay best for Before Midnight, Same
-  Flame, Surface Signal, or a completed One Lucky Bloom record; otherwise it is `new`. This deliberately privacy-limited signal is a
-  returning-player proxy, not a unique-person count. Analytics reads existing
-  gameplay progress but creates no identifier and writes no browser storage.
+- Surface Signal's `new` or `returning` class is fixed per scored run when
+  `play-started` is accepted. `returning` means its durable completion marker or
+  a legacy saved best (including zero) already exists. Its first run stays `new` through
+  completion, including a 0/6 result; that completion establishes returning
+  status for a retry in the same loaded session and, when storage is available,
+  for a later reload.
+- The other games retain their established page-load classification. Returning
+  means a positive gameplay best for Before Midnight or Same Flame, or a valid
+  completed One Lucky Bloom record. This deliberately privacy-limited signal is
+  a returning-player proxy, not a unique-person count. The analytics module
+  reads existing gameplay state but creates no identifier and writes no browser
+  storage; Surface Signal's game module writes only the fixed
+  `nownow-surface-signal-played-v1=1` completion marker. Throwing or unavailable
+  storage falls back to `new` and never blocks result UI or lifecycle telemetry.
 
 Every event is a counter path, not an individual event record. A random
 five-character cache buster is generated per request and discarded.
@@ -51,8 +70,8 @@ User-Agent, or referrer rows.
 
 ## Explicit privacy boundary
 
-The browser sends: canonical pathname or fixed event name, static title, event
-flags, and the cache buster. Requests use `credentials: omit` and
+The browser sends: canonical pathname or one of the fixed event names above,
+static title, event flags, and the cache buster. Requests use `credentials: omit` and
 `referrerPolicy: no-referrer`.
 
 The browser does **not** send names, email addresses, account IDs, scores,

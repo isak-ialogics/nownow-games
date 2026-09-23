@@ -264,17 +264,17 @@ const analytics = await readFile(resolve(root, "shared", "analytics.js"), "utf8"
 if (!hub.includes('src="./shared/analytics.js"')) {
   throw new Error("Hub is missing the privacy-safe analytics module.");
 }
-for (const token of [
-  '"/analytics/count"',
-  'credentials:"omit"',
-  'referrerPolicy:"no-referrer"',
-  '"play-started"',
-  '"play-completed"',
-  '"share-triggered"',
+for (const [pattern, label] of [
+  [/['"]\/analytics\/count['"]/, "/analytics/count"],
+  [/credentials\s*:\s*['"]omit['"]/, "credentials: omit"],
+  [/referrerPolicy\s*:\s*['"]no-referrer['"]/, "referrerPolicy: no-referrer"],
+  [/['"]play-started['"]/, "play-started"],
+  [/['"]play-completed['"]/, "play-completed"],
+  [/['"]share-triggered['"]/, "share-triggered"],
 ]) {
-  if (!analytics.includes(token)) {
+  if (!pattern.test(analytics)) {
     throw new Error(
-      `Analytics module is missing privacy/event contract: ${token}.`,
+      `Analytics module is missing privacy/event contract: ${label}.`,
     );
   }
 }

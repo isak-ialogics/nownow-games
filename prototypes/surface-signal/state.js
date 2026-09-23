@@ -20,7 +20,16 @@ export const CUES = (
 
 const BEST_KEY = "nownow-surface-signal-best-v1";
 const EARLY_KEY = "nownow-surface-signal-early-v1";
+const PLAYED_KEY = "nownow-surface-signal-played-v1";
 const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+
+export function safeGameStorage(target = globalThis) {
+  try {
+    return target?.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export function createGame() {
   return {
@@ -164,6 +173,15 @@ export function clearBest(storage) {
     storage?.removeItem(EARLY_KEY);
   } catch {}
   return readBest(storage);
+}
+
+export function markPlayed(storage) {
+  try {
+    storage?.setItem(PLAYED_KEY, '1');
+    return Boolean(storage);
+  } catch {
+    return false;
+  }
 }
 
 export function createShareData(result, url) {

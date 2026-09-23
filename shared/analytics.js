@@ -9,8 +9,18 @@ const games = new Set([
 ]);
 const actions = new Set([
   "play-started",
+  "first-input",
+  "round-2-reached",
+  "round-4-reached",
+  "round-6-reached",
   "play-completed",
   "share-triggered",
+]);
+const funnelActions = new Set([
+  "first-input",
+  "round-2-reached",
+  "round-4-reached",
+  "round-6-reached",
 ]);
 const trackers = new WeakMap();
 
@@ -30,7 +40,11 @@ export function countUrl(
 }
 
 export function visitorType(storage, game) {
+  if (!game) return "new";
   try {
+    if (storage?.getItem(`nownow-${game}-played-v1`) === "1") {
+      return "returning";
+    }
     const value = storage?.getItem(`nownow-${game}-best-v1`);
     if (game === "one-lucky-bloom") {
       const record = JSON.parse(value);
@@ -41,23 +55,36 @@ export function visitorType(storage, game) {
         ? "returning"
         : "new";
     }
+    if (game === "surface-signal") {
+      return value !== null && value !== undefined && Number.isFinite(Number(value))
+        ? "returning"
+        : "new";
+    }
     return Number(value) > 0 ? "returning" : "new";
   } catch {
     return "new";
   }
 }
 
+function storageFor(windowTarget) {
+  try {
+    return windowTarget?.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function send(path, title, event = false) {
   void fetch(countUrl(path, title, { event, noSession: event }), {
-    credentials:"omit",
+    credentials: "omit",
     keepalive: true,
-    referrerPolicy:"no-referrer",
+    referrerPolicy: "no-referrer",
   }).catch(() => {});
 }
 
-function audience(windowObject) {
+function audience(windowTarget) {
   try {
-    return new URL(windowObject.location.href).searchParams.get("nng_audience") ===
+    return new URL(windowTarget.location.href).searchParams.get("nng_audience") ===
       "synthetic-qa"
       ? "/synthetic-qa"
       : "";
@@ -66,58 +93,79 @@ function audience(windowObject) {
   }
 }
 
-export function trackGameEvent(game, action, documentObject = document) {
-  return trackers.get(documentObject)?.(game, action) ?? false;
+export function trackGameEvent(game, action, documentTarget = document) {
+  return trackers.get(documentTarget)?.(game, action) ?? false;
 }
 
-export function initAnalytics(documentObject = document, windowObject = window) {
-  const query = (selector) => documentObject.querySelector(selector);
-  const path = new URL(
-    query('[rel="canonical"]')?.href ?? windowObject.location.href,
+export function initAnalytics(documentTarget = document, windowTarget = window) {
+  const query = (selector) => documentTarget.querySelector(selector);
+  const pathname = new URL(
+    query('[rel="canonical"]')?.href ?? windowTarget.location.href,
   ).pathname;
-  const prefix = audience(windowObject);
-  send(prefix + path, documentObject.title);
+  const prefix = audience(windowTarget);
+  send(prefix + pathname, documentTarget.title);
 
-  const game = path.split("/").at(-2);
+  const game = pathname.split("/").at(-2);
   if (!games.has(game)) return;
 
-  let storage;
-  try {
-    storage = windowObject.localStorage;
-  } catch {}
-  const type = visitorType(storage, game);
+  const storage = storageFor(windowTarget);
+  const title = documentTarget.title.split(" | ")[0];
+  const pageType = visitorType(storage, game);
+  const dynamicRunType = game === "surface-signal";
   let running = false;
+  let completedInSession = false;
+  let runType = null;
+  const sentThisRun = new Set();
 
-  trackers.set(documentObject, (id, action) => {
+  trackers.set(documentTarget, (id, action) => {
     if (id !== game || !actions.has(action)) return false;
+
     if (action === "play-started") {
       if (running) return false;
+      runType = dynamicRunType
+        ? (completedInSession ? "returning" : visitorType(storage, game))
+        : pageType;
       running = true;
+      sentThisRun.clear();
     } else if (action === "play-completed") {
-      if (!running) return false;
-      running = false;
+      if (!running || sentThisRun.has(action)) return false;
+      sentThisRun.add(action);
+    } else if (funnelActions.has(action)) {
+      if (!running || sentThisRun.has(action)) return false;
+      sentThisRun.add(action);
     }
-    send(
-      `${prefix}/event/${game}/${action}/${type}`,
-      `${documentObject.title.split(" | ")[0]}: ${action}`,
-      true,
-    );
+
+    const type = runType ?? (dynamicRunType && completedInSession
+      ? "returning"
+      : pageType);
+    send(`${prefix}/event/${game}/${action}/${type}`, `${title}: ${action}`, true);
+
+    if (action === "play-completed") {
+      running = false;
+      completedInSession = true;
+    }
     return true;
   });
 
-  const event = (action) => trackGameEvent(game, action, documentObject);
+  const event = (action) => trackGameEvent(game, action, documentTarget);
   const view = query("#game-panel,#game");
   const result = query("#result-card,#result");
+  const explicitStart = view?.hasAttribute?.("data-explicit-start") ?? false;
   const begin = () => event("play-started");
-  const start = () => {
+  const startVisibleGame = () => {
     if (view && !view.hidden) begin();
   };
-  if (documentObject.readyState === "complete") start();
-  else documentObject.addEventListener("DOMContentLoaded", start, { once: true });
-  query("#retry")?.addEventListener("click", begin);
-  query("#share-best,#share-result")?.addEventListener(
-    "click",
-    () => event("share-triggered"),
+
+  if (!explicitStart) {
+    if (documentTarget.readyState === "complete") startVisibleGame();
+    else documentTarget.addEventListener("DOMContentLoaded", startVisibleGame, {
+      once: true,
+    });
+    query("#retry")?.addEventListener("click", begin);
+  }
+
+  query("#share-best,#share-result")?.addEventListener("click", () =>
+    event("share-triggered"),
   );
   if (result) {
     new MutationObserver(() => {

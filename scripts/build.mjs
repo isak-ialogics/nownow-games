@@ -152,6 +152,7 @@ const surfaceSignalNames = Object.entries({
   RUN_MS: "F", SECTOR_COUNT: "G", CUES: "H", commitGuess: "I",
   createGame: "J", createShareData: "K", phaseAt: "L", readBest: "M",
   saveBest: "N", clearBest: "O", summarize: "P", updateGame: "Q",
+  markPlayed: "R", safeGameStorage: "S",
 });
 
 function compactSurfaceSignalJs(source) {
@@ -297,12 +298,17 @@ for (const entry of await readdir(sharedDir, { withFileTypes: true })) {
   const cssPath = resolve(sharedDir, entry.name);
   await writeFile(cssPath, compactCss(await readFile(cssPath, "utf8")));
 }
-const analyticsPath = resolve(sharedDir, "analytics.js");
-const analytics = await minify(await readFile(analyticsPath, "utf8"), {
-  compress: { passes: 3 }, mangle: true, module: true,
-});
-if (!analytics.code) throw new Error("Shared analytics minification failed.");
-await writeFile(analyticsPath, `${analytics.code}\n`);
+for (const entry of await readdir(sharedDir, { withFileTypes: true })) {
+  if (!entry.isFile() || !entry.name.endsWith(".js")) continue;
+  const jsPath = resolve(sharedDir, entry.name);
+  const output = await minify(await readFile(jsPath, "utf8"), {
+    compress: { passes: 3 }, mangle: true, module: true,
+  });
+  if (!output.code) {
+    throw new Error(`Shared JavaScript minification failed: ${entry.name}`);
+  }
+  await writeFile(jsPath, `${output.code}\n`);
+}
 
 await writeFile(resolve(destination, "robots.txt"), buildRobots());
 await writeFile(resolve(destination, "sitemap.xml"), buildSitemap(cards));

@@ -3,9 +3,16 @@ import test from "node:test";
 
 import {
   buildItchioPortalFiles,
+  canonicalText,
   createDeterministicZip,
   readDeterministicZip,
 } from "../../scripts/package-itchio.mjs";
+
+test("itch.io source text is canonical across platform line endings", () => {
+  const canonical = Buffer.from("first\nsecond\n");
+  assert.deepEqual(canonicalText(Buffer.from("first\r\nsecond\r\n")), canonical);
+  assert.deepEqual(canonicalText(canonical), canonical);
+});
 
 test("itch.io package is deterministic, root-flat, local-only, and source-marked", async () => {
   const first = await buildItchioPortalFiles();

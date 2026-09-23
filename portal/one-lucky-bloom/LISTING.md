@@ -86,7 +86,7 @@ stock media, fonts, or generated assets are included.
 - **Portal version:** 1.0.0
 - **Owned source SHA:** `48e24d237a1adc56fb29bdfd37bc82acf78680f3`
 - **ZIP:** `releases/one-lucky-bloom/one-lucky-bloom-itchio-1.0.0.zip`
-- **ZIP SHA-256:** `767fb7f290a2b75fd1e0d33929cfa196d828c0929ad591dc4d2dd255d6023330`
+- **ZIP SHA-256:** `a692c3714ed999a6bb5bc7dae54d0dc22268c6056b6c7d6a60e458208ffba56e`
 - **Inventory:** `releases/one-lucky-bloom/one-lucky-bloom-itchio-1.0.0.inventory.txt`
 
 Do not create or publish a listing from this kit without a separate approved

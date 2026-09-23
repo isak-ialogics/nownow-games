@@ -3,7 +3,8 @@
 This directory records the portal-specific release contract. The package is a
 deterministic derivative of the owned game files at source commit
 `48e24d237a1adc56fb29bdfd37bc82acf78680f3`; the packaging script records a
-SHA-256 for every input in the ZIP's `source.json` marker.
+SHA-256 for every LF-canonicalized text input in the ZIP's `source.json`
+marker.
 
 The portal transform is intentionally narrow:
 

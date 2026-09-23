@@ -8,8 +8,14 @@ const configPath = resolve(root, "portal", "one-lucky-bloom", "release.json");
 const releaseRoot = resolve(root, "releases", "one-lucky-bloom");
 const distRoot = resolve(root, "dist", "itchio", "one-lucky-bloom");
 const cleanroomRoot = resolve(root, "dist", "itchio-cleanroom", "one-lucky-bloom");
+const listingPath = resolve(root, "portal", "one-lucky-bloom", "LISTING.md");
+const qaPath = resolve(root, "portal", "one-lucky-bloom", "QA.md");
 
 const sha256 = (body) => createHash("sha256").update(body).digest("hex");
+
+export function canonicalText(body) {
+  return Buffer.from(body.toString("utf8").replace(/\r\n/gu, "\n"));
+}
 
 function replaceOnce(source, search, replacement, label) {
   const first = source.indexOf(search);
@@ -173,7 +179,7 @@ export async function buildItchioPortalFiles() {
   const config = JSON.parse(await readFile(configPath, "utf8"));
   const sources = new Map();
   for (const path of config.sourceFiles) {
-    const body = await readFile(resolve(root, path));
+    const body = canonicalText(await readFile(resolve(root, path)));
     const actual = sha256(body);
     if (config.sourceHashes?.[path] !== actual) {
       throw new Error(
@@ -406,6 +412,7 @@ export async function packageItchioPortal({ check = false } = {}) {
   const { config, files } = await writeItchioPortalDirectory();
   const zip = createDeterministicZip(files);
   const digest = sha256(zip);
+  const extractedBytes = [...files.values()].reduce((sum, body) => sum + body.length, 0);
   const zipPath = resolve(releaseRoot, config.packageFile);
   const checksumPath = `${zipPath}.sha256`;
   const inventoryPath = resolve(
@@ -414,12 +421,26 @@ export async function packageItchioPortal({ check = false } = {}) {
   );
   const checksum = `${digest}  ${config.packageFile}\n`;
   if (check) {
-    const [committedZip, committedChecksum, committedInventory] = await Promise.all([
-      readFile(zipPath), readFile(checksumPath, "utf8"), readFile(inventoryPath, "utf8"),
-    ]);
+    const [committedZip, committedChecksum, committedInventory, listing, qa] =
+      await Promise.all([
+        readFile(zipPath),
+        readFile(checksumPath, "utf8"),
+        readFile(inventoryPath, "utf8"),
+        readFile(listingPath, "utf8"),
+        readFile(qaPath, "utf8"),
+      ]);
     if (!zip.equals(committedZip)) throw new Error("Committed itch.io ZIP is stale; run npm run portal:package.");
     if (checksum !== committedChecksum) throw new Error("Committed itch.io checksum is stale.");
     if (inventory(files) !== committedInventory) throw new Error("Committed itch.io inventory is stale.");
+    if (!listing.includes(config.ownedSourceCommit) || !listing.includes(digest)) {
+      throw new Error("itch.io listing source or checksum evidence is stale.");
+    }
+    const budgetClaim =
+      `${zip.length.toLocaleString("en-US")} ZIP bytes; ` +
+      `${extractedBytes.toLocaleString("en-US")} extracted bytes; six files.`;
+    if (!qa.includes(config.ownedSourceCommit) || !qa.includes(budgetClaim)) {
+      throw new Error("itch.io QA source or package budget evidence is stale.");
+    }
     const unpacked = readDeterministicZip(committedZip);
     for (const [name, body] of files) {
       if (!unpacked.get(name)?.equals(body)) {
@@ -435,7 +456,6 @@ export async function packageItchioPortal({ check = false } = {}) {
       writeFile(inventoryPath, inventory(files)),
     ]);
   }
-  const extractedBytes = [...files.values()].reduce((sum, body) => sum + body.length, 0);
   console.log(
     `${check ? "Verified" : "Packaged"} ${config.packageFile}: ${zip.length} ZIP bytes, ` +
     `${extractedBytes} extracted bytes, ${files.size} files, sha256:${digest}`,

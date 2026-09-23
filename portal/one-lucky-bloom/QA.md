@@ -74,7 +74,7 @@ independent sign-off requested by the release train.
   run/retry passed at 320 × 740 with axe-core reporting zero violations.
 - Desktop Chromium: framed keyboard select/lock and offline storage-denied full
   run/retry passed at 1280 × 800 with axe-core reporting zero violations.
-- Package budget: 39,086 ZIP bytes; 38,502 extracted bytes; six files.
+- Package budget: 38,287 ZIP bytes; 37,703 extracted bytes; six files.
 - Media dimensions: cover 630 × 500; desktop intro 1280 × 800; mobile play and
   result screenshots 390 × 844.
 

@@ -58,20 +58,24 @@ state, records a redacted receipt before mutation, and verifies that `:prod`
 resolves to the approved digest afterward.
 
 Promotion uses `docker buildx imagetools create --prefer-index=false` with one
-digest-pinned source. It invokes no Dockerfile build path. The workflow uses only
-the established `IAL_GHCR_TOKEN` repository secret already used by the DEV
-publisher; the job token is limited to `contents: read`, the workflow defines
-no GitHub environment, and it prints no credential. The
-private GHCR package is user-owned and has no linked repository, so the
+digest-pinned source. It invokes no Dockerfile build path. The complete
+secret-bearing job is bound to the GitHub `production` environment, whose
+deployment branch policy permits only `main`, and the workflow also fails closed
+with a job-level `main` ref gate. The environment-scoped `IAL_GHCR_TOKEN` is
+therefore unavailable to off-`main` dispatches before checkout, login, or any
+registry access. The job token is limited to `contents: read`, and the workflow
+prints no credential.
+
+The private GHCR package is user-owned and has no linked repository, so the
 repository-scoped `GITHUB_TOKEN` used by the first preflight could authenticate
-but failed closed with `permission_denied: read_package`. Reusing the existing
-publisher authority is the narrow correction: it adds no credential and changes
-no runtime authority. The entire secret-bearing job remains restricted to
-`main`: review correction branches with static and focused tests, merge only
-after independent QA, and then run `execute=false` from merged `main` to prove
-read access without mutation. Never inject the write-capable secret into
-branch-controlled workflow code. `execute=true` remains a separately approved
-manual action.
+but failed closed with `permission_denied: read_package`. Review correction
+branches with static and focused tests, merge through the normal controls, and
+then run `execute=false` from merged `main` to prove the environment-scoped
+credential can perform registry preflight without mutation. The legacy
+repository-scoped `IAL_GHCR_TOKEN` remains only until that merged-main validation
+succeeds and its legitimate IAL owner removes it. Never inject the write-capable
+secret into branch-controlled workflow code. `execute=true` remains a separately
+approved manual action.
 The checked-in fixture receipt is
 [`evidence/now-255/promotion-fixture-receipt.json`](./evidence/now-255/promotion-fixture-receipt.json).
 

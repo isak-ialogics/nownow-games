@@ -17,6 +17,42 @@ import {
 
 const runtimeIdentity = IMAGE_NAME + ":prod@" + PREVIOUS_PROD_DIGEST;
 
+function workflowJob(source, jobName) {
+  const lines = source.split("\n");
+  const start = lines.findIndex((line) => line === `  ${jobName}:`);
+  assert.notEqual(start, -1, `workflow job ${jobName} must exist`);
+  const end = lines.findIndex(
+    (line, index) => index > start && /^  [a-zA-Z0-9_-]+:\s*$/u.test(line),
+  );
+  return lines.slice(start, end === -1 ? undefined : end).join("\n");
+}
+
+function workflowJobProperty(job, property) {
+  const match = job.match(new RegExp(`^    ${property}:\\s*(.+)$`, "mu"));
+  return match?.[1]?.trim();
+}
+
+function promotionDispatchPlan({ job, ref, allowedEnvironmentBranches, execute }) {
+  const mainRef = "refs/heads/main";
+  const branch = ref.startsWith("refs/heads/") ? ref.slice("refs/heads/".length) : null;
+  const jobRefAuthorized =
+    workflowJobProperty(job, "if") === "github.ref == 'refs/heads/main'" &&
+    ref === mainRef;
+  const environmentAuthorized =
+    workflowJobProperty(job, "environment") === "production" &&
+    allowedEnvironmentBranches.includes(branch);
+  const authorized = jobRefAuthorized && environmentAuthorized;
+
+  return {
+    authorized,
+    jobRefAuthorized,
+    environmentAuthorized,
+    secretAvailable: authorized,
+    registryReached: authorized,
+    mutatesProd: authorized && execute,
+  };
+}
+
 function promotionOptions(registry, overrides = {}) {
   return {
     registry,
@@ -197,10 +233,6 @@ test("promotion tooling contains no image build path", async () => {
     "utf8",
   );
   assert.match(workflow, /workflow_dispatch:/u);
-  assert.match(
-    workflow,
-    /^\s*if: github\.ref == 'refs\/heads\/main'\s*$/mu,
-  );
   assert.doesNotMatch(workflow, /\|\|\s*inputs\.execute/u);
   assert.match(workflow, /username: isak-ialogics/u);
   assert.match(workflow, /secrets\.IAL_GHCR_TOKEN/u);
@@ -209,6 +241,54 @@ test("promotion tooling contains no image build path", async () => {
   assert.match(workflow, /scripts\/prod-oci-release\.mjs/u);
   assert.doesNotMatch(
     workflow,
-    /workflow_run:|build-push-action|docker\s+build|environment:/u,
+    /workflow_run:|build-push-action|docker\s+build/u,
   );
+});
+
+test("off-main manual dispatch is denied before secret or registry access", async () => {
+  const workflow = await readFile(
+    new URL("../../.github/workflows/deploy-prod.yml", import.meta.url),
+    "utf8",
+  );
+  const job = workflowJob(workflow, "promote");
+  const plan = promotionDispatchPlan({
+    job,
+    ref: "refs/heads/now-261/protected-production-environment",
+    allowedEnvironmentBranches: ["main"],
+    execute: false,
+  });
+
+  assert.equal(workflowJobProperty(job, "environment"), "production");
+  assert.match(job, /secrets\.IAL_GHCR_TOKEN/u);
+  assert.deepEqual(plan, {
+    authorized: false,
+    jobRefAuthorized: false,
+    environmentAuthorized: false,
+    secretAvailable: false,
+    registryReached: false,
+    mutatesProd: false,
+  });
+});
+
+test("authorized main dispatch permits a non-mutating preflight", async () => {
+  const workflow = await readFile(
+    new URL("../../.github/workflows/deploy-prod.yml", import.meta.url),
+    "utf8",
+  );
+  const job = workflowJob(workflow, "promote");
+  const plan = promotionDispatchPlan({
+    job,
+    ref: "refs/heads/main",
+    allowedEnvironmentBranches: ["main"],
+    execute: false,
+  });
+
+  assert.deepEqual(plan, {
+    authorized: true,
+    jobRefAuthorized: true,
+    environmentAuthorized: true,
+    secretAvailable: true,
+    registryReached: true,
+    mutatesProd: false,
+  });
 });

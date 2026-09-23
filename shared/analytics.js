@@ -1,7 +1,12 @@
 const endpoint = "/analytics/count";
-const games = new Set(
-  "before-midnight latch safe-passage same-flame surface-signal".split(" "),
-);
+const games = new Set([
+  "before-midnight",
+  "latch",
+  "safe-passage",
+  "same-flame",
+  "surface-signal",
+  "one-lucky-bloom",
+]);
 const actions = new Set([
   "play-started",
   "first-input",
@@ -22,7 +27,11 @@ const trackers = new WeakMap();
 export function countUrl(
   path,
   title,
-  { event = false, noSession = false, nonce = Math.random().toString(36).slice(2, 7) } = {},
+  {
+    event = false,
+    noSession = false,
+    nonce = Math.random().toString(36).slice(2, 7),
+  } = {},
 ) {
   const query = new URLSearchParams({ p: path, t: title, rnd: nonce });
   if (event) query.set("e", "1");
@@ -36,10 +45,22 @@ export function visitorType(storage, game) {
     if (storage?.getItem(`nownow-${game}-played-v1`) === "1") {
       return "returning";
     }
-    const best = storage?.getItem(`nownow-${game}-best-v1`);
-    return best !== null && best !== undefined && Number.isFinite(Number(best))
-      ? "returning"
-      : "new";
+    const value = storage?.getItem(`nownow-${game}-best-v1`);
+    if (game === "one-lucky-bloom") {
+      const record = JSON.parse(value);
+      return record?.version === 1 &&
+        typeof record.playsCompleted === "number" &&
+        Number.isInteger(record.playsCompleted) &&
+        record.playsCompleted > 0
+        ? "returning"
+        : "new";
+    }
+    if (game === "surface-signal") {
+      return value !== null && value !== undefined && Number.isFinite(Number(value))
+        ? "returning"
+        : "new";
+    }
+    return Number(value) > 0 ? "returning" : "new";
   } catch {
     return "new";
   }
@@ -132,7 +153,7 @@ export function initAnalytics(documentTarget = document, windowTarget = window) 
   const explicitStart = view?.hasAttribute?.("data-explicit-start") ?? false;
   const begin = () => event("play-started");
   const startVisibleGame = () => {
-    if (!view?.hidden) begin();
+    if (view && !view.hidden) begin();
   };
 
   if (!explicitStart) {

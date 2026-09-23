@@ -68,14 +68,14 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     scrollWidth: document.documentElement.scrollWidth,
   }));
   expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
-  await expect(page.locator("[data-prototype-count]")).toHaveText("05");
+  await expect(page.locator("[data-prototype-count]")).toHaveText("06");
   await expect(page.locator("[data-prototype-count]")).toHaveAttribute(
     "aria-label",
-    "5 games",
+    "6 games",
   );
-  await expect(page.locator(".prototype-card")).toHaveCount(5);
+  await expect(page.locator(".prototype-card")).toHaveCount(6);
   const playLinks = page.getByRole("link", { name: /Play now/ });
-  await expect(playLinks).toHaveCount(5);
+  await expect(playLinks).toHaveCount(6);
   await expect(playLinks.nth(0)).toHaveAttribute(
     "href",
     "./games/before-midnight/",
@@ -96,6 +96,10 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     "href",
     "./prototypes/surface-signal/",
   );
+  await expect(playLinks.nth(5)).toHaveAttribute(
+    "href",
+    "./games/one-lucky-bloom/",
+  );
   await expect(
     page.getByRole("heading", { level: 3, name: "Before Midnight", exact: true }),
   ).toBeVisible();
@@ -111,6 +115,9 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 3, name: "Surface Signal" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "One Lucky Bloom" }),
   ).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
   await expect(page.getByText("No login. No ads. Privacy-safe analytics.")).toBeVisible();

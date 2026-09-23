@@ -10,7 +10,7 @@ const pages = new Map([
     {
       title: "Original Mobile Browser Games | NowNow Games",
       description:
-        "Play five original, mobile-first browser games from NowNow Games, including Surface Signal, Same Flame, Before Midnight, Latch!, and Safe Passage.",
+        "Play six original, mobile-first browser games from NowNow Games, including One Lucky Bloom, Surface Signal, Same Flame, Before Midnight, Latch!, and Safe Passage.",
       canonical: `${productionOrigin}/`,
       schema: ["Organization", "WebSite"],
     },
@@ -62,6 +62,16 @@ const pages = new Map([
       description:
         "Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game.",
       canonical: `${productionOrigin}/prototypes/surface-signal/`,
+      schema: ["VideoGame"],
+    },
+  ],
+  [
+    "prototypes/one-lucky-bloom/index.html",
+    {
+      title: "One Lucky Bloom | NowNow Games",
+      description:
+        "Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game.",
+      canonical: `${productionOrigin}/games/one-lucky-bloom/`,
       schema: ["VideoGame"],
     },
   ],

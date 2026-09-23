@@ -12,15 +12,16 @@ events use this fixed taxonomy:
 
 `/event/{game-id}/{action}/{new|returning}`
 
-The five game IDs are `before-midnight`, `latch`, `safe-passage`, `same-flame`,
-and `surface-signal`. Before Midnight's historical `/event/before-midnight/...` counter
+The six game IDs are `before-midnight`, `latch`, `safe-passage`, `same-flame`,
+`surface-signal`, and `one-lucky-bloom`. Before Midnight's historical `/event/before-midnight/...` counter
 keys are unchanged.
 
 - `play-started` fires once when a scored run intentionally starts, and again
   when Retry intentionally starts another run. Surface Signal does not emit it
-  on page load, launch-card initialization, or practice input. The other games
-  retain their existing playable-initialization behavior; an expired Same Flame
-  page does not count as a start.
+  on page load, launch-card initialization, or practice input. One Lucky Bloom
+  likewise waits for Try your luck or Play again. The other games retain their
+  existing playable-initialization behavior; an expired Same Flame page does
+  not count as a start.
 - Surface Signal adds four fixed funnel actions: `first-input` on its first
   accepted scored choice, then `round-2-reached`, `round-4-reached`, and
   `round-6-reached` when those authored rounds resolve. Each action has
@@ -36,14 +37,16 @@ keys are unchanged.
   two fallback paths. Latch and Safe Passage expose a result-page share action;
   Before Midnight and Same Flame retain their existing result sharing.
 - Surface Signal's `new` or `returning` class is fixed per scored run when
-  `play-started` is accepted. `returning` means durable state for that game
-  records a prior completion or a legacy saved best (including a saved zero).
-  Its first run stays `new` through completion; that completion establishes
-  returning status for a retry in the same loaded session and, when storage is
-  available, for a later reload. The other games retain their established
-  page-load classification. This deliberately privacy-limited signal is a
-  returning-player proxy, not a unique-person count. The analytics module reads
-  existing gameplay state but creates no identifier and writes no browser
+  `play-started` is accepted. `returning` means its durable completion marker or
+  a legacy saved best (including zero) already exists. Its first run stays `new` through
+  completion, including a 0/6 result; that completion establishes returning
+  status for a retry in the same loaded session and, when storage is available,
+  for a later reload.
+- The other games retain their established page-load classification. Returning
+  means a positive gameplay best for Before Midnight or Same Flame, or a valid
+  completed One Lucky Bloom record. This deliberately privacy-limited signal is
+  a returning-player proxy, not a unique-person count. The analytics module
+  reads existing gameplay state but creates no identifier and writes no browser
   storage; Surface Signal's game module writes only the fixed
   `nownow-surface-signal-played-v1=1` completion marker. Throwing or unavailable
   storage falls back to `new` and never blocks result UI or lifecycle telemetry.

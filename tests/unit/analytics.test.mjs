@@ -20,6 +20,7 @@ function fixture(
     title = "Latch! | NowNow Games",
     href = "https://dev.invalid/ignored",
     explicitStart = false,
+    includeView = true,
   } = {},
 ) {
   const listeners = new Map();
@@ -40,6 +41,7 @@ function fixture(
     ["#retry", button("#retry")],
     ["#share-best,#share-result", button("#share")],
   ]);
+  if (!includeView) nodes.delete("#game-panel,#game");
   const document = {
     readyState,
     title,
@@ -115,26 +117,33 @@ test("returning status uses only durable state for the current game", () => {
     ["nownow-before-midnight-best-v1", "0"],
     ["nownow-same-flame-best-v1", "88"],
     ["nownow-surface-signal-played-v1", "1"],
+    ["nownow-one-lucky-bloom-best-v1", JSON.stringify({ version: 1, playsCompleted: 2 })],
   ]);
   const storage = {
     getItem: (key) => stored.get(key) ?? null,
     setItem() { writes += 1; },
   };
 
-  assert.equal(visitorType(storage, "before-midnight"), "returning");
+  assert.equal(visitorType(storage, "before-midnight"), "new");
   assert.equal(visitorType(storage, "same-flame"), "returning");
   assert.equal(visitorType(storage, "surface-signal"), "returning");
+  assert.equal(visitorType(storage, "one-lucky-bloom"), "returning");
   assert.equal(visitorType(storage, "latch"), "new");
   assert.equal(visitorType(storage, "safe-passage"), "new");
   assert.equal(visitorType(storage, undefined), "new");
   assert.equal(writes, 0);
 
+  assert.equal(visitorType({ getItem: () => "0" }, "surface-signal"), "returning");
+  assert.equal(visitorType({ getItem: () => "5" }, "surface-signal"), "returning");
+  assert.equal(visitorType({ getItem: () => "not-a-score" }, "surface-signal"), "new");
+  assert.equal(visitorType({ getItem: () => "0" }, "same-flame"), "new");
   assert.equal(visitorType({ getItem: () => null }, "same-flame"), "new");
   assert.equal(visitorType({ getItem: () => "not-a-score" }, "same-flame"), "new");
-  assert.equal(
-    visitorType({ getItem: () => { throw new Error("blocked storage"); } }, "same-flame"),
-    "new",
-  );
+  assert.equal(visitorType({ getItem: () => JSON.stringify({ version: 1, playsCompleted: 0 }) }, "one-lucky-bloom"), "new");
+  assert.equal(visitorType({ getItem: () => JSON.stringify({ version: 2, playsCompleted: 2 }) }, "one-lucky-bloom"), "new");
+  assert.equal(visitorType({ getItem: () => JSON.stringify({ version: 1, playsCompleted: "2" }) }, "one-lucky-bloom"), "new");
+  assert.equal(visitorType({ getItem: () => "not-json" }, "one-lucky-bloom"), "new");
+  assert.equal(visitorType({ getItem: () => { throw new Error("blocked storage"); } }, "same-flame"), "new");
 });
 
 test("legacy game lifecycle hooks keep historical paths and deduplicate each run", (t) => {
@@ -183,6 +192,23 @@ test("legacy games retain their page-load visitor class across retry", (t) => {
     "/event/latch/play-started/new",
     "/event/latch/play-completed/new",
     "/event/latch/play-started/new",
+  ]);
+});
+
+test("a bundled game without a conventional panel id owns its start signal", (t) => {
+  const { requests } = stubTransport(t);
+  const page = fixture("/games/one-lucky-bloom/", {
+    includeView: false,
+    title: "One Lucky Bloom | NowNow Games",
+  });
+  initAnalytics(page.document, page.window);
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/games/one-lucky-bloom/",
+  ]);
+  assert.equal(trackGameEvent("one-lucky-bloom", "play-started", page.document), true);
+  assert.deepEqual(requests.map(({ url }) => pathOf(url)), [
+    "/games/one-lucky-bloom/",
+    "/event/one-lucky-bloom/play-started/new",
   ]);
 });
 

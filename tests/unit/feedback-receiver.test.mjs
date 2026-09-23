@@ -325,6 +325,12 @@ test("serves the built site, redirects canonical routes, and returns the custom 
   assert.equal(legacy.status, 308);
   assert.equal(legacy.headers.get("location"), "/games/before-midnight/?from=test");
 
+  const bloomLegacy = await fetch(`${url}/prototypes/one-lucky-bloom/`, {
+    redirect: "manual",
+  });
+  assert.equal(bloomLegacy.status, 308);
+  assert.equal(bloomLegacy.headers.get("location"), "/games/one-lucky-bloom/");
+
   const canonical = await getWithHost(
     `${url}/a?b=1`,
     "www.nownowgames.co.za",

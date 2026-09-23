@@ -32,6 +32,7 @@ jobs:
           npm test
           npm run build
           npm run budget
+          npm run portal:check
 
       - name: Install browser
         run: npx playwright install --with-deps chromium

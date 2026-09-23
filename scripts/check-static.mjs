@@ -130,6 +130,17 @@ const required = [
   "shared/input.js",
   "shared/site.css",
   "prototypes/README.md",
+  "portal/one-lucky-bloom/LISTING.md",
+  "portal/one-lucky-bloom/QA.md",
+  "portal/one-lucky-bloom/README.md",
+  "portal/one-lucky-bloom/cover.html",
+  "portal/one-lucky-bloom/media/cover-630x500.png",
+  "portal/one-lucky-bloom/media/intro-1280x800.png",
+  "portal/one-lucky-bloom/media/play-390x844.png",
+  "portal/one-lucky-bloom/media/result-390x844.png",
+  "portal/one-lucky-bloom/release.json",
+  "scripts/capture-itchio-media.mjs",
+  "scripts/package-itchio.mjs",
 ];
 
 function tagWithAttribute(source, element, attribute, value) {

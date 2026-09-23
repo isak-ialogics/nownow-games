@@ -8,6 +8,7 @@ import {
   readPrototypeCards,
 } from "./hub-registry.mjs";
 import { buildRobots, buildSitemap } from "./seo.mjs";
+import { writeItchioPortalDirectory } from "./package-itchio.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const destination = resolve(root, "dist");
@@ -312,7 +313,8 @@ for (const entry of await readdir(sharedDir, { withFileTypes: true })) {
 
 await writeFile(resolve(destination, "robots.txt"), buildRobots());
 await writeFile(resolve(destination, "sitemap.xml"), buildSitemap(cards));
+await writeItchioPortalDirectory(resolve(destination, "itchio", "one-lucky-bloom"));
 
 console.log(
-  `Built ${sources.length} static source paths, crawl files, and ${cards.length} prototype card${cards.length === 1 ? "" : "s"} into ${destination}`,
+  `Built ${sources.length} static source paths, crawl files, ${cards.length} prototype card${cards.length === 1 ? "" : "s"}, and the One Lucky Bloom portal build into ${destination}`,
 );

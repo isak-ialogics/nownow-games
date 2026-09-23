@@ -44,6 +44,11 @@ test("promotion captures prior state then verifies the approved digest", async (
 
   assert.equal(receipt.outcome, "fixture-pass");
   assert.equal(receipt.after.prodAliasDigest, APPROVED_DIGEST);
+  assert.equal(receipt.redacted, true);
+  assert.doesNotMatch(
+    JSON.stringify(receipt),
+    /authorization|bearer|github_token|ial_ghcr_token|password/iu,
+  );
   assert.equal(saved[0].phase, "preflight-captured");
   assert.equal(saved[0].before.prodAliasDigest, PREVIOUS_PROD_DIGEST);
   assert.equal(saved[0].before.runtimeIdentity, runtimeIdentity);
@@ -192,8 +197,18 @@ test("promotion tooling contains no image build path", async () => {
     "utf8",
   );
   assert.match(workflow, /workflow_dispatch:/u);
-  assert.match(workflow, /github\.ref == 'refs\/heads\/main'/u);
-  assert.match(workflow, /secrets\.GITHUB_TOKEN/u);
+  assert.match(
+    workflow,
+    /^\s*if: github\.ref == 'refs\/heads\/main'\s*$/mu,
+  );
+  assert.doesNotMatch(workflow, /\|\|\s*inputs\.execute/u);
+  assert.match(workflow, /username: isak-ialogics/u);
+  assert.match(workflow, /secrets\.IAL_GHCR_TOKEN/u);
+  assert.doesNotMatch(workflow, /secrets\.GITHUB_TOKEN/u);
+  assert.doesNotMatch(workflow, /packages:\s+write/u);
   assert.match(workflow, /scripts\/prod-oci-release\.mjs/u);
-  assert.doesNotMatch(workflow, /workflow_run:|build-push-action|docker\s+build/u);
+  assert.doesNotMatch(
+    workflow,
+    /workflow_run:|build-push-action|docker\s+build|environment:/u,
+  );
 });

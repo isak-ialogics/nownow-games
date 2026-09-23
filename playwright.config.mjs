@@ -30,7 +30,7 @@ export default defineConfig({
     },
     {
       name: "desktop-chromium",
-      testMatch: /feedback\.spec\.mjs/,
+      testMatch: /(?:feedback|itchio-portal)\.spec\.mjs/,
       use: { ...devices["Desktop Chrome"] },
     },
   ],

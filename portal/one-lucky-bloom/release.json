@@ -1,0 +1,21 @@
+{
+  "title": "One Lucky Bloom",
+  "version": "1.0.0",
+  "portal": "itchio",
+  "ownedSourceCommit": "48e24d237a1adc56fb29bdfd37bc82acf78680f3",
+  "packageFile": "one-lucky-bloom-itchio-1.0.0.zip",
+  "sourceFiles": [
+    "prototypes/one-lucky-bloom/index.html",
+    "prototypes/one-lucky-bloom/game.js",
+    "prototypes/one-lucky-bloom/state.js",
+    "prototypes/one-lucky-bloom/style.css",
+    "shared/input.js"
+  ],
+  "sourceHashes": {
+    "prototypes/one-lucky-bloom/index.html": "920633994ae096870abd6d274d5bf442d09fcab8b285b328bf03d3487647a353",
+    "prototypes/one-lucky-bloom/game.js": "86b56f96ba98ee4eaece6e96f034f531233a3891ab3255f48a0cc0639e9f0326",
+    "prototypes/one-lucky-bloom/state.js": "82f2f6090a8ecce9c8b3ac3c5630ad171a1ba95b35ef95d8af276edbd96b02a0",
+    "prototypes/one-lucky-bloom/style.css": "071e13250e4c73920ff3d2b7b45ae0f451a4dbef2d446b25f1c10beb4776c2ff",
+    "shared/input.js": "0ded7fa64dd1d2885df58a7e7333074b02767bcbb0b06f123b93a779f4de74cd"
+  }
+}

@@ -3,9 +3,59 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <meta name="description" content="Safe Passage: an abstract hold-and-release formation arcade game." />
-    <title>Safe Passage - NowNow Games</title>
+    <meta
+      name="description"
+      content="Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game."
+    />
+    <meta property="og:title" content="Safe Passage | NowNow Games" />
+    <meta
+      property="og:description"
+      content="Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nownowgames.co.za/assets/safe-passage-share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Safe Passage game with two abstract craft inside a green safety corridor" />
+    <meta
+      property="og:url"
+      content="https://nownowgames.co.za/prototypes/safe-passage/"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Safe Passage | NowNow Games" />
+    <meta
+      name="twitter:description"
+      content="Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game."
+    />
+    <meta name="twitter:url" content="https://nownowgames.co.za/prototypes/safe-passage/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/safe-passage-share.png" />
+    <meta name="twitter:image:alt" content="Safe Passage game with two abstract craft inside a green safety corridor" />
+    <link
+      rel="canonical"
+      href="https://nownowgames.co.za/prototypes/safe-passage/"
+    />
+    <title>Safe Passage | NowNow Games</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Safe Passage",
+        "url": "https://nownowgames.co.za/prototypes/safe-passage/",
+        "description": "Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game.",
+        "gamePlatform": "Web browser",
+        "playMode": "SinglePlayer",
+        "inLanguage": "en-ZA",
+        "isAccessibleForFree": true,
+        "publisher": {
+          "@type": "Organization",
+          "name": "NowNow Games",
+          "url": "https://nownowgames.co.za/"
+        }
+      }
+    </script>
+    <meta name="nownow-feedback-context" content="safe-passage@1" />
     <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="../../shared/feedback.css" />
   </head>
   <body>
     <header><a href="../../" aria-label="Back to NowNow Games">&larr; All games</a><span>Sound off</span></header>
@@ -13,7 +63,7 @@
       <section class="intro" aria-labelledby="game-title">
         <p class="kicker">Abstract arcade formation</p>
         <h1 id="game-title">Safe <em>Passage</em></h1>
-        <p>Keep both craft in the approved green corridor. The lower red zone always ends the run.</p>
+        <p data-page-description>Hold and release to guide two delayed craft through a safety corridor in Safe Passage, an original browser game. The lower red zone always ends the run.</p>
       </section>
 
       <section id="game" class="game" aria-label="Safe Passage game">
@@ -31,14 +81,23 @@
         <ul class="key" aria-label="Safety band key"><li><i class="green"></i>Green scores</li><li><i class="amber"></i>Amber resets chain</li><li><i class="red"></i>Red ends run</li></ul>
       </section>
 
-      <section id="result" class="result" aria-labelledby="result-title" tabindex="-1" hidden>
+      <section id="result" class="result" aria-labelledby="result-title" data-result-screen tabindex="-1" hidden>
         <p class="kicker">Corridor discipline report</p>
         <h2 id="result-title">Pass complete</h2>
         <p id="announcement">Formation held: 0%. Safe gates: 0. Roofline breaches: 0.</p>
         <dl><div><dt>Score</dt><dd id="final-score">0</dd></div><div><dt>Gate record</dt><dd id="final-gates">0 / 12</dd></div></dl>
+        <button id="share-result" class="share" type="button">Share game link</button>
         <button id="retry" type="button">Retry passage</button>
+        <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../../games/before-midnight/">Play Before Midnight</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
       </section>
     </main>
+    <script type="module" src="../../shared/analytics.js"></script>
+    <script type="module" src="../../shared/feedback.js"></script>
     <script type="module" src="./game.js"></script>
   </body>
 </html>

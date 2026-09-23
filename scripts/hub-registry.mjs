@@ -6,6 +6,12 @@ const COUNT_END = "<!-- PROTOTYPE_COUNT_END -->";
 const CARDS_START = "<!-- PROTOTYPE_CARDS_START -->";
 const CARDS_END = "<!-- PROTOTYPE_CARDS_END -->";
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PUBLIC_PATH_PATTERN =
+  /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
+
+export function publicPathForCard(card) {
+  return card.publicPath ?? `prototypes/${card.slug}`;
+}
 
 function escapeHtml(value) {
   return value
@@ -21,14 +27,34 @@ function assertCard(card, slug) {
     throw new Error(`Prototype directory has an invalid slug: ${slug}`);
   }
 
-  for (const field of ["title", "kicker", "description"]) {
+  for (const field of [
+    "title",
+    "kicker",
+    "description",
+    "pageTitle",
+    "pageDescription",
+    "socialImage",
+    "socialImageAlt",
+  ]) {
     if (typeof card[field] !== "string" || card[field].trim() === "") {
       throw new Error(`${slug}/card.json requires a non-empty ${field}.`);
     }
   }
 
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*\.png$/.test(card.socialImage)) {
+    throw new Error(`${slug}/card.json has an invalid socialImage.`);
+  }
+
   if (!Number.isInteger(card.order) || card.order < 1) {
     throw new Error(`${slug}/card.json requires a positive integer order.`);
+  }
+
+  if (
+    card.publicPath !== undefined &&
+    (typeof card.publicPath !== "string" ||
+      !PUBLIC_PATH_PATTERN.test(card.publicPath))
+  ) {
+    throw new Error(`${slug}/card.json has an invalid publicPath.`);
   }
 
   if (
@@ -83,20 +109,17 @@ function renderCard(card, index) {
 
   return `        <article class="prototype-card">
           <div class="card-preview card-art--${escapeHtml(card.slug)}" aria-hidden="true">
-            <span class="preview-shape preview-shape-a"></span>
-            <span class="preview-shape preview-shape-b"></span>
-            <span class="preview-shape preview-shape-c"></span>
-            <span class="preview-label">GAME / ${cardNumber}</span>
+            <i class="a"></i><i class="b"></i><i class="c"></i>
           </div>
           <div class="card-content">
             <p class="card-kicker">${escapeHtml(card.kicker)}</p>
             <h3>${escapeHtml(card.title)}</h3>
             <p>${escapeHtml(card.description)}</p>
-            <ul class="feature-list" aria-label="Game features">
+            <ul class="feature-list">
 ${features}
             </ul>
-            <a class="play-link" href="./prototypes/${escapeHtml(card.slug)}/">
-              Play now <span aria-hidden="true">&rarr;</span>
+            <a class="play-link" href="./${escapeHtml(publicPathForCard(card))}/">
+              Play now →
             </a>
           </div>
         </article>`;

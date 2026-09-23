@@ -247,7 +247,7 @@ main {
   place-items: center;
 }
 
-.preview-shape {
+.card-preview > i {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -257,31 +257,31 @@ main {
 
 /* Before Midnight: a fill meter rising toward the cap you must stop under. */
 .card-art--before-midnight { background: linear-gradient(180deg, #232a24, #141813); }
-.card-art--before-midnight .preview-shape-a,
-.card-art--before-midnight .preview-shape-b {
+.card-art--before-midnight .a,
+.card-art--before-midnight .b {
   width: 5rem; height: 12.5rem; border-radius: 2.6rem;
   transform: translate(-50%, -50%);
 }
-.card-art--before-midnight .preview-shape-a { background: #12160f; border: 1px solid var(--line); }
-.card-art--before-midnight .preview-shape-b { background: linear-gradient(180deg, transparent 44%, var(--lime) 44%); }
-.card-art--before-midnight .preview-shape-c {
+.card-art--before-midnight .a { background: #12160f; border: 1px solid var(--line); }
+.card-art--before-midnight .b { background: linear-gradient(180deg, transparent 44%, var(--lime) 44%); }
+.card-art--before-midnight .c {
   width: 6.2rem; margin-top: -3.5rem;
   border-top: 2px dashed var(--orange); transform: translateX(-50%);
 }
 
 /* Latch: two doors; the correct one is secured with a lime latch. */
 .card-art--latch { background: linear-gradient(135deg, #27221b, #151915); }
-.card-art--latch .preview-shape-a,
-.card-art--latch .preview-shape-b {
+.card-art--latch .a,
+.card-art--latch .b {
   width: 5rem; height: 11rem; border-radius: 0.5rem 0.5rem 0.35rem 0.35rem;
   transform: translate(-50%, -50%);
 }
-.card-art--latch .preview-shape-a { margin-left: -3.4rem; background: #1a1e1b; border: 1px solid var(--line); }
-.card-art--latch .preview-shape-b {
+.card-art--latch .a { margin-left: -3.4rem; background: #1a1e1b; border: 1px solid var(--line); }
+.card-art--latch .b {
   margin-left: 3.4rem; background: #1c231a; border: 2px solid var(--lime);
   box-shadow: 0 1rem 3rem rgb(200 255 61 / 18%);
 }
-.card-art--latch .preview-shape-c {
+.card-art--latch .c {
   z-index: 1; width: 0.75rem; height: 0.75rem; margin-left: 1.9rem;
   background: var(--lime); border-radius: 50%;
   box-shadow: 0 0 0 0.32rem rgb(16 18 17 / 85%), 0 0 1.2rem var(--lime);
@@ -290,26 +290,42 @@ main {
 
 /* Safe Passage: two craft held inside an angled safety corridor. */
 .card-art--safe-passage { background: linear-gradient(160deg, #1b2531, #151915); }
-.card-art--safe-passage .preview-shape-a {
+.card-art--safe-passage .a {
   width: 16rem; height: 5.5rem;
   background: linear-gradient(180deg, rgb(126 215 255 / 7%), transparent);
   border-top: 2px dashed rgb(126 215 255 / 55%);
   border-bottom: 2px dashed rgb(126 215 255 / 55%);
   transform: translate(-50%, -50%) rotate(-14deg);
 }
-.card-art--safe-passage .preview-shape-b,
-.card-art--safe-passage .preview-shape-c {
+.card-art--safe-passage .b,
+.card-art--safe-passage .c {
   z-index: 1; border-radius: 50% 50% 50% 15%;
   transform: translate(-50%, -50%) rotate(-14deg);
 }
-.card-art--safe-passage .preview-shape-b {
+.card-art--safe-passage .b {
   width: 1.55rem; height: 1.55rem; margin: -0.6rem 0 0 -2.6rem;
   background: var(--lime); box-shadow: 0 0 1rem rgb(200 255 61 / 45%);
 }
-.card-art--safe-passage .preview-shape-c {
+.card-art--safe-passage .c {
   width: 1.25rem; height: 1.25rem; margin: 0.9rem 0 0 2.6rem;
   background: var(--sky); box-shadow: 0 0 0.8rem rgb(126 215 255 / 45%);
 }
+
+/* Same Flame: two distinct fires meeting across one shared ember line. */
+.card-art--same-flame { background: radial-gradient(circle at 50% 60%, #6b291a, #170e0b 65%); }
+.card-art--same-flame .a,
+.card-art--same-flame .b {
+  width: 4.6rem; height: 6.4rem; border-radius: 70% 35% 65% 40%;
+  background: linear-gradient(135deg, #ffcf58, #ff633f 72%);
+  filter: drop-shadow(0 0 1.2rem rgb(255 107 53 / 55%));
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.card-art--same-flame .a { margin-left: -4rem; }
+.card-art--same-flame .b { margin-left: 4rem; background: linear-gradient(135deg, #ffe17d, #e84d3b 72%); }
+.card-art--same-flame .c { width: 7rem; border-top: 2px dotted #ffcf58; transform: translateX(-50%); }
+.card-art--surface-signal{background:linear-gradient(#16485a 49%,#07303d 50%)}
+.card-art--surface-signal .a{width:9rem;height:3rem;border-top:.5rem solid #74d8d2;border-radius:50%;transform:translate(-50%,-50%)}
+.card-art--one-lucky-bloom{background:radial-gradient(circle,#c697d4 0 12%,#52325f 13%,#21172b 70%)}
 
 .preview-label {
   position: absolute;

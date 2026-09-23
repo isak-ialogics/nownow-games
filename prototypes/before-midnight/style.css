@@ -18,6 +18,7 @@ body {
   min-height: 100svh;
   margin: 0;
   color: var(--ink);
+  overscroll-behavior: none; /* iOS: prevent pull-to-refresh and overscroll navigation */
   background:
     radial-gradient(circle at 90% 0, rgb(156 233 197 / 10%), transparent 20rem),
     var(--paper);
@@ -180,6 +181,8 @@ h1 {
   cursor: pointer;
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none; /* iOS: suppress long-press system callout */
   place-items: center;
 }
 
@@ -259,6 +262,23 @@ kbd {
   font-weight: 900;
   cursor: pointer;
 }
+
+.share {
+  color: var(--ink);
+  background: #29322f;
+  border: 1px solid var(--mint);
+}
+
+.more-games {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  padding: 1.5rem 0;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+.more-games p { flex-basis: 100%; margin: 0; color: var(--muted); }
+.more-games a { display: inline-flex; min-height: 44px; align-items: center; }
 
 [hidden] { display: none !important; }
 

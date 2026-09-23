@@ -1,9 +1,19 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { expectResultDiscovery } from "./result-discovery.mjs";
+
+const localOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT ?? 4173}`;
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const evidenceDir = process.env.EVIDENCE_DIR;
+
+function eventPaths(requests) {
+  return requests
+    .map((request) => new URL(request))
+    .filter((url) => url.pathname === "/analytics/count")
+    .map((url) => url.searchParams.get("p"));
+}
 
 async function waitForThreat(page, doorNumber) {
   const door = page.locator(".door").nth(doorNumber - 1);
@@ -17,10 +27,22 @@ test("touch, mouse, number key, focus activation, results, and retry work", asyn
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async (value) => { globalThis.__copiedResult = value; } },
+    });
+  });
   const requests = [];
   page.on("request", (request) => requests.push(request.url()));
   const response = await page.goto("/prototypes/latch/");
   expect(response?.ok()).toBe(true);
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/latch/play-started/new").length).toBe(1);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Latch!");
   await expect(page.getByText(/stay inside and secure only/i)).toBeVisible();
   await expect(page.locator("audio")).toHaveCount(0);
@@ -83,10 +105,17 @@ test("touch, mouse, number key, focus activation, results, and retry work", asyn
 
   const result = page.locator("#result-card");
   await expect(result).toBeVisible({ timeout: 10000 });
+  await expectResultDiscovery(page, result, {
+    crossGameName: "One Lucky Bloom",
+    crossGamePath: "/games/one-lucky-bloom/",
+    retryName: "Retry Latch!",
+  });
   await expect(page.locator("#final-hits")).toHaveText("4");
   await expect(page.locator("#final-false")).toHaveText("1");
   await expect(result).toContainText(/keep your distance/i);
-  await expect(page.locator("#result-card button")).toHaveCount(1);
+  await expect(page.locator("#result-card button")).toHaveCount(2);
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/latch/play-completed/new").length).toBe(1);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 
   if (evidenceDir) {
@@ -97,12 +126,23 @@ test("touch, mouse, number key, focus activation, results, and retry work", asyn
     });
   }
 
+  await page.getByRole("button", { name: "Share game link" }).click();
+  await expect(page.locator("#share-status")).toHaveText("Result copied.");
+  expect(await page.evaluate(() => globalThis.__copiedResult)).toBe(
+    "I played Latch! Try it: https://nownowgames.co.za/prototypes/latch/",
+  );
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/latch/share-triggered/new").length).toBe(1);
+  const startsBeforeRetry = eventPaths(requests).filter((path) =>
+    path === "/event/latch/play-started/new").length;
   await page.getByRole("button", { name: "Retry Latch!" }).click();
   await expect(result).toBeHidden();
   await expect(page.locator("#score")).toHaveText("0");
   await expect(page.locator("#timer")).toHaveText("55");
+  await expect.poll(() => eventPaths(requests).filter((path) =>
+    path === "/event/latch/play-started/new").length).toBe(startsBeforeRetry + 1);
   expect(
-    requests.every((url) => url.startsWith("http://127.0.0.1:4173/")),
+    requests.every((url) => url.startsWith(`${localOrigin}/`)),
   ).toBe(true);
 });
 

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game." />
+    <meta property="og:title" content="Surface Signal | NowNow Games" />
+    <meta property="og:description" content="Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nownowgames.co.za/assets/surface-signal-share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Surface Signal shore-view game with five abstract observation sectors" />
+    <meta property="og:url" content="https://nownowgames.co.za/prototypes/surface-signal/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Surface Signal | NowNow Games" />
+    <meta name="twitter:description" content="Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game." />
+    <meta name="twitter:url" content="https://nownowgames.co.za/prototypes/surface-signal/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/surface-signal-share.png" />
+    <meta name="twitter:image:alt" content="Surface Signal shore-view game with five abstract observation sectors" />
+    <meta name="theme-color" content="#071d2b" />
+    <link rel="canonical" href="https://nownowgames.co.za/prototypes/surface-signal/" />
+    <title>Surface Signal | NowNow Games</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Surface Signal",
+        "url": "https://nownowgames.co.za/prototypes/surface-signal/",
+        "description": "Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game.",
+        "gamePlatform": "Web browser",
+        "playMode": "SinglePlayer",
+        "inLanguage": "en-ZA",
+        "isAccessibleForFree": true,
+        "publisher": { "@type": "Organization", "name": "NowNow Games", "url": "https://nownowgames.co.za/" }
+      }
+    </script>
+    <meta name="nownow-feedback-context" content="surface-signal@1" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="../../shared/feedback.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="../../" aria-label="Back to NowNow Games">&larr; All games</a>
+      <span>Six signals &middot; 42 seconds</span>
+    </header>
+
+    <main>
+      <section class="title-block" aria-labelledby="game-title">
+        <p class="kicker">Watch from shore</p>
+        <h1 id="game-title">Surface<br />Signal</h1>
+        <p class="intro" data-page-description>Read a blow and wake, then predict the next surfacing sector in Surface Signal, an original shore-based browser game.</p>
+      </section>
+
+      <section id="launch-card" class="launch-card" aria-labelledby="launch-title">
+        <p class="kicker">One calm practice signal</p>
+        <h2 id="launch-title">Read the cue.</h2>
+        <p id="launch-copy" class="launch-copy">Practice once without a score or timer. The six-signal run stays paused until you start it.</p>
+        <div id="practice-panel" class="practice-panel">
+          <p class="practice-copy"><strong>Practice cue:</strong> a blow appears in sector 2 and its wake runs one sector right. Choose where the arc will surface.</p>
+          <div class="horizon practice-horizon" aria-label="Untimed practice signal">
+            <div class="signal practice-signal" aria-hidden="true">
+              <span class="plume"><i></i></span>
+              <span class="wake" data-direction="right">&rsaquo;</span>
+            </div>
+            <div id="practice-reveal" class="reveal" aria-hidden="true" hidden><i></i></div>
+            <div
+              id="practice-control"
+              class="sectors"
+              role="group"
+              aria-label="Choose a practice surfacing sector"
+              aria-describedby="practice-status"
+              aria-activedescendant="practice-sector-3"
+              tabindex="0"
+            >
+              <button id="practice-sector-1" type="button" tabindex="-1" aria-label="Practice sector 1" aria-pressed="false"><span>1</span></button>
+              <button id="practice-sector-2" type="button" tabindex="-1" aria-label="Practice sector 2" aria-pressed="false"><span>2</span></button>
+              <button id="practice-sector-3" type="button" tabindex="-1" aria-label="Practice sector 3" aria-pressed="true"><span>3</span></button>
+              <button id="practice-sector-4" type="button" tabindex="-1" aria-label="Practice sector 4" aria-pressed="false"><span>4</span></button>
+              <button id="practice-sector-5" type="button" tabindex="-1" aria-label="Practice sector 5" aria-pressed="false"><span>5</span></button>
+            </div>
+          </div>
+          <p id="practice-status" class="status" role="status" aria-live="polite">No clock is running. Make one practice choice when you are ready.</p>
+        </div>
+        <button id="start-run" class="action share" type="button" aria-describedby="launch-copy practice-status" disabled>Start six-signal run</button>
+      </section>
+
+      <section id="game-panel" class="game-panel" aria-label="Surface Signal game" data-explicit-start hidden>
+        <div class="score-line">
+          <p>Time <strong><span id="time-left">42.0</span>s</strong></p>
+          <p>Signal <strong id="cue-count">1/6</strong></p>
+          <p>Score <strong id="score">0</strong></p>
+        </div>
+
+        <div class="horizon" aria-label="Five observation sectors">
+          <div id="signal" class="signal" aria-hidden="true">
+            <span class="plume"><i></i></span>
+            <span id="wake" class="wake"></span>
+          </div>
+          <div id="reveal" class="reveal" aria-hidden="true" hidden><i></i></div>
+          <div
+            id="sector-control"
+            class="sectors"
+            role="group"
+            aria-label="Choose a surfacing sector"
+            aria-describedby="instructions game-status"
+            aria-activedescendant="sector-3"
+            tabindex="0"
+          >
+            <button id="sector-1" type="button" tabindex="-1" aria-label="Sector 1" aria-pressed="false"><span>1</span></button>
+            <button id="sector-2" type="button" tabindex="-1" aria-label="Sector 2" aria-pressed="false"><span>2</span></button>
+            <button id="sector-3" type="button" tabindex="-1" aria-label="Sector 3" aria-pressed="true"><span>3</span></button>
+            <button id="sector-4" type="button" tabindex="-1" aria-label="Sector 4" aria-pressed="false"><span>4</span></button>
+            <button id="sector-5" type="button" tabindex="-1" aria-label="Sector 5" aria-pressed="false"><span>5</span></button>
+          </div>
+        </div>
+
+        <p id="game-status" class="status" role="status" aria-live="polite">Watch for the first signal.</p>
+        <p id="instructions" class="instructions">Tap a sector or press <kbd>1</kbd>&ndash;<kbd>5</kbd>. Keyboard: use <kbd>&larr;</kbd> <kbd>&rarr;</kbd>, then <kbd>Enter</kbd>. An earlier correct call earns up to 25 confidence points. No sound required.</p>
+        <p class="safe-note">A fixed-view observation game with abstract cues &mdash; no live sightings, location data, pursuit, or guaranteed encounters.</p>
+        <p id="pause-note" class="pause-note" role="status" hidden>Paused &middot; return when you are ready.</p>
+      </section>
+
+      <section id="result-card" class="result-card" tabindex="-1" aria-labelledby="result-title" data-result-screen hidden>
+        <p class="kicker">Your horizon trace</p>
+        <h2 id="result-title">Signals read.</h2>
+        <p>Each mark shows your call and the revealed sector.</p>
+        <ol id="trace" class="trace" aria-label="Six signal results"></ol>
+        <dl>
+          <div><dt>Correct</dt><dd id="final-correct">0/6</dd></div>
+          <div><dt>Early calls</dt><dd id="final-early">0</dd></div>
+          <div><dt>Score</dt><dd id="final-score">0</dd></div>
+        </dl>
+        <p>Personal best: <strong id="best-read">0/6 read &middot; 0 early</strong></p>
+        <button id="share-result" class="action share" type="button">Share your horizon trace</button>
+        <button id="retry" class="action" type="button">Watch another six</button>
+        <button id="reset-best" class="action" type="button">Reset saved best</button>
+        <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../../games/one-lucky-bloom/">Play One Lucky Bloom</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
+      </section>
+    </main>
+
+    <script type="module" src="../../shared/analytics.js"></script>
+    <script type="module" src="../../shared/feedback.js"></script>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

@@ -1,12 +1,15 @@
 # Prototype contract
 
-Each prototype is an independent static page under `prototypes/<slug>/`. The three reserved directories and card orders are:
+Each prototype is an independent static page under `prototypes/<slug>/`. The reserved directories and card orders are:
 
 | Slug | Card order |
 | --- | ---: |
 | `before-midnight` | 1 |
-| `safe-passage` | 2 |
-| `latch` | 3 |
+| `latch` | 2 |
+| `safe-passage` | 3 |
+| `same-flame` | 4 |
+| `surface-signal` | 5 |
+| `one-lucky-bloom` | 6 |
 
 ## Required files
 
@@ -20,7 +23,7 @@ prototypes/<slug>/
 
 - `index.html` is a self-contained, mobile-first game page with relative asset paths and a viewport meta tag.
 - `game.js` imports `createInputController` from `../../shared/input.js`. Keep game-state transitions separate from rendering where practical.
-- `card.json` follows the one-line schema in the root README. Its positive integer `order` must be unique; the build infers `slug` from the directory.
+- `card.json` follows the one-line schema in the root README. Its positive integer `order` must be unique; the build infers `slug` from the directory. An optional safe relative `publicPath` publishes a game at a canonical route while keeping its source in the prototype registry.
 - Local CSS and original local assets may be added inside the prototype directory. Do not add third-party assets.
 
 ## Play and accessibility requirements
@@ -31,7 +34,7 @@ prototypes/<slug>/
 - Audio starts muted, has an obvious mute control if present, and is never required to understand or complete play.
 - Honor `prefers-reduced-motion`; reduced motion must not remove gameplay information.
 - Provide deterministic presets or seeds so tests can reproduce timing, scoring, and end states.
-- The post-game surface is a result card with a retry action only. Do not add sharing, signup, leaderboard, or retention funnels.
+- The post-game surface is a focused result card. Add sharing only when the accepted mechanic requires it; do not add signup, leaderboard, or retention funnels.
 
 ## Technical boundaries
 

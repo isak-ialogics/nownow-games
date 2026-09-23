@@ -380,6 +380,19 @@ kbd {
   cursor: pointer;
 }
 .result-card button:focus-visible { outline: 4px solid var(--amber); outline-offset: 3px; }
+#share-result { color: var(--mint); background: transparent; border: 1px solid var(--mint); }
+#share-status { min-height: 1.4rem; margin: .5rem 0 0; color: var(--mint); }
+
+.more-games {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  padding: 1.5rem 0;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+.more-games p { flex-basis: 100%; margin: 0; color: var(--muted); }
+.more-games a { display: inline-flex; min-height: 44px; align-items: center; color: var(--mint); }
 
 body[data-paused="true"] .game-panel { opacity: .72; }
 

@@ -424,14 +424,18 @@ export async function packageItchioPortal({ check = false } = {}) {
     const [committedZip, committedChecksum, committedInventory, listing, qa] =
       await Promise.all([
         readFile(zipPath),
-        readFile(checksumPath, "utf8"),
-        readFile(inventoryPath, "utf8"),
+        readFile(checksumPath),
+        readFile(inventoryPath),
         readFile(listingPath, "utf8"),
         readFile(qaPath, "utf8"),
       ]);
     if (!zip.equals(committedZip)) throw new Error("Committed itch.io ZIP is stale; run npm run portal:package.");
-    if (checksum !== committedChecksum) throw new Error("Committed itch.io checksum is stale.");
-    if (inventory(files) !== committedInventory) throw new Error("Committed itch.io inventory is stale.");
+    if (!Buffer.from(checksum).equals(canonicalText(committedChecksum))) {
+      throw new Error("Committed itch.io checksum is stale.");
+    }
+    if (!Buffer.from(inventory(files)).equals(canonicalText(committedInventory))) {
+      throw new Error("Committed itch.io inventory is stale.");
+    }
     if (!listing.includes(config.ownedSourceCommit) || !listing.includes(digest)) {
       throw new Error("itch.io listing source or checksum evidence is stale.");
     }

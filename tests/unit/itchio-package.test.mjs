@@ -5,6 +5,7 @@ import {
   buildItchioPortalFiles,
   canonicalText,
   createDeterministicZip,
+  packageItchioPortal,
   readDeterministicZip,
 } from "../../scripts/package-itchio.mjs";
 
@@ -44,6 +45,11 @@ test("itch.io package is deterministic, root-flat, local-only, and source-marked
   assert.equal(marker.ownedSourceCommit, "48e24d237a1adc56fb29bdfd37bc82acf78680f3");
   assert.equal(Object.keys(marker.ownedSourceFiles).length, 5);
   assert.ok(Object.values(marker.ownedSourceFiles).every((hash) => /^sha256:[a-f0-9]{64}$/u.test(hash)));
+});
+
+test("committed itch.io package verifies after platform checkout", async () => {
+  const result = await packageItchioPortal({ check: true });
+  assert.equal(result.digest, "a692c3714ed999a6bb5bc7dae54d0dc22268c6056b6c7d6a60e458208ffba56e");
 });
 
 test("itch.io ZIP reader rejects altered package bytes", async () => {

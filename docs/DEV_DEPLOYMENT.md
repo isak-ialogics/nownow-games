@@ -11,7 +11,7 @@
 successful `main` push triggers DEV publication:
 
 - `.github/workflows/deploy-dev.yml` publishes the immutable commit tag and the
-  moving `dev` tag after a green `main` run.
+  moving `dev` tag after a green `main` push run. It has no manual-dispatch path.
 - `.github/workflows/deploy-prod.yml` is manual-only and promotes one pinned,
   independently accepted manifest to the moving `prod` alias without rebuilding.
 
@@ -66,16 +66,25 @@ therefore unavailable to off-`main` dispatches before checkout, login, or any
 registry access. The job token is limited to `contents: read`, and the workflow
 prints no credential.
 
-The private GHCR package is user-owned and has no linked repository, so the
-repository-scoped `GITHUB_TOKEN` used by the first preflight could authenticate
-but failed closed with `permission_denied: read_package`. Review correction
-branches with static and focused tests, merge through the normal controls, and
-then run `execute=false` from merged `main` to prove the environment-scoped
-credential can perform registry preflight without mutation. The legacy
-repository-scoped `IAL_GHCR_TOKEN` remains only until that merged-main validation
-succeeds and its legitimate IAL owner removes it. Never inject the write-capable
-secret into branch-controlled workflow code. `execute=true` remains a separately
-approved manual action.
+The private GHCR package is user-owned and has no linked repository. PROD alone
+uses the environment-scoped `IAL_GHCR_TOKEN`; that binding and the protected
+`production` environment must not be changed for DEV delivery. The DEV publish
+job instead uses GitHub's short-lived repository `GITHUB_TOKEN`, restricted at
+the job to `contents: read` and `packages: write`. The package owner must grant
+`isak-ialogics/nownow-games` Write access under the package's **Actions access**
+setting. This is package-specific workflow access, not a repository secret or a
+repository-source link. No PAT is stored in repository settings.
+
+The publish job exists only for a successful `Verify static harness` workflow
+whose event is a push, branch is `main`, and head repository is this repository.
+It checks out that verified SHA without persisting checkout credentials. Review
+correction branches with static and focused tests, merge through the normal
+controls, and let the merged-main verification trigger publication. Never add a
+manual dispatch or expose package write authority to pull-request code.
+
+For PROD preflight, run `execute=false` from merged `main` to prove the
+environment-scoped credential can read the registry without mutation.
+`execute=true` remains a separately approved manual action.
 The checked-in fixture receipt is
 [`evidence/now-255/promotion-fixture-receipt.json`](./evidence/now-255/promotion-fixture-receipt.json).
 

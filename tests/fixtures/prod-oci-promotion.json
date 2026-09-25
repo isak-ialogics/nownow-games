@@ -1,0 +1,8 @@
+{
+  "sourceDigest": "sha256:729dd520ba422a65e69a7c70aaf92addb53e379bdfed4e468d2abb63e62876c0",
+  "prodAliasDigest": "sha256:20d3055817bbbd2b83abbd5ca462d869b105c3e176da4e669ad34eb862fcd3d1",
+  "promotionDigest": "sha256:729dd520ba422a65e69a7c70aaf92addb53e379bdfed4e468d2abb63e62876c0",
+  "runtimeIdentity": "ghcr.io/isak-ialogics/nownow-games:prod@sha256:20d3055817bbbd2b83abbd5ca462d869b105c3e176da4e669ad34eb862fcd3d1",
+  "runtimeReplicas": "1/1",
+  "capturedAt": "2026-09-23T00:00:00.000Z"
+}

@@ -222,6 +222,10 @@ test.describe("Feedback keyboard isolation across every game", () => {
   test("clears a held gameplay key, resumes once, and accepts a fresh key after close", async ({
     page,
   }) => {
+    await page.addInitScript(
+      (timestamp) => { Date.now = () => timestamp; },
+      Date.parse("2026-09-12T12:00:00+02:00"),
+    );
     await page.goto("/prototypes/same-flame/");
     await page.evaluate(() => {
       window.__feedbackTransitions = [];

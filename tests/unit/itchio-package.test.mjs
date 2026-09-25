@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
   buildItchioPortalFiles,
   canonicalText,
   createDeterministicZip,
+  packageItchioPortal,
   readDeterministicZip,
 } from "../../scripts/package-itchio.mjs";
 
@@ -44,6 +46,21 @@ test("itch.io package is deterministic, root-flat, local-only, and source-marked
   assert.equal(marker.ownedSourceCommit, "48e24d237a1adc56fb29bdfd37bc82acf78680f3");
   assert.equal(Object.keys(marker.ownedSourceFiles).length, 5);
   assert.ok(Object.values(marker.ownedSourceFiles).every((hash) => /^sha256:[a-f0-9]{64}$/u.test(hash)));
+});
+
+test("committed itch.io package verifies after platform checkout", async () => {
+  const result = await packageItchioPortal({ check: true });
+  const checksum = await readFile(
+    new URL(
+      `../../releases/one-lucky-bloom/${result.config.packageFile}.sha256`,
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  const [evidenceDigest, evidencePackageFile, ...unexpectedFields] = checksum.trim().split(/\s+/u);
+  assert.equal(result.digest, evidenceDigest);
+  assert.equal(result.config.packageFile, evidencePackageFile);
+  assert.deepEqual(unexpectedFields, []);
 });
 
 test("itch.io ZIP reader rejects altered package bytes", async () => {

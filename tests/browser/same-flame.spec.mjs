@@ -15,6 +15,10 @@ function eventPaths(requests) {
 }
 
 test("mobile play exposes equivalent touch and keyboard controls without external calls", async ({ page }) => {
+  await page.addInitScript(
+    (timestamp) => { Date.now = () => timestamp; },
+    Date.parse("2026-09-12T12:00:00+02:00"),
+  );
   await page.setViewportSize({ width: 320, height: 740 });
   const requests = [];
   page.on("request", (request) => requests.push(request.url()));
@@ -61,6 +65,7 @@ test("mobile play exposes equivalent touch and keyboard controls without externa
   const interactive = await page.evaluate(
     () => performance.getEntriesByType("navigation")[0].domInteractive,
   );
+  expect(interactive).toBeGreaterThan(0);
   expect(interactive).toBeLessThan(2000);
   test.info().annotations.push({
     type: "warm-cache-interactive",

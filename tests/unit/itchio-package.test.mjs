@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -49,7 +50,17 @@ test("itch.io package is deterministic, root-flat, local-only, and source-marked
 
 test("committed itch.io package verifies after platform checkout", async () => {
   const result = await packageItchioPortal({ check: true });
-  assert.equal(result.digest, "a692c3714ed999a6bb5bc7dae54d0dc22268c6056b6c7d6a60e458208ffba56e");
+  const checksum = await readFile(
+    new URL(
+      `../../releases/one-lucky-bloom/${result.config.packageFile}.sha256`,
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  const [evidenceDigest, evidencePackageFile, ...unexpectedFields] = checksum.trim().split(/\s+/u);
+  assert.equal(result.digest, evidenceDigest);
+  assert.equal(result.config.packageFile, evidencePackageFile);
+  assert.deepEqual(unexpectedFields, []);
 });
 
 test("itch.io ZIP reader rejects altered package bytes", async () => {

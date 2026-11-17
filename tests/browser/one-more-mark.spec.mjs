@@ -152,6 +152,83 @@ test("Share falls back to copying the result and canonical link", async ({ page 
   );
 });
 
+test("cancelled result feedback leaves every retry path in a clean active round", async ({ browser }) => {
+  test.setTimeout(150_000);
+  const viewports = [
+    { name: "mobile320", width: 320, height: 740, isMobile: true, hasTouch: true },
+    { name: "desktop", width: 1280, height: 800, isMobile: false, hasTouch: false },
+  ];
+  const retryPaths = [
+    { name: "lowercase r", activate: (page) => page.keyboard.press("r") },
+    { name: "uppercase R", activate: (page) => page.keyboard.press("R") },
+    {
+      name: "click",
+      activate: (page) => page.getByRole("button", { name: "Scan another booklet" }).click(),
+    },
+    {
+      name: "Enter",
+      activate: async (page) => {
+        await page.getByRole("button", { name: "Scan another booklet" }).focus();
+        await page.keyboard.press("Enter");
+      },
+    },
+  ];
+
+  for (const viewport of viewports) {
+    const context = await browser.newContext({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.isMobile,
+      hasTouch: viewport.hasTouch,
+    });
+    const page = await context.newPage();
+    try {
+      await page.clock.install();
+      await page.goto(`${origin}/games/one-more-mark/`);
+
+      for (const retryPath of retryPaths) {
+        await page.clock.runFor(43_000);
+        await expect(page.locator("#result-card"), `${viewport.name}: ${retryPath.name}`).toBeVisible();
+        await page.getByRole("button", { name: "Feedback" }).click();
+        await expect(page.getByLabel("What happened?")).toBeFocused();
+        await page.getByRole("button", { name: "Cancel" }).click();
+
+        await retryPath.activate(page);
+
+        await expect(page.locator("#game-panel"), `${viewport.name}: ${retryPath.name}`).toBeVisible();
+        await expect(page.locator("#pause-note"), `${viewport.name}: ${retryPath.name}`).toBeHidden();
+        await expect(page.getByRole("button", { name: /FILL/ })).toBeEnabled();
+        const before = Number(await page.locator("#time").textContent());
+        await page.clock.runFor(1_000);
+        const after = Number(await page.locator("#time").textContent());
+        expect(before - after, `${viewport.name}: ${retryPath.name} timer`).toBeGreaterThanOrEqual(0.8);
+      }
+    } finally {
+      await context.close();
+    }
+  }
+});
+
+test("live feedback still pauses and resumes an active round", async ({ page }) => {
+  await page.clock.install();
+  await page.goto("/games/one-more-mark/");
+  await page.clock.runFor(1_000);
+
+  await page.getByRole("button", { name: "Feedback" }).click();
+  await expect(page.locator("#pause-note")).toBeVisible();
+  await expect(page.locator("#fill")).toBeDisabled();
+  const pausedAt = Number(await page.locator("#time").textContent());
+  await page.clock.runFor(5_000);
+  expect(Number(await page.locator("#time").textContent())).toBe(pausedAt);
+
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.locator("#pause-note")).toBeHidden();
+  await expect(page.locator("#fill")).toBeEnabled();
+  await page.clock.runFor(1_000);
+  const afterResume = Number(await page.locator("#time").textContent());
+  expect(pausedAt - afterResume).toBeGreaterThanOrEqual(0.8);
+  await expect(page.locator("#result-card")).toBeHidden();
+});
+
 test("result R retry is reload-free, focused, 320px-safe, and ignored while editing feedback", async ({ page }) => {
   await page.clock.install();
   await page.setViewportSize({ width: 320, height: 740 });

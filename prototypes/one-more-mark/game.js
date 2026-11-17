@@ -101,9 +101,15 @@ function act(action) {
   }, FEEDBACK_MS);
 }
 
+function clearPauseState() {
+  pauses.clear();
+  pauseNote.hidden = true;
+}
+
 function start(next) {
   cancelAnimationFrame(frame);
   clearTimeout(advanceTimer);
+  clearPauseState();
   game = next;
   result.hidden = true;
   panel.hidden = false;
@@ -123,8 +129,9 @@ function pause(reason) {
 
 function resume(reason) {
   pauses.delete(reason);
-  if (pauses.size || game.ended) return;
+  if (pauses.size) return;
   pauseNote.hidden = true;
+  if (game.ended) return;
   setControls();
   lastAt = performance.now();
   frame = requestAnimationFrame(tick);

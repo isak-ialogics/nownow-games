@@ -10,6 +10,7 @@ Each prototype is an independent static page under `prototypes/<slug>/`. The res
 | `same-flame` | 4 |
 | `surface-signal` | 5 |
 | `one-lucky-bloom` | 6 |
+| `one-more-mark` | 7 |
 
 ## Required files
 

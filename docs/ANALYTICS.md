@@ -12,8 +12,8 @@ events use this fixed taxonomy:
 
 `/event/{game-id}/{action}/{new|returning}`
 
-The six game IDs are `before-midnight`, `latch`, `safe-passage`, `same-flame`,
-`surface-signal`, and `one-lucky-bloom`. Before Midnight's historical `/event/before-midnight/...` counter
+The seven game IDs are `before-midnight`, `latch`, `safe-passage`, `same-flame`,
+`surface-signal`, `one-lucky-bloom`, and `one-more-mark`. Before Midnight's historical `/event/before-midnight/...` counter
 keys are unchanged.
 
 - `play-started` fires once when a scored run intentionally starts, and again

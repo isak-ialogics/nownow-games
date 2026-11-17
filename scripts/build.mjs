@@ -232,6 +232,22 @@ async function bundleOneLuckyBloom(stateSource, gameSource) {
   return `${header}const ${declarations.join(",")};${body}\n`;
 }
 
+async function bundleOneMoreMark(stateSource, gameSource) {
+  const imports = [...gameSource.matchAll(/^import[\s\S]*?;$/gm)]
+    .map(([source]) => source)
+    .filter((source) => !source.includes('"./state.js"'));
+  const stateBody = stateSource.replace(/^export\s+/gm, "");
+  const gameBody = gameSource.replace(/^import[\s\S]*?;\s*$/gm, "");
+  const result = await minify(`${imports.join("\n")}\n${stateBody}\n${gameBody}`, {
+    compress: { passes: 4, pure_getters: "strict" },
+    mangle: { toplevel: true },
+    module: true,
+    format: { comments: false },
+  });
+  if (!result.code) throw new Error("One More Mark JavaScript minification failed.");
+  return `${result.code}\n`;
+}
+
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
 
@@ -288,6 +304,15 @@ for (const directory of ["prototypes/one-lucky-bloom", "games/one-lucky-bloom"])
   await writeFile(gamePath, await bundleOneLuckyBloom(
     await readFile(statePath, "utf8"),
     bloomGameText(await readFile(gamePath, "utf8")),
+  ));
+  await writeFile(statePath, "");
+}
+for (const directory of ["prototypes/one-more-mark", "games/one-more-mark"]) {
+  const gamePath = resolve(destination, directory, "game.js");
+  const statePath = resolve(destination, directory, "state.js");
+  await writeFile(gamePath, await bundleOneMoreMark(
+    await readFile(statePath, "utf8"),
+    await readFile(gamePath, "utf8"),
   ));
   await writeFile(statePath, "");
 }

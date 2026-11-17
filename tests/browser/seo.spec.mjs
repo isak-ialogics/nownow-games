@@ -12,7 +12,7 @@ const pages = [
     canonical: `${origin}/`,
     title: "Original Mobile Browser Games | NowNow Games",
     description:
-      "Play six original, mobile-first browser games from NowNow Games, including One Lucky Bloom, Surface Signal, Same Flame, Before Midnight, Latch!, and Safe Passage.",
+      "Play seven original, mobile-first browser games from NowNow Games, including One More Mark and six more quick challenges.",
     schemaTypes: ["Organization", "WebSite"],
   },
   {
@@ -63,11 +63,19 @@ const pages = [
       "Read branch and wind cues, then lock one blossom landing lane in One Lucky Bloom, an original spring prediction game.",
     schemaTypes: ["VideoGame"],
   },
+  {
+    path: "/games/one-more-mark/",
+    canonical: `${origin}/games/one-more-mark/`,
+    title: "One More Mark | NowNow Games",
+    description:
+      "Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game.",
+    schemaTypes: ["VideoGame"],
+  },
 ];
 const social = new Map([
   ["/", {
     image: `${origin}/assets/hub-share.png`,
-    alt: "NowNow Games home page showing six original browser games",
+    alt: "NowNow Games home page showing seven original browser games",
   }],
   ["/games/before-midnight/", {
     image: `${origin}/assets/before-midnight-share.png`,
@@ -92,6 +100,10 @@ const social = new Map([
   ["/games/one-lucky-bloom/", {
     image: `${origin}/assets/one-lucky-bloom-share.png`,
     alt: "One Lucky Bloom canopy game with five blossom landing lanes",
+  }],
+  ["/games/one-more-mark/", {
+    image: `${origin}/assets/one-more-mark-share.png`,
+    alt: "One More Mark fictional booklet scan with Fill and Flip controls",
   }],
 ]);
 
@@ -256,6 +268,16 @@ test("legacy canonical game routes redirect permanently", async ({
   const bloomResponse = await page.goto("/prototypes/one-lucky-bloom/");
   expect(bloomResponse?.status()).toBe(200);
   expect(page.url()).toBe(`${localOrigin}/games/one-lucky-bloom/`);
+
+  const markLegacy = await request.get("/prototypes/one-more-mark/", {
+    maxRedirects: 0,
+  });
+  expect(markLegacy.status()).toBe(308);
+  expect(markLegacy.headers().location).toBe("/games/one-more-mark/");
+
+  const markResponse = await page.goto("/prototypes/one-more-mark/");
+  expect(markResponse?.status()).toBe(200);
+  expect(page.url()).toBe(`${localOrigin}/games/one-more-mark/`);
 });
 
 test("unknown routes return the friendly page with HTTP 404", async ({ page }) => {

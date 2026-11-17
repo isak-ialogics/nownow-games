@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game." />
+    <meta property="og:title" content="One More Mark | NowNow Games" />
+    <meta property="og:description" content="Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nownowgames.co.za/assets/one-more-mark-share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="One More Mark fictional booklet scan with Fill and Flip controls" />
+    <meta property="og:url" content="https://nownowgames.co.za/games/one-more-mark/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="One More Mark | NowNow Games" />
+    <meta name="twitter:description" content="Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game." />
+    <meta name="twitter:url" content="https://nownowgames.co.za/games/one-more-mark/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/one-more-mark-share.png" />
+    <meta name="twitter:image:alt" content="One More Mark fictional booklet scan with Fill and Flip controls" />
+    <meta name="theme-color" content="#17263b" />
+    <link rel="canonical" href="https://nownowgames.co.za/games/one-more-mark/" />
+    <title>One More Mark | NowNow Games</title>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"VideoGame","name":"One More Mark","url":"https://nownowgames.co.za/games/one-more-mark/","description":"Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game.","gamePlatform":"Web browser","playMode":"SinglePlayer","inLanguage":"en-ZA","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"NowNow Games","url":"https://nownowgames.co.za/"}}
+    </script>
+    <meta name="nownow-feedback-context" content="one-more-mark@1" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="../../shared/feedback.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="../../" aria-label="Back to NowNow Games">← All games</a>
+      <span>42 seconds · sound optional</span>
+    </header>
+    <main id="page-main">
+      <section class="title">
+        <p class="kicker">A final fictional scan</p>
+        <h1>One More<br />Mark</h1>
+        <p class="deck" data-page-description>Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game. Fictional scan game; not exam guidance.</p>
+      </section>
+      <div class="settings"><button id="sound" type="button" aria-pressed="false">Sound off</button></div>
+      <section id="game-panel" class="game" aria-label="One More Mark game">
+        <div class="hud">
+          <p>Seconds<strong id="time">42.0</strong></p>
+          <p>Marks found<strong id="marks">0</strong></p>
+          <p>Clean streak<strong id="streak">0</strong></p>
+        </div>
+        <div class="booklet-meta"><strong id="booklet">Indigo tabs</strong><span id="page-number">Page 1 of 5</span></div>
+        <article id="paper" class="paper" aria-live="polite"></article>
+        <p id="feedback" class="feedback" role="status" aria-live="polite">Find the open box — or flip a clean page.</p>
+        <p id="pause-note" class="pause" role="status" hidden>Paused while this page is away.</p>
+        <div class="choices">
+          <button id="fill" type="button">FILL<small>F or Space</small></button>
+          <button id="flip" type="button">FLIP<small>→ or Enter</small></button>
+        </div>
+        <p class="instructions">Tap Fill for one unfinished response. Tap Flip when every response is complete. A wrong scan costs 2 seconds. Keyboard: <kbd>F</kbd>/<kbd>Space</kbd> or <kbd>→</kbd>/<kbd>Enter</kbd>.</p>
+      </section>
+      <section id="result-card" class="result" aria-labelledby="result-title" data-result-screen hidden>
+        <p class="kicker">Time called</p>
+        <h2 id="result-title">Final scan logged</h2>
+        <p>Only this fictional scan is counted — never a grade or real exam result.</p>
+        <dl>
+          <div><dt>Marks found</dt><dd id="final-marks">0 / 0</dd></div>
+          <div><dt>Best clean streak</dt><dd id="final-streak">0</dd></div>
+          <div><dt>Accuracy</dt><dd id="final-accuracy">0%</dd></div>
+        </dl>
+        <button id="retry" class="primary" type="button">Scan another booklet</button>
+        <button id="share-result" class="action" type="button">Share to WhatsApp or another app</button>
+        <button id="copy-link" class="action" type="button">Copy result + game link</button>
+        <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../one-lucky-bloom/">Play One Lucky Bloom</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
+      </section>
+    </main>
+    <script type="module" src="../../shared/analytics.js"></script>
+    <script type="module" src="../../shared/feedback.js"></script>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

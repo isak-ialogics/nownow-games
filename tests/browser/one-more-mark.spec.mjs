@@ -113,7 +113,7 @@ test("result controls use Web Share, explicit copy, and a keyboard path without 
   await page.clock.runFor(43_000);
   await expect(page.locator("#result-card")).toBeVisible();
 
-  await page.getByRole("button", { name: "Share to WhatsApp or another app" }).focus();
+  await page.getByRole("button", { name: "Share result" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#share-status")).toHaveText("Share sheet opened.");
   expect(await page.evaluate(() => globalThis.__shared)).toEqual({
@@ -145,9 +145,50 @@ test("Share falls back to copying the result and canonical link", async ({ page 
   });
   await page.goto("/games/one-more-mark/");
   await page.clock.runFor(43_000);
-  await page.getByRole("button", { name: "Share to WhatsApp or another app" }).click();
+  await page.getByRole("button", { name: "Share result" }).click();
   await expect(page.locator("#share-status")).toHaveText("Result and game link copied.");
   expect(await page.evaluate(() => globalThis.__fallback)).toBe(
     "I found 0/1 unfinished marks in 42 seconds on One More Mark. How clean is your final scan?\nhttps://nownowgames.co.za/games/one-more-mark/",
   );
+});
+
+test("result R retry is reload-free, focused, 320px-safe, and ignored while editing feedback", async ({ page }) => {
+  await page.clock.install();
+  await page.setViewportSize({ width: 320, height: 740 });
+  let mainFrameNavigations = 0;
+  page.on("framenavigated", (frame) => {
+    if (frame === page.mainFrame()) mainFrameNavigations += 1;
+  });
+
+  await page.goto("/games/one-more-mark/");
+  await page.clock.runFor(43_000);
+  await expect(page.locator("#result-card")).toBeVisible();
+
+  await page.getByRole("button", { name: "Feedback" }).click();
+  const message = page.getByLabel("What happened?");
+  await expect(message).toBeFocused();
+  await page.keyboard.press("r");
+  await expect(message).toHaveValue("r");
+  await expect(page.locator("#result-card")).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+
+  await page.keyboard.press("R");
+  await expect(page.locator("#game-panel")).toBeVisible();
+  await expect(page.locator("#booklet")).toHaveText("Graphite grid");
+  await expect(page.getByRole("button", { name: /FILL/ })).toBeFocused();
+  await page.clock.runFor(1_000);
+  await expect(page.locator("#result-card")).toBeHidden();
+  expect(Number(await page.locator("#time").textContent())).toBeGreaterThanOrEqual(40.9);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+
+  await page.clock.runFor(42_000);
+  await page.keyboard.press("r");
+  await expect(page.locator("#game-panel")).toBeVisible();
+  await expect(page.locator("#booklet")).toHaveText("Teal corners");
+
+  await page.clock.runFor(43_000);
+  await page.getByRole("button", { name: "Scan another booklet" }).click();
+  await expect(page.locator("#game-panel")).toBeVisible();
+  await expect(page.locator("#booklet")).toHaveText("Coral rules");
+  expect(mainFrameNavigations).toBe(1);
 });

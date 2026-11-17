@@ -105,7 +105,7 @@ export function shareData(result) {
 
 export async function shareResult(result, navigatorTarget = globalThis.navigator) {
   const data = shareData(result);
-  if (navigatorTarget?.share) {
+  if (typeof navigatorTarget?.share === "function") {
     try {
       await navigatorTarget.share(data);
       return "shared";
@@ -113,8 +113,10 @@ export async function shareResult(result, navigatorTarget = globalThis.navigator
       if (error?.name === "AbortError") return "cancelled";
     }
   }
+  const clipboard = navigatorTarget?.clipboard;
+  if (typeof clipboard?.writeText !== "function") return "failed";
   try {
-    await navigatorTarget?.clipboard?.writeText(`${data.text}\n${data.url}`);
+    await clipboard.writeText(`${data.text}\n${data.url}`);
     return "copied";
   } catch {
     return "failed";

@@ -31,8 +31,10 @@ async function startStaticServer(t) {
   const root = await mkdtemp(join(scratchRoot, "nownow-static-test-"));
   const html = `<!doctype html><title>NowNow</title><p>${"flame ".repeat(700)}</p>`;
   const javascript = `export const rhythm = "${"together-".repeat(600)}";`;
+  const favicon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>';
   await writeFile(join(root, "index.html"), html);
   await writeFile(join(root, "app.js"), javascript);
+  await writeFile(join(root, "favicon.svg"), favicon);
   await writeFile(join(root, "404.html"), "That page slipped away.");
   const server = createAppServer({ root, env: {} });
   const url = await listen(server);
@@ -40,7 +42,7 @@ async function startStaticServer(t) {
     await close(server);
     await rm(root, { recursive: true, force: true });
   });
-  return { html, javascript, url };
+  return { favicon, html, javascript, url };
 }
 
 test("negotiates Brotli, gzip, and identity according to client quality", () => {
@@ -51,7 +53,7 @@ test("negotiates Brotli, gzip, and identity according to client quality", () => 
 });
 
 test("serves compressed, cacheable, revalidatable static responses with security headers", async (t) => {
-  const { html, javascript, url } = await startStaticServer(t);
+  const { favicon, html, javascript, url } = await startStaticServer(t);
   const documentResponse = await fetch(url, {
     cache: "no-store",
     headers: { "Accept-Encoding": "br" },
@@ -101,4 +103,17 @@ test("serves compressed, cacheable, revalidatable static responses with security
     Number(identityResponse.headers.get("content-length")),
     Buffer.byteLength(javascript),
   );
+
+  const faviconResponse = await fetch(`${url}/favicon.ico`);
+  assert.equal(faviconResponse.status, 200);
+  assert.equal(
+    faviconResponse.headers.get("content-type"),
+    "image/svg+xml; charset=utf-8",
+  );
+  assert.equal(
+    faviconResponse.headers.get("cache-control"),
+    "public, max-age=3600, must-revalidate",
+  );
+  assert.equal(faviconResponse.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(await faviconResponse.text(), favicon);
 });

@@ -54,6 +54,7 @@ jobs:
           done
 
           curl --silent --fail http://127.0.0.1:8080/healthz | grep --fixed-strings '"ok":true'
+          curl --silent --show-error --head http://127.0.0.1:8080/favicon.ico | grep --ignore-case '^Content-Type: image/svg+xml'
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
             --header 'Content-Type: application/json' \
             --data '{"message":"CI receiver probe","path":"/games/before-midnight/","context":"before-midnight@1"}' \

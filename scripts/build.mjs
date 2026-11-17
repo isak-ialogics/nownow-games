@@ -12,7 +12,14 @@ import { writeItchioPortalDirectory } from "./package-itchio.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const destination = resolve(root, "dist");
-const sources = ["index.html", "404.html", "assets", "shared", "prototypes"];
+const sources = [
+  "index.html",
+  "404.html",
+  "favicon.svg",
+  "assets",
+  "shared",
+  "prototypes",
+];
 const bloomIds = new Map(Object.entries({
   "page-main": "pm", "title-block": "tb", "storage-note": "sn",
   "reset-data": "rd", "skip-tutorial": "sk", "game-panel": "gp",

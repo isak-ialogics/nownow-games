@@ -94,10 +94,10 @@ const pages = new Map([
     {
       title: "One More Mark | NowNow Games",
       description:
-        "Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game.",
+        "Find every empty answer in One More Mark, an original 42-second fictional final-check game.",
       canonical: `${productionOrigin}/games/one-more-mark/`,
       image: "one-more-mark-share.png",
-      imageAlt: "One More Mark fictional booklet scan with Fill and Flip controls",
+      imageAlt: "One More Mark fictional answer sheet with numbered rows",
       schema: ["VideoGame"],
     },
   ],

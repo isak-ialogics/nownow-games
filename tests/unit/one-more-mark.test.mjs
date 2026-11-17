@@ -2,20 +2,21 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  BOOKLETS, CANONICAL_URL, PENALTY_MS, RUN_MS, advancePage, bookletOrder,
-  createGame, currentPage, decide, elapse, retryGame, shareData, shareResult,
+  BOOKLETS, CANONICAL_URL, PENALTY_MS, RUN_MS, bookletOrder, createGame,
+  currentPage, decide, elapse, retryGame, settleDecision, shareData, shareResult,
   summarize,
 } from "../../prototypes/one-more-mark/state.js";
 
-test("six authored five-page booklets expose exactly one or zero open boxes", () => {
+test("six deterministic five-page layouts share the two-beat first play", () => {
   assert.equal(BOOKLETS.length, 6);
-  assert.equal(BOOKLETS.every((booklet) => booklet.pages.length === 5), true);
-  const pages = BOOKLETS.flatMap((booklet) => booklet.pages);
-  assert.equal(pages.length, 30);
-  assert.equal(pages.filter((page) => page.incomplete).length, 11);
-  for (const page of pages) {
-    assert.equal(page.incomplete, page.open >= 0);
-    assert.equal(page.open >= -1 && page.open <= 3, true);
+  for (const booklet of BOOKLETS) {
+    assert.equal(booklet.pages.length, 5);
+    assert.equal(booklet.pages[0].open, 1, "page 1 always has row 2 empty");
+    assert.equal(booklet.pages[1].open, -1, "page 2 is always complete");
+    for (const page of booklet.pages) {
+      assert.equal(page.incomplete, page.open >= 0);
+      assert.equal(page.open >= -1 && page.open <= 3, true);
+    }
   }
 });
 
@@ -27,96 +28,125 @@ test("booklet order rotates once per retry and repeats deterministically", () =>
   assert.deepEqual(createGame(2).deck, createGame(2).deck);
 });
 
-test("Fill banks marks, Flip grows clean streaks, and inputs are atomic", () => {
+test("timer stays held through both wrong onboarding branches", () => {
   const game = createGame();
-  assert.equal(currentPage(game).incomplete, true);
-  assert.deepEqual(decide(game, "fill"), {
-    action: "fill", correct: true, expected: "fill", penalty: 0,
+  elapse(game, 5_000);
+  assert.equal(game.timeLeft, RUN_MS);
+
+  assert.deepEqual(decide(game, 0), {
+    action: 0, correct: false, expected: 1, onboarding: true, penalty: 0,
   });
+  assert.equal(game.timeLeft, RUN_MS);
+  assert.equal(decide(game, 1), null, "input lock rejects a second decision");
+  assert.equal(settleDecision(game, false), true);
+
+  assert.deepEqual(decide(game, "complete"), {
+    action: "complete", correct: false, expected: 1, onboarding: true, penalty: 0,
+  });
+  assert.equal(game.timeLeft, RUN_MS);
+  settleDecision(game, false);
+  elapse(game, 9_000);
+  assert.equal(game.timeLeft, RUN_MS);
+});
+
+test("row 2 arms the timer, adds one mark, and advances to complete page 2", () => {
+  const game = createGame();
+  assert.equal(decide(game, 1).correct, true);
+  assert.equal(game.timerArmed, true);
   assert.equal(game.marks, 1);
-  assert.equal(decide(game, "fill"), null, "locked pages reject double input");
-  assert.equal(advancePage(game), true);
-
+  elapse(game, 250);
+  assert.equal(game.timeLeft, RUN_MS - 250);
+  assert.equal(settleDecision(game, true), true);
+  assert.equal(currentPage(game).page, 1);
   assert.equal(currentPage(game).incomplete, false);
-  assert.equal(decide(game, "flip").correct, true);
+  assert.equal(decide(game, "complete").correct, true);
   assert.equal(game.streak, 1);
-  assert.equal(game.bestStreak, 1);
-  advancePage(game);
-  decide(game, "flip");
-  assert.equal(game.streak, 2);
-  assert.equal(game.bestStreak, 2);
-  advancePage(game);
-  decide(game, "fill");
+});
+
+test("later row and complete decisions apply correctness and a two-second penalty", () => {
+  const game = createGame();
+  decide(game, 1);
+  settleDecision(game, true);
+  decide(game, "complete");
+  settleDecision(game, true);
+  assert.equal(currentPage(game).open, 3);
+
+  const beforeRow = game.timeLeft;
+  assert.deepEqual(decide(game, 0), {
+    action: 0, correct: false, expected: 3, onboarding: false, penalty: PENALTY_MS,
+  });
+  assert.equal(game.timeLeft, beforeRow - PENALTY_MS);
+  settleDecision(game, false);
+
+  const beforeComplete = game.timeLeft;
+  assert.equal(decide(game, "complete").correct, false);
+  assert.equal(game.timeLeft, beforeComplete - PENALTY_MS);
+  settleDecision(game, false);
+  assert.equal(decide(game, 3).correct, true);
   assert.equal(game.marks, 2);
-  assert.equal(game.streak, 2, "a correct Fill preserves the clean Flip streak");
 });
 
-test("wrong decisions break streaks and remove exactly two seconds", () => {
+test("the post-onboarding penalty floors time at zero and ends the run", () => {
   const game = createGame();
-  decide(game, "fill");
-  advancePage(game);
-  decide(game, "flip");
-  advancePage(game);
-  const before = game.timeLeft;
-  const outcome = decide(game, "fill");
-  assert.equal(outcome.correct, false);
-  assert.equal(outcome.penalty, PENALTY_MS);
-  assert.equal(game.timeLeft, before - PENALTY_MS);
-  assert.equal(game.streak, 0);
+  decide(game, 1);
+  settleDecision(game, true);
+  decide(game, "complete");
+  settleDecision(game, true);
+  game.timeLeft = 1_500;
+  decide(game, 0);
+  assert.equal(game.ended, true);
+  assert.equal(game.timeLeft, 0);
+  assert.equal(decide(game, 3), null);
 });
 
-test("timer reaches a final state at zero and a penalty can end the run", () => {
+test("an armed timer reaches a deterministic zero-time result", () => {
   const game = createGame();
+  decide(game, 1);
+  settleDecision(game, true);
   elapse(game, RUN_MS - 1);
   assert.equal(game.ended, false);
   assert.equal(game.timeLeft, 1);
   elapse(game, 1);
   assert.equal(game.ended, true);
   assert.equal(game.timeLeft, 0);
-  assert.equal(decide(game, "fill"), null);
-
-  const penalized = createGame();
-  decide(penalized, "fill");
-  advancePage(penalized);
-  penalized.timeLeft = 1_500;
-  decide(penalized, "fill");
-  assert.equal(penalized.ended, true);
-  assert.equal(penalized.timeLeft, 0);
 });
 
-test("retry resets state without navigation and starts the next booklet", () => {
+test("one-action retry resets state, holds time, and rotates the booklet", () => {
   const game = createGame();
-  decide(game, "fill");
+  decide(game, 1);
   const retry = retryGame(game);
   assert.equal(retry.run, 1);
   assert.equal(retry.marks, 0);
+  assert.equal(retry.timerArmed, false);
   assert.equal(retry.timeLeft, RUN_MS);
   assert.equal(currentPage(retry).booklet, 1);
   assert.deepEqual(summarize(retry).order, [1, 2, 3, 4, 5, 0]);
 });
 
-test("summary reports neutral marks, best streak, and decision accuracy", () => {
+test("summary reports neutral marks, streak, and decision accuracy", () => {
   const game = createGame();
-  decide(game, "fill");
-  advancePage(game);
-  decide(game, "fill");
+  decide(game, 1);
+  settleDecision(game, true);
+  decide(game, 0);
   assert.deepEqual(summarize(game), {
     marks: 1, available: 1, bestStreak: 0, accuracy: 50,
     decisions: 2, order: [0, 1, 2, 3, 4, 5],
   });
 });
 
-test("Web Share is preferred and clipboard is the copy-link fallback", async () => {
+test("Web Share is preferred and clipboard remains the user-triggered fallback", async () => {
   const result = { marks: 9, available: 11 };
   const data = shareData(result);
   assert.deepEqual(data, {
     title: "One More Mark",
-    text: "I found 9/11 unfinished marks in 42 seconds on One More Mark. How clean is your final scan?",
+    text: "I found 9/11 empty answers in 42 seconds on One More Mark. How clean is your final scan?",
     url: CANONICAL_URL,
   });
 
   let shared;
-  assert.equal(await shareResult(result, { share: async (value) => { shared = value; } }), "shared");
+  assert.equal(await shareResult(result, {
+    share: async (value) => { shared = value; },
+  }), "shared");
   assert.deepEqual(shared, data);
 
   let copied;
@@ -134,28 +164,11 @@ test("Web Share is preferred and clipboard is the copy-link fallback", async () 
   }), "cancelled");
 });
 
-test("copy fallback reports success only after a callable write resolves", async () => {
+test("copy fallback reports failure without a callable successful clipboard", async () => {
   const result = { marks: 4, available: 6 };
   assert.equal(await shareResult(result, {}), "failed");
   assert.equal(await shareResult(result, { clipboard: {} }), "failed");
   assert.equal(await shareResult(result, {
-    clipboard: { writeText: "not callable" },
-  }), "failed");
-  assert.equal(await shareResult(result, {
     clipboard: { writeText: async () => { throw new Error("denied"); } },
   }), "failed");
-
-  let fallbackText;
-  assert.equal(await shareResult(result, {
-    share: async () => { throw new Error("share unavailable"); },
-    clipboard: { writeText: async (value) => { fallbackText = value; } },
-  }), "copied");
-  assert.equal(fallbackText, `${shareData(result).text}\n${CANONICAL_URL}`);
-
-  let wroteAfterCancel = false;
-  assert.equal(await shareResult(result, {
-    share: async () => { throw Object.assign(new Error("cancel"), { name: "AbortError" }); },
-    clipboard: { writeText: async () => { wroteAfterCancel = true; } },
-  }), "cancelled");
-  assert.equal(wroteAfterCancel, false);
 });

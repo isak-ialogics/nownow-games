@@ -68,7 +68,7 @@ const pages = [
     canonical: `${origin}/games/one-more-mark/`,
     title: "One More Mark | NowNow Games",
     description:
-      "Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game.",
+      "Find every empty answer in One More Mark, an original 42-second fictional final-check game.",
     schemaTypes: ["VideoGame"],
   },
 ];
@@ -103,7 +103,7 @@ const social = new Map([
   }],
   ["/games/one-more-mark/", {
     image: `${origin}/assets/one-more-mark-share.png`,
-    alt: "One More Mark fictional booklet scan with Fill and Flip controls",
+    alt: "One More Mark fictional answer sheet with numbered rows",
   }],
 ]);
 

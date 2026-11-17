@@ -31,13 +31,16 @@ promotes itself to production.
 
 ## PROD exact-manifest promotion
 
-The release pinned by NOW-255 has these identities:
+The release tooling repaired by NOW-282 is pinned to the exact, already-built
+OCI index for the candidate merged by PR #43:
 
-- accepted source commit: `d26c3414391546780726bb9ec8f9dec123f26fdd`;
-- accepted OCI digest: `sha256:729dd520ba422a65e69a7c70aaf92addb53e379bdfed4e468d2abb63e62876c0`;
-- PROD branch commit: `5f4d1ad3e289cbb787ac613eb65aeb3998617fa4`;
-- prior PROD digest: `sha256:20d3055817bbbd2b83abbd5ca462d869b105c3e176da4e669ad34eb862fcd3d1`;
-- rollback PROD commit: `2c5d2fc73e94c3ccaf9638c402b7b90588b5bd64`.
+- candidate source commit: `634cfd2961188918af0bedaa41771400fbe7d9b6`;
+- repository-pinned OCI index: `sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef`;
+- candidate merge: [PR #43](https://github.com/isak-ialogics/nownow-games/pull/43).
+
+This repository pin is not release authorization. Independent One More Mark QA
+PASS and separate exact-digest Hermes PROD authorization remain mandatory
+before merge or dispatch. Never rebuild the candidate to satisfy this gate.
 
 Before dispatch, the authorised release operator captures the current registry
 alias and production runtime on the PROD Swarm manager:
@@ -86,7 +89,8 @@ For PROD preflight, run `execute=false` from merged `main` to prove the
 environment-scoped credential can read the registry without mutation.
 `execute=true` remains a separately approved manual action.
 The checked-in fixture receipt is
-[`evidence/now-255/promotion-fixture-receipt.json`](./evidence/now-255/promotion-fixture-receipt.json).
+[`evidence/now-282/promotion-fixture-receipt.json`](./evidence/now-282/promotion-fixture-receipt.json).
+The historical NOW-255 receipt remains unchanged in its own evidence directory.
 
 ## Feedback receiver configuration
 

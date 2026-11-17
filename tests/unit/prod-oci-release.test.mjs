@@ -15,6 +15,8 @@ import {
   rollbackProd,
 } from "../../scripts/prod-oci-release.mjs";
 
+const PR_43_DIGEST =
+  "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef";
 const runtimeIdentity = IMAGE_NAME + ":prod@" + PREVIOUS_PROD_DIGEST;
 
 function workflowJob(source, jobName) {
@@ -66,6 +68,23 @@ function promotionOptions(registry, overrides = {}) {
     ...overrides,
   };
 }
+
+test("release tooling accepts the exact PR #43 OCI index", async () => {
+  assert.equal(APPROVED_DIGEST, PR_43_DIGEST);
+
+  const registry = new FixtureRegistry({
+    sourceDigest: PR_43_DIGEST,
+    prodAliasDigest: PREVIOUS_PROD_DIGEST,
+  });
+  const receipt = await promoteProd({
+    ...promotionOptions(registry),
+    approvedDigest: PR_43_DIGEST,
+    execute: false,
+  });
+
+  assert.equal(receipt.outcome, "no-mutation");
+  assert.equal(receipt.after.plannedProdAliasDigest, PR_43_DIGEST);
+});
 
 test("promotion captures prior state then verifies the approved digest", async () => {
   const events = [];
@@ -126,18 +145,24 @@ test("dry run validates the planned copy without mutating the PROD alias", async
   );
 });
 
-test("promotion fails closed for a digest other than the pinned approval", async () => {
-  const registry = new FixtureRegistry({
-    sourceDigest: APPROVED_DIGEST,
-    prodAliasDigest: PREVIOUS_PROD_DIGEST,
-  });
+test("promotion fails closed for a digest other than the PR #43 OCI index", async () => {
+  const events = [];
+  const otherDigest = "sha256:" + "f".repeat(64);
+  const registry = new FixtureRegistry(
+    {
+      sourceDigest: PR_43_DIGEST,
+      prodAliasDigest: PREVIOUS_PROD_DIGEST,
+    },
+    events,
+  );
   await assert.rejects(
     promoteProd({
       ...promotionOptions(registry),
-      approvedDigest: PREVIOUS_PROD_DIGEST,
+      approvedDigest: otherDigest,
     }),
-    /not the repository-pinned NOW-255 digest/u,
+    /not the repository-pinned PR #43 OCI index/u,
   );
+  assert.deepEqual(events, []);
 });
 
 test("resolved source digest mismatch fails before copying", async () => {

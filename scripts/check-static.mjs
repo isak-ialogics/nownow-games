@@ -10,10 +10,10 @@ const pages = new Map([
     {
       title: "Original Mobile Browser Games | NowNow Games",
       description:
-        "Play six original, mobile-first browser games from NowNow Games, including One Lucky Bloom, Surface Signal, Same Flame, Before Midnight, Latch!, and Safe Passage.",
+        "Play seven original, mobile-first browser games from NowNow Games, including One More Mark and six more quick challenges.",
       canonical: `${productionOrigin}/`,
       image: "hub-share.png",
-      imageAlt: "NowNow Games home page showing six original browser games",
+      imageAlt: "NowNow Games home page showing seven original browser games",
       schema: ["Organization", "WebSite"],
     },
   ],
@@ -86,6 +86,18 @@ const pages = new Map([
       canonical: `${productionOrigin}/games/one-lucky-bloom/`,
       image: "one-lucky-bloom-share.png",
       imageAlt: "One Lucky Bloom canopy game with five blossom landing lanes",
+      schema: ["VideoGame"],
+    },
+  ],
+  [
+    "prototypes/one-more-mark/index.html",
+    {
+      title: "One More Mark | NowNow Games",
+      description:
+        "Fill unfinished responses or flip complete fictional pages in One More Mark, an original 42-second visual scan game.",
+      canonical: `${productionOrigin}/games/one-more-mark/`,
+      image: "one-more-mark-share.png",
+      imageAlt: "One More Mark fictional booklet scan with Fill and Flip controls",
       schema: ["VideoGame"],
     },
   ],

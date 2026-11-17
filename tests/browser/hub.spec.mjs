@@ -68,14 +68,14 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     scrollWidth: document.documentElement.scrollWidth,
   }));
   expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
-  await expect(page.locator("[data-prototype-count]")).toHaveText("06");
+  await expect(page.locator("[data-prototype-count]")).toHaveText("07");
   await expect(page.locator("[data-prototype-count]")).toHaveAttribute(
     "aria-label",
-    "6 games",
+    "7 games",
   );
-  await expect(page.locator(".prototype-card")).toHaveCount(6);
+  await expect(page.locator(".prototype-card")).toHaveCount(7);
   const playLinks = page.getByRole("link", { name: /Play now/ });
-  await expect(playLinks).toHaveCount(6);
+  await expect(playLinks).toHaveCount(7);
   await expect(playLinks.nth(0)).toHaveAttribute(
     "href",
     "./games/before-midnight/",
@@ -100,6 +100,10 @@ test("game hub is responsive, accessible, and has no retired route", async ({
     "href",
     "./games/one-lucky-bloom/",
   );
+  await expect(playLinks.nth(6)).toHaveAttribute(
+    "href",
+    "./games/one-more-mark/",
+  );
   await expect(
     page.getByRole("heading", { level: 3, name: "Before Midnight", exact: true }),
   ).toBeVisible();
@@ -122,6 +126,9 @@ test("game hub is responsive, accessible, and has no retired route", async ({
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 3, name: "One Lucky Bloom" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "One More Mark" }),
   ).toBeVisible();
   await expect(page.locator('[href*="input-lab"]')).toHaveCount(0);
   await expect(page.getByText("No login. No ads. Privacy-safe analytics.")).toBeVisible();

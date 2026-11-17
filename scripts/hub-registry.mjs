@@ -108,7 +108,7 @@ function renderCard(card, index) {
   const cardNumber = String(index + 1).padStart(2, "0");
 
   return `        <article class="prototype-card">
-          <div class="card-preview card-art--${escapeHtml(card.slug)}" aria-hidden="true">
+          <div class="card-preview card-art--${escapeHtml(card.slug)}">
             <i class="a"></i><i class="b"></i><i class="c"></i>
           </div>
           <div class="card-content">

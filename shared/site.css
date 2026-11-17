@@ -326,6 +326,10 @@ main {
 .card-art--surface-signal{background:linear-gradient(#16485a 49%,#07303d 50%)}
 .card-art--surface-signal .a{width:9rem;height:3rem;border-top:.5rem solid #74d8d2;border-radius:50%;transform:translate(-50%,-50%)}
 .card-art--one-lucky-bloom{background:radial-gradient(circle,#c697d4 0 12%,#52325f 13%,#21172b 70%)}
+.card-art--one-more-mark{background:linear-gradient(150deg,#29466d,#17263b)}
+.card-art--one-more-mark .a{width:10rem;height:13rem;background:#fffdf5;border-radius:.3rem;transform:translate(-50%,-50%) rotate(-4deg);box-shadow:0 1rem 2rem #0005}
+.card-art--one-more-mark .b{width:5.5rem;border-top:.45rem solid #71829a;transform:translate(-65%,-180%) rotate(-4deg)}
+.card-art--one-more-mark .c{width:2rem;height:2rem;margin:2.5rem 0 0 2.2rem;border:.25rem solid #b62a3c;transform:translate(-50%,-50%) rotate(-4deg)}
 
 .preview-label {
   position: absolute;

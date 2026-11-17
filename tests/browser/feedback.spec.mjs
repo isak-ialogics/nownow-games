@@ -25,6 +25,7 @@ const feedbackGames = [
   },
   { name: "Surface Signal", path: "/prototypes/surface-signal/" },
   { name: "One Lucky Bloom", path: "/games/one-lucky-bloom/" },
+  { name: "One More Mark", path: "/games/one-more-mark/" },
 ];
 
 test.describe("Before Midnight feedback control", () => {

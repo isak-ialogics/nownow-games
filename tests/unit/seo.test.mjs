@@ -14,6 +14,7 @@ const cards = [
   { slug: "same-flame" },
   { slug: "surface-signal" },
   { slug: "one-lucky-bloom", publicPath: "games/one-lucky-bloom" },
+  { slug: "one-more-mark", publicPath: "games/one-more-mark" },
 ];
 
 test("sitemap follows the discovered game registry", () => {
@@ -30,6 +31,7 @@ test("sitemap follows the discovered game registry", () => {
       `${PRODUCTION_ORIGIN}/prototypes/same-flame/`,
       `${PRODUCTION_ORIGIN}/prototypes/surface-signal/`,
       `${PRODUCTION_ORIGIN}/games/one-lucky-bloom/`,
+      `${PRODUCTION_ORIGIN}/games/one-more-mark/`,
     ],
   );
   assert.doesNotMatch(sitemap, /404\.html/);

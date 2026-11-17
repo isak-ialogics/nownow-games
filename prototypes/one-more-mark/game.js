@@ -147,10 +147,16 @@ sound.addEventListener("click", () => {
   sound.ariaPressed = String(soundOn);
 });
 window.addEventListener("keydown", (event) => {
-  if (result.hidden && !event.repeat && !isEditableTarget(event.target)) {
-    const action = event.key === "f" || event.key === "F" || event.key === " " ? "fill" : event.key === "ArrowRight" || event.key === "Enter" ? "flip" : null;
-    if (action) { event.preventDefault(); act(action); }
+  if (event.repeat || isEditableTarget(event.target)) return;
+  if (!result.hidden) {
+    if (event.key === "r" || event.key === "R") {
+      event.preventDefault();
+      start(retryGame(game));
+    }
+    return;
   }
+  const action = event.key === "f" || event.key === "F" || event.key === " " ? "fill" : event.key === "ArrowRight" || event.key === "Enter" ? "flip" : null;
+  if (action) { event.preventDefault(); act(action); }
 });
 document.addEventListener("visibilitychange", () => document.hidden ? pause("background") : resume("background"));
 window.addEventListener("blur", () => pause("blur"));

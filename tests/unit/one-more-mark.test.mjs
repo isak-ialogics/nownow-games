@@ -133,3 +133,29 @@ test("Web Share is preferred and clipboard is the copy-link fallback", async () 
     share: async () => { throw Object.assign(new Error("cancel"), { name: "AbortError" }); },
   }), "cancelled");
 });
+
+test("copy fallback reports success only after a callable write resolves", async () => {
+  const result = { marks: 4, available: 6 };
+  assert.equal(await shareResult(result, {}), "failed");
+  assert.equal(await shareResult(result, { clipboard: {} }), "failed");
+  assert.equal(await shareResult(result, {
+    clipboard: { writeText: "not callable" },
+  }), "failed");
+  assert.equal(await shareResult(result, {
+    clipboard: { writeText: async () => { throw new Error("denied"); } },
+  }), "failed");
+
+  let fallbackText;
+  assert.equal(await shareResult(result, {
+    share: async () => { throw new Error("share unavailable"); },
+    clipboard: { writeText: async (value) => { fallbackText = value; } },
+  }), "copied");
+  assert.equal(fallbackText, `${shareData(result).text}\n${CANONICAL_URL}`);
+
+  let wroteAfterCancel = false;
+  assert.equal(await shareResult(result, {
+    share: async () => { throw Object.assign(new Error("cancel"), { name: "AbortError" }); },
+    clipboard: { writeText: async () => { wroteAfterCancel = true; } },
+  }), "cancelled");
+  assert.equal(wroteAfterCancel, false);
+});

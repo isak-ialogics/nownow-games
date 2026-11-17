@@ -18,6 +18,7 @@ const CONTENT_TYPES = Object.freeze({
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
+  ".svg": "image/svg+xml; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
   ".xml": "application/xml; charset=utf-8",
 });
@@ -222,7 +223,10 @@ export function createAppServer({
         return;
       }
 
-      let file = resolve(root, `.${pathname}`);
+      const artifactPathname = pathname === "/favicon.ico"
+        ? "/favicon.svg"
+        : pathname;
+      let file = resolve(root, `.${artifactPathname}`);
       const pathFromRoot = relative(root, file);
       if (pathFromRoot.startsWith("..") || isAbsolute(pathFromRoot)) {
         response

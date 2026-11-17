@@ -134,6 +134,7 @@ for (const card of cards) {
 }
 const required = [
   "404.html",
+  "favicon.svg",
   ...new Set([...pages.values()].map(({ image }) => `assets/${image}`)),
   "server/app.mjs",
   "server/feedback.mjs",

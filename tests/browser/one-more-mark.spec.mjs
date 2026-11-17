@@ -8,6 +8,34 @@ const eventPaths = (requests) => requests.map((value) => new URL(value))
   .filter((url) => url.pathname === "/analytics/count")
   .map((url) => url.searchParams.get("p"));
 
+test("fresh exact route loads its favicon with no non-2xx responses", async ({ page }) => {
+  const failures = [];
+  const non2xx = [];
+  page.on("requestfailed", (request) => {
+    if (new URL(request.url()).pathname !== "/analytics/count") failures.push(request.url());
+  });
+  page.on("response", (response) => {
+    if (response.status() < 200 || response.status() >= 300) {
+      non2xx.push(`${response.status()} ${response.url()}`);
+    }
+  });
+
+  await page.goto("/games/one-more-mark/");
+  const favicon = await page.evaluate(async () => {
+    const response = await fetch("/favicon.ico", { cache: "no-store" });
+    return {
+      contentType: response.headers.get("content-type"),
+      status: response.status,
+    };
+  });
+  await page.waitForLoadState("networkidle");
+
+  expect(favicon.status).toBe(200);
+  expect(favicon.contentType).toBe("image/svg+xml; charset=utf-8");
+  expect(failures).toEqual([]);
+  expect(non2xx).toEqual([]);
+});
+
 test("390px first play holds time, corrects both wrong branches, and teaches direct actions", async ({ page }) => {
   await page.clock.install();
   await page.addInitScript(() => {

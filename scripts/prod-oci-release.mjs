@@ -22,6 +22,8 @@ export const ROLLBACK_ORDER = [
 ];
 
 const digestPattern = /^sha256:[a-f0-9]{64}$/u;
+const runtimeIdentityPattern =
+  /^ghcr\.io\/isak-ialogics\/nownow-games(?::[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,127})?@(sha256:[a-f0-9]{64})$/u;
 const servicePattern = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/u;
 
 function fail(message) {
@@ -36,9 +38,13 @@ export function validateDigest(value, label = "digest") {
 }
 
 export function digestFromRuntimeIdentity(identity) {
-  const match = (identity ?? "").match(/@(sha256:[a-f0-9]{64})$/u);
-  if (!match || !identity.startsWith(IMAGE_NAME + ":")) {
-    fail("Runtime identity must be an immutable " + IMAGE_NAME + ":<tag>@sha256 reference.");
+  const match = (identity ?? "").match(runtimeIdentityPattern);
+  if (!match) {
+    fail(
+      "Runtime identity must be an immutable " +
+        IMAGE_NAME +
+        "@sha256 reference, with an optional tag before @.",
+    );
   }
   return match[1];
 }

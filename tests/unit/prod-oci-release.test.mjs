@@ -86,6 +86,65 @@ test("release tooling accepts the exact PR #43 OCI index", async () => {
   assert.equal(receipt.after.plannedProdAliasDigest, PR_43_DIGEST);
 });
 
+test("runtime identity accepts digest-only and tag-plus-digest forms", async () => {
+  for (const previousRuntimeIdentity of [
+    IMAGE_NAME + "@" + PREVIOUS_PROD_DIGEST,
+    IMAGE_NAME + ":prod@" + PREVIOUS_PROD_DIGEST,
+  ]) {
+    const registry = new FixtureRegistry({
+      sourceDigest: APPROVED_DIGEST,
+      prodAliasDigest: PREVIOUS_PROD_DIGEST,
+    });
+    const receipt = await promoteProd({
+      ...promotionOptions(registry),
+      previousRuntimeIdentity,
+      execute: false,
+    });
+
+    assert.equal(receipt.outcome, "no-mutation");
+    assert.equal(receipt.before.runtimeIdentity, previousRuntimeIdentity);
+    assert.equal(registry.prodAliasDigest, PREVIOUS_PROD_DIGEST);
+  }
+});
+
+test("invalid runtime identities fail before registry access", async () => {
+  const invalidIdentities = [
+    ["empty", ""],
+    ["mutable tag only", IMAGE_NAME + ":prod"],
+    [
+      "wrong registry",
+      "registry.example/isak-ialogics/nownow-games@" + PREVIOUS_PROD_DIGEST,
+    ],
+    [
+      "wrong repository",
+      "ghcr.io/isak-ialogics/other-games@" + PREVIOUS_PROD_DIGEST,
+    ],
+    ["short digest", IMAGE_NAME + "@sha256:" + "a".repeat(63)],
+    ["malformed digest", IMAGE_NAME + "@sha256:" + "g".repeat(64)],
+  ];
+
+  for (const [label, previousRuntimeIdentity] of invalidIdentities) {
+    const events = [];
+    const registry = new FixtureRegistry(
+      {
+        sourceDigest: APPROVED_DIGEST,
+        prodAliasDigest: PREVIOUS_PROD_DIGEST,
+      },
+      events,
+    );
+
+    await assert.rejects(
+      promoteProd({
+        ...promotionOptions(registry),
+        previousRuntimeIdentity,
+      }),
+      /Runtime identity must be an immutable/u,
+      label,
+    );
+    assert.deepEqual(events, [], label);
+  }
+});
+
 test("promotion captures prior state then verifies the approved digest", async () => {
   const events = [];
   const saved = [];

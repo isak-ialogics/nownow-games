@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "redacted": true,
+  "fixture": true,
+  "capturedAt": "2026-11-18T00:00:00.000Z",
+  "phase": "promotion-verified",
+  "outcome": "fixture-pass",
+  "image": "ghcr.io/isak-ialogics/nownow-games",
+  "approvedSource": {
+    "ref": "ghcr.io/isak-ialogics/nownow-games@sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597",
+    "requestedDigest": "sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597",
+    "resolvedDigest": "sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597"
+  },
+  "before": {
+    "prodAlias": "ghcr.io/isak-ialogics/nownow-games:prod",
+    "prodAliasDigest": "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef",
+    "runtimeIdentity": "ghcr.io/isak-ialogics/nownow-games:prod@sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef",
+    "runtimeReplicas": "1/1"
+  },
+  "after": {
+    "prodAliasDigest": "sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597"
+  },
+  "rollbackOrder": [
+    "restore-prod-alias",
+    "verify-restored-alias",
+    "recover-service",
+    "verify-prod-alias",
+    "verify-steady-runtime"
+  ]
+}

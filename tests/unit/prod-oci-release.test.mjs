@@ -15,7 +15,9 @@ import {
   rollbackProd,
 } from "../../scripts/prod-oci-release.mjs";
 
-const PR_43_DIGEST =
+const LAST_FULL_STOP_DIGEST =
+  "sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597";
+const ONE_MORE_MARK_DIGEST =
   "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef";
 const runtimeIdentity = IMAGE_NAME + ":prod@" + PREVIOUS_PROD_DIGEST;
 
@@ -64,26 +66,27 @@ function promotionOptions(registry, overrides = {}) {
     previousRuntimeIdentity: runtimeIdentity,
     previousRuntimeReplicas: "1/1",
     execute: true,
-    capturedAt: "2026-09-23T00:00:00.000Z",
+    capturedAt: "2026-11-18T00:00:00.000Z",
     ...overrides,
   };
 }
 
-test("release tooling accepts the exact PR #43 OCI index", async () => {
-  assert.equal(APPROVED_DIGEST, PR_43_DIGEST);
+test("release tooling accepts the exact Last Full Stop OCI index", async () => {
+  assert.equal(APPROVED_DIGEST, LAST_FULL_STOP_DIGEST);
+  assert.equal(PREVIOUS_PROD_DIGEST, ONE_MORE_MARK_DIGEST);
 
   const registry = new FixtureRegistry({
-    sourceDigest: PR_43_DIGEST,
+    sourceDigest: LAST_FULL_STOP_DIGEST,
     prodAliasDigest: PREVIOUS_PROD_DIGEST,
   });
   const receipt = await promoteProd({
     ...promotionOptions(registry),
-    approvedDigest: PR_43_DIGEST,
+    approvedDigest: LAST_FULL_STOP_DIGEST,
     execute: false,
   });
 
   assert.equal(receipt.outcome, "no-mutation");
-  assert.equal(receipt.after.plannedProdAliasDigest, PR_43_DIGEST);
+  assert.equal(receipt.after.plannedProdAliasDigest, LAST_FULL_STOP_DIGEST);
 });
 
 test("runtime identity accepts digest-only and tag-plus-digest forms", async () => {
@@ -204,24 +207,28 @@ test("dry run validates the planned copy without mutating the PROD alias", async
   );
 });
 
-test("promotion fails closed for a digest other than the PR #43 OCI index", async () => {
-  const events = [];
-  const otherDigest = "sha256:" + "f".repeat(64);
-  const registry = new FixtureRegistry(
-    {
-      sourceDigest: PR_43_DIGEST,
-      prodAliasDigest: PREVIOUS_PROD_DIGEST,
-    },
-    events,
-  );
-  await assert.rejects(
-    promoteProd({
-      ...promotionOptions(registry),
-      approvedDigest: otherDigest,
-    }),
-    /not the repository-pinned PR #43 OCI index/u,
-  );
-  assert.deepEqual(events, []);
+test("promotion fails closed for any other digest before registry access", async () => {
+  for (const rejectedDigest of [
+    ONE_MORE_MARK_DIGEST,
+    "sha256:" + "f".repeat(64),
+  ]) {
+    const events = [];
+    const registry = new FixtureRegistry(
+      {
+        sourceDigest: LAST_FULL_STOP_DIGEST,
+        prodAliasDigest: PREVIOUS_PROD_DIGEST,
+      },
+      events,
+    );
+    await assert.rejects(
+      promoteProd({
+        ...promotionOptions(registry),
+        approvedDigest: rejectedDigest,
+      }),
+      /not the repository-pinned Last Full Stop OCI index/u,
+    );
+    assert.deepEqual(events, [], rejectedDigest);
+  }
 });
 
 test("resolved source digest mismatch fails before copying", async () => {

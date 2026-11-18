@@ -1,8 +1,8 @@
 {
-  "sourceDigest": "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef",
-  "prodAliasDigest": "sha256:20d3055817bbbd2b83abbd5ca462d869b105c3e176da4e669ad34eb862fcd3d1",
-  "promotionDigest": "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef",
-  "runtimeIdentity": "ghcr.io/isak-ialogics/nownow-games:prod@sha256:20d3055817bbbd2b83abbd5ca462d869b105c3e176da4e669ad34eb862fcd3d1",
+  "sourceDigest": "sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597",
+  "prodAliasDigest": "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef",
+  "promotionDigest": "sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597",
+  "runtimeIdentity": "ghcr.io/isak-ialogics/nownow-games:prod@sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef",
   "runtimeReplicas": "1/1",
-  "capturedAt": "2026-11-17T00:00:00.000Z"
+  "capturedAt": "2026-11-18T00:00:00.000Z"
 }

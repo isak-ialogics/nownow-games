@@ -31,16 +31,17 @@ promotes itself to production.
 
 ## PROD exact-manifest promotion
 
-The release tooling repaired by NOW-282 is pinned to the exact, already-built
-OCI index for the candidate merged by PR #43:
+The release tooling retargeted by NOW-298 is pinned to the exact, already-built
+Last Full Stop OCI index for the candidate merged by PR #48:
 
-- candidate source commit: `634cfd2961188918af0bedaa41771400fbe7d9b6`;
-- repository-pinned OCI index: `sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef`;
-- candidate merge: [PR #43](https://github.com/isak-ialogics/nownow-games/pull/43).
+- candidate source commit: `d0e058f7880921273524dcadd571a8c366bf9d46`;
+- repository-pinned OCI index: `sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597`;
+- candidate merge: [PR #48](https://github.com/isak-ialogics/nownow-games/pull/48).
 
-This repository pin is not release authorization. Independent One More Mark QA
-PASS and separate exact-digest Hermes PROD authorization remain mandatory
-before merge or dispatch. Never rebuild the candidate to satisfy this gate.
+This repository pin is not release authorization or a dispatch request.
+Independent Last Full Stop QA PASS and separate exact-digest Hermes PROD
+authorization are mandatory release evidence. Never rebuild the candidate to
+satisfy this gate.
 
 Before dispatch, the authorised release operator captures the current registry
 alias and production runtime on the PROD Swarm manager:
@@ -89,8 +90,8 @@ For PROD preflight, run `execute=false` from merged `main` to prove the
 environment-scoped credential can read the registry without mutation.
 `execute=true` remains a separately approved manual action.
 The checked-in fixture receipt is
-[`evidence/now-282/promotion-fixture-receipt.json`](./evidence/now-282/promotion-fixture-receipt.json).
-The historical NOW-255 receipt remains unchanged in its own evidence directory.
+[`evidence/now-298/promotion-fixture-receipt.json`](./evidence/now-298/promotion-fixture-receipt.json).
+Historical receipts remain unchanged in their own evidence directories.
 
 ## Feedback receiver configuration
 

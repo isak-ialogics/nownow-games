@@ -9,9 +9,9 @@ const execFile = promisify(execFileCallback);
 export const IMAGE_NAME = "ghcr.io/isak-ialogics/nownow-games";
 export const PROD_ALIAS = IMAGE_NAME + ":prod";
 export const APPROVED_DIGEST =
-  "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef";
+  "sha256:a17fde8ce5d40e510fc5788c6a5751de3cb16b321c8200cec92cab9c8f3ad597";
 export const PREVIOUS_PROD_DIGEST =
-  "sha256:20d3055817bbbd2b83abbd5ca462d869b105c3e176da4e669ad34eb862fcd3d1";
+  "sha256:1e7d17844fed99610379a16f7e21468eb55981e801a165a8df2ec7644612c9ef";
 export const PROD_SERVICE = "prod-nownow-games_static";
 export const ROLLBACK_ORDER = [
   "restore-prod-alias",
@@ -222,7 +222,7 @@ export async function promoteProd({
   validateDigest(approvedDigest, "Approved digest");
   if (approvedDigest !== APPROVED_DIGEST) {
     fail(
-      "Approved digest is not the repository-pinned PR #43 OCI index " +
+      "Approved digest is not the repository-pinned Last Full Stop OCI index " +
         APPROVED_DIGEST +
         ".",
     );

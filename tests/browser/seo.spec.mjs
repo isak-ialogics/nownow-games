@@ -12,7 +12,7 @@ const pages = [
     canonical: `${origin}/`,
     title: "Original Mobile Browser Games | NowNow Games",
     description:
-      "Play seven original, mobile-first browser games from NowNow Games, including One More Mark and six more quick challenges.",
+      "Play eight original, mobile-first browser games from NowNow Games, including Last Full Stop and seven more quick challenges.",
     schemaTypes: ["Organization", "WebSite"],
   },
   {
@@ -71,11 +71,19 @@ const pages = [
       "Find every empty answer in One More Mark, an original 42-second fictional final-check game.",
     schemaTypes: ["VideoGame"],
   },
+  {
+    path: "/games/last-full-stop/",
+    canonical: `${origin}/games/last-full-stop/`,
+    title: "Last Full Stop | NowNow Games",
+    description:
+      "Bank a growing fictional sentence or risk one more phrase before TIME in Last Full Stop, an original 45-second browser game.",
+    schemaTypes: ["VideoGame"],
+  },
 ];
 const social = new Map([
   ["/", {
     image: `${origin}/assets/hub-share.png`,
-    alt: "NowNow Games home page showing seven original browser games",
+    alt: "NowNow Games home page showing eight original browser games",
   }],
   ["/games/before-midnight/", {
     image: `${origin}/assets/before-midnight-share.png`,
@@ -104,6 +112,10 @@ const social = new Map([
   ["/games/one-more-mark/", {
     image: `${origin}/assets/one-more-mark-share.png`,
     alt: "One More Mark fictional answer sheet with numbered rows",
+  }],
+  ["/games/last-full-stop/", {
+    image: `${origin}/assets/last-full-stop-share.png`,
+    alt: "Last Full Stop game showing a fictional sentence, TIME cue, and full stop control",
   }],
 ]);
 
@@ -278,6 +290,16 @@ test("legacy canonical game routes redirect permanently", async ({
   const markResponse = await page.goto("/prototypes/one-more-mark/");
   expect(markResponse?.status()).toBe(200);
   expect(page.url()).toBe(`${localOrigin}/games/one-more-mark/`);
+
+  const stopLegacy = await request.get("/prototypes/last-full-stop/", {
+    maxRedirects: 0,
+  });
+  expect(stopLegacy.status()).toBe(308);
+  expect(stopLegacy.headers().location).toBe("/games/last-full-stop/");
+
+  const stopResponse = await page.goto("/prototypes/last-full-stop/");
+  expect(stopResponse?.status()).toBe(200);
+  expect(page.url()).toBe(`${localOrigin}/games/last-full-stop/`);
 });
 
 test("unknown routes return the friendly page with HTTP 404", async ({ page }) => {

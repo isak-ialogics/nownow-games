@@ -15,6 +15,7 @@ const captures = [
   ["/prototypes/surface-signal/", "surface-signal-share.png"],
   ["/games/one-lucky-bloom/", "one-lucky-bloom-share.png"],
   ["/games/one-more-mark/", "one-more-mark-share.png"],
+  ["/games/last-full-stop/", "last-full-stop-share.png"],
 ];
 
 await mkdir(outputRoot, { recursive: true });

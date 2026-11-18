@@ -7,6 +7,7 @@ const games = new Set([
   "surface-signal",
   "one-lucky-bloom",
   "one-more-mark",
+  "last-full-stop",
 ]);
 const actions = new Set([
   "play-started",

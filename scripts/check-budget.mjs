@@ -24,6 +24,13 @@ const limits = Object.freeze({
     total: 27 * KIBIBYTE,
     javascript: 12 * KIBIBYTE,
   }),
+  lastFullStop: Object.freeze({
+    // NOW-294 includes five complete authored ten-beat papers plus the pure
+    // timing state machine. The stricter compressed wire ceiling below is
+    // unchanged and remains the player-facing payload contract.
+    total: 27 * KIBIBYTE,
+    javascript: 13 * KIBIBYTE,
+  }),
   wire: Object.freeze({
     total: 20 * KIBIBYTE,
     javascript: 8.5 * KIBIBYTE,
@@ -38,8 +45,8 @@ const limits = Object.freeze({
     javascript: 14 * KIBIBYTE,
   }),
   hub: Object.freeze({
-    // NOW-249 gives the hub its own truthful social image contract.
-    total: 7.5 * KIBIBYTE,
+    // NOW-294 adds the eighth discovered card while keeping the hub static.
+    total: 8.25 * KIBIBYTE,
   }),
 });
 
@@ -190,7 +197,9 @@ for (const directory of prototypeDirectories) {
       await collect(resolve(prototypeRoot, directory.name)),
       directory.name === "surface-signal"
         ? limits.surfaceSignal
-        : limits.prototype,
+        : directory.name === "last-full-stop"
+          ? limits.lastFullStop
+          : limits.prototype,
     ),
   );
 }

@@ -330,6 +330,10 @@ main {
 .card-art--one-more-mark .a{width:10rem;height:13rem;background:#fffdf5;border-radius:.3rem;transform:translate(-50%,-50%) rotate(-4deg);box-shadow:0 1rem 2rem #0005}
 .card-art--one-more-mark .b{width:5.5rem;border-top:.45rem solid #71829a;transform:translate(-65%,-180%) rotate(-4deg)}
 .card-art--one-more-mark .c{width:2rem;height:2rem;margin:2.5rem 0 0 2.2rem;border:.25rem solid #b62a3c;transform:translate(-50%,-50%) rotate(-4deg)}
+.card-art--last-full-stop{background:linear-gradient(145deg,#41362d,#1c1713)}
+.card-art--last-full-stop .a{width:11rem;height:13rem;background:repeating-linear-gradient(0deg,#f7f0df 0 1.45rem,#d5ccba 1.45rem 1.52rem);border-radius:.25rem;transform:translate(-50%,-50%) rotate(-3deg);box-shadow:0 1rem 2rem #0006}
+.card-art--last-full-stop .b{width:6.6rem;border-top:.45rem solid #6e6257;transform:translate(-62%,-10%) rotate(-3deg)}
+.card-art--last-full-stop .c{width:3.2rem;height:3.2rem;margin:2.5rem 0 0 3rem;border:.45rem solid #f4c45b;border-radius:50%;transform:translate(-50%,-50%)}
 
 .preview-label {
   position: absolute;

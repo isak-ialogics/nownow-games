@@ -10,10 +10,10 @@ const pages = new Map([
     {
       title: "Original Mobile Browser Games | NowNow Games",
       description:
-        "Play seven original, mobile-first browser games from NowNow Games, including One More Mark and six more quick challenges.",
+        "Play eight original, mobile-first browser games from NowNow Games, including Last Full Stop and seven more quick challenges.",
       canonical: `${productionOrigin}/`,
       image: "hub-share.png",
-      imageAlt: "NowNow Games home page showing seven original browser games",
+      imageAlt: "NowNow Games home page showing eight original browser games",
       schema: ["Organization", "WebSite"],
     },
   ],
@@ -98,6 +98,19 @@ const pages = new Map([
       canonical: `${productionOrigin}/games/one-more-mark/`,
       image: "one-more-mark-share.png",
       imageAlt: "One More Mark fictional answer sheet with numbered rows",
+      schema: ["VideoGame"],
+    },
+  ],
+  [
+    "prototypes/last-full-stop/index.html",
+    {
+      title: "Last Full Stop | NowNow Games",
+      description:
+        "Bank a growing fictional sentence or risk one more phrase before TIME in Last Full Stop, an original 45-second browser game.",
+      canonical: `${productionOrigin}/games/last-full-stop/`,
+      image: "last-full-stop-share.png",
+      imageAlt:
+        "Last Full Stop game showing a fictional sentence, TIME cue, and full stop control",
       schema: ["VideoGame"],
     },
   ],

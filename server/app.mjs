@@ -205,11 +205,12 @@ export function createAppServer({
 
       const pathname = decodeURIComponent(url.pathname);
       const legacyGame = pathname.match(
-        /^\/prototypes\/(before-midnight|one-lucky-bloom|one-more-mark)\/?$/u,
+        /^\/prototypes\/(before-midnight|last-full-stop|one-lucky-bloom|one-more-mark)\/?$/u,
       )?.[1];
       if (legacyGame) {
         const legacyLocation = {
           "before-midnight": "/games/before-midnight/",
+          "last-full-stop": "/games/last-full-stop/",
           "one-lucky-bloom": "/games/one-lucky-bloom/",
           "one-more-mark": "/games/one-more-mark/",
         }[legacyGame];

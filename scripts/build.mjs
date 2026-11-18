@@ -239,7 +239,7 @@ async function bundleOneLuckyBloom(stateSource, gameSource) {
   return `${header}const ${declarations.join(",")};${body}\n`;
 }
 
-async function bundleOneMoreMark(stateSource, gameSource) {
+async function bundleStateGame(stateSource, gameSource, label) {
   const imports = [...gameSource.matchAll(/^import[\s\S]*?;$/gm)]
     .map(([source]) => source)
     .filter((source) => !source.includes('"./state.js"'));
@@ -251,7 +251,7 @@ async function bundleOneMoreMark(stateSource, gameSource) {
     module: true,
     format: { comments: false },
   });
-  if (!result.code) throw new Error("One More Mark JavaScript minification failed.");
+  if (!result.code) throw new Error(`${label} JavaScript minification failed.`);
   return `${result.code}\n`;
 }
 
@@ -314,14 +314,20 @@ for (const directory of ["prototypes/one-lucky-bloom", "games/one-lucky-bloom"])
   ));
   await writeFile(statePath, "");
 }
-for (const directory of ["prototypes/one-more-mark", "games/one-more-mark"]) {
-  const gamePath = resolve(destination, directory, "game.js");
-  const statePath = resolve(destination, directory, "state.js");
-  await writeFile(gamePath, await bundleOneMoreMark(
-    await readFile(statePath, "utf8"),
-    await readFile(gamePath, "utf8"),
-  ));
-  await writeFile(statePath, "");
+for (const [slug, label] of [
+  ["one-more-mark", "One More Mark"],
+  ["last-full-stop", "Last Full Stop"],
+]) {
+  for (const directory of [`prototypes/${slug}`, `games/${slug}`]) {
+    const gamePath = resolve(destination, directory, "game.js");
+    const statePath = resolve(destination, directory, "state.js");
+    await writeFile(gamePath, await bundleStateGame(
+      await readFile(statePath, "utf8"),
+      await readFile(gamePath, "utf8"),
+      label,
+    ));
+    await writeFile(statePath, "");
+  }
 }
 // Shared CSS ships to every game; compact it the same way per-game stylesheets
 // already are (NOW-201 needed the reclaimed headroom for the feedback control).

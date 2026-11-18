@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Bank a growing fictional sentence or risk one more phrase before TIME in Last Full Stop, an original 45-second browser game." />
+    <meta property="og:title" content="Last Full Stop | NowNow Games" />
+    <meta property="og:description" content="Bank a growing fictional sentence or risk one more phrase before TIME in Last Full Stop, an original 45-second browser game." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://nownowgames.co.za/assets/last-full-stop-share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Last Full Stop game showing a fictional sentence, TIME cue, and full stop control" />
+    <meta property="og:url" content="https://nownowgames.co.za/games/last-full-stop/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Last Full Stop | NowNow Games" />
+    <meta name="twitter:description" content="Bank a growing fictional sentence or risk one more phrase before TIME in Last Full Stop, an original 45-second browser game." />
+    <meta name="twitter:url" content="https://nownowgames.co.za/games/last-full-stop/" />
+    <meta name="twitter:image" content="https://nownowgames.co.za/assets/last-full-stop-share.png" />
+    <meta name="twitter:image:alt" content="Last Full Stop game showing a fictional sentence, TIME cue, and full stop control" />
+    <meta name="theme-color" content="#201c19" />
+    <link rel="icon" href="../../favicon.ico" type="image/svg+xml" />
+    <link rel="canonical" href="https://nownowgames.co.za/games/last-full-stop/" />
+    <title>Last Full Stop | NowNow Games</title>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"VideoGame","name":"Last Full Stop","url":"https://nownowgames.co.za/games/last-full-stop/","description":"Bank a growing fictional sentence or risk one more phrase before TIME in Last Full Stop, an original 45-second browser game.","gamePlatform":"Web browser","playMode":"SinglePlayer","inLanguage":"en-ZA","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"NowNow Games","url":"https://nownowgames.co.za/"}}
+    </script>
+    <meta name="nownow-feedback-context" content="last-full-stop@1" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="../../shared/feedback.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="../../" aria-label="Back to NowNow Games">← All games</a>
+      <button id="sound" type="button" aria-pressed="false">Sound off</button>
+    </header>
+    <main id="page-main">
+      <section class="title-block">
+        <p class="kicker">Last Full Stop · bank or risk</p>
+        <h1>Stop safely, or risk one more phrase.</h1>
+        <p class="deck" data-page-description>Bank a growing fictional sentence or risk one more phrase before TIME in Last Full Stop, an original 45-second browser game.</p>
+      </section>
+      <section id="game-panel" class="game" aria-label="Last Full Stop game" data-explicit-start>
+        <div class="hud">
+          <p>Seconds<strong id="time">45.0</strong><span id="timer-state">Held</span></p>
+          <p>Banked<strong id="banked">0</strong><span>words</span></p>
+          <p>Phrase<strong id="beat">1 / 10</strong><span>fixed paper</span></p>
+        </div>
+        <div id="time-cue" class="time-cue" data-notch="1" role="img" aria-label="TIME in 2 breaks">
+          <div class="cue-copy"><span>TIME cue</span><strong id="cue-label">TIME in 2 breaks</strong></div>
+          <div class="notches" aria-hidden="true"><i></i><i></i><i></i><i></i><b id="cue-hand"></b></div>
+        </div>
+        <article class="paper" aria-label="Fictional unfinished sentence">
+          <p id="locked-sentence" class="locked" hidden></p>
+          <p id="sentence" class="sentence">The last idea waits beside the margin while the quiet clock watches</p>
+          <div class="pot" aria-live="polite">
+            <span><b id="words">12</b> words</span>
+            <span>×<b id="multiplier">1.4</b></span>
+            <strong>= <b id="pot">17</b> to bank</strong>
+          </div>
+        </article>
+        <p id="choice" class="choice">FULL STOP banks 17. Wait for ×1.7; TIME is 2 breaks away.</p>
+        <p id="feedback" class="feedback" role="status" aria-live="polite">Bank 17 now, or wait for more before TIME.</p>
+        <button id="full-stop" class="full-stop" type="button" aria-keyshortcuts="Space Enter" aria-label="FULL STOP, bank 17 words">
+          <strong>FULL STOP</strong><span>Bank <b id="button-pot">17</b> · Space / Enter</span>
+        </button>
+        <div id="pause-card" class="pause-card" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+          <p class="kicker">Round paused</p>
+          <h2 id="pause-title">Ready when you are.</h2>
+          <p>The phrase and clock are frozen. Resume explicitly to reopen this break.</p>
+          <button id="resume" class="resume" type="button">Resume round</button>
+        </div>
+        <p class="fiction">Fictional reflex game · not exam guidance</p>
+      </section>
+      <section id="result-card" class="result" aria-labelledby="result-title" data-result-screen hidden>
+        <p class="kicker">TIME · paper closed</p>
+        <h2 id="result-title">Your safe words stay banked.</h2>
+        <p>Try another authored paper and choose a greedier stopping point.</p>
+        <p class="fiction">Only fictional words are counted. This is not a grade or real result.</p>
+        <dl>
+          <div><dt>Banked words</dt><dd id="final-banked">0</dd></div>
+          <div><dt>Biggest safe sentence</dt><dd id="final-biggest">0</dd></div>
+          <div><dt>Unbanked words lost</dt><dd id="final-lost">0</dd></div>
+        </dl>
+        <button id="retry" class="primary" type="button" aria-keyshortcuts="R">Try another paper <span aria-hidden="true">· R</span></button>
+        <button id="share-result" class="action" type="button">Share challenge</button>
+        <button id="copy-link" class="action" type="button">Copy result + game link</button>
+        <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+        <nav class="more-games" aria-label="More NowNow Games">
+          <p>Keep playing</p>
+          <a data-cross-game href="../one-lucky-bloom/">Play One Lucky Bloom</a>
+          <a data-hub-link href="../../">All games</a>
+        </nav>
+      </section>
+    </main>
+    <script type="module" src="../../shared/analytics.js"></script>
+    <script type="module" src="../../shared/feedback.js"></script>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
